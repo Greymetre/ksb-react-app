@@ -1,20 +1,26 @@
-import { View, Text, ScrollView, FlatList, Pressable, ActivityIndicator, TextInput, TouchableWithoutFeedback, Keyboard } from 'react-native'
-import React, { useCallback, useEffect, useState } from 'react'
+import { View, FlatList, Pressable, ActivityIndicator, TextInput, TouchableWithoutFeedback, Keyboard, Modal, ScrollView } from 'react-native'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { styles } from './styles'
 import { rw } from '../../utils/responsive'
 import AppText from '../../components/AppText/AppText'
-import { ArrowDownIcon, CreateIcon, EyeIcon, PlusAddIcon } from '../../assets/svgs/SvgsFile'
-import { useMutateTourPlanApi, useMutateTourPlanSelectApi } from '../../api/query/TourPlanApi'
+import { ArrowDownIcon, CreateIcon, EyeIcon } from '../../assets/svgs/SvgsFile'
 import { Dropdown } from 'react-native-element-dropdown'
 import { colors } from '../../utils/Colors'
 import Toast from 'react-native-toast-message'
 import store from '../../components/redux/Store'
 import { fonts, shadowStyle } from '../../utils/typography'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
 interface DropdownUser {
   label: string;
   value: number | string;
+}
+
+interface FilterOption {
+  label: string;
+  value: string;
+  id?: number | string | null;
+  zone?: string;
+  zone_id?: number | string | null;
 }
 
 type TourPlanPageProps = {
@@ -23,6 +29,16 @@ type TourPlanPageProps = {
 const TourPlanPage = ({ navigation }: TourPlanPageProps) => {
 
   const [selectedUserName, setSelectedUserName] = useState<string>('Select User');
+  const [zones, setZones] = useState<FilterOption[]>([]);
+  const [branches, setBranches] = useState<FilterOption[]>([]);
+  const [selectedZone, setSelectedZone] = useState<FilterOption | null>(null);
+  const [selectedBranch, setSelectedBranch] = useState<FilterOption | null>(null);
+  const [isZoneFocus, setIsZoneFocus] = useState(false);
+  const [isBranchFocus, setIsBranchFocus] = useState(false);
+  const [designationOptions, setDesignationOptions] = useState<any[]>([]);
+  const [selectedDesignations, setSelectedDesignations] = useState<string[]>([]);
+  const [tempSelectedDesignations, setTempSelectedDesignations] = useState<string[]>([]);
+  const [showDesignationModal, setShowDesignationModal] = useState(false);
   const [hasShowDropDown, setHasShowDropDown] = useState<any>(false)
   const [users, setUsers] = useState<DropdownUser[]>([]);
   const [usersSelect, setUsersSelect] = useState<DropdownUser[]>([]);
@@ -35,17 +51,160 @@ const TourPlanPage = ({ navigation }: TourPlanPageProps) => {
   const [dropDownpage, setDropDownpage] = useState<number>(1);
   const [hasMoreDropDown, setHasMoreDropDown] = useState<boolean>(true);
   const [loadingDropDown, setLoadingDropDown] = useState<boolean>(false);
+
+
+  const formatFilterOption = useCallback((item: any): FilterOption => {
+    if (typeof item === 'string') {
+      return { label: item, value: item, id: null };
+    }
+
+    const label =
+      item?.name ||
+      item?.zone ||
+      item?.zone_name ||
+      item?.branch ||
+      item?.branch_name ||
+      item?.label ||
+      '';
+    const id = item?.id ?? item?.value ?? null;
+
+    return {
+      label: String(label),
+      value: String(id ?? label),
+      id,
+      zone: item?.zone || item?.zone_name || item?.zone?.name || item?.zone?.zone_name,
+      zone_id: item?.zone_id || item?.zone?.id || null,
+    };
+  }, []);
+
+  const branchOptions = useMemo(() => {
+    if (!selectedZone) return branches;
+
+    return branches.filter((branch) => {
+      if (!branch.zone && !branch.zone_id) return true;
+      return (
+        branch.zone_id?.toString() === selectedZone.id?.toString() ||
+        branch.zone?.toLowerCase() === selectedZone.label.toLowerCase()
+      );
+    });
+  }, [branches, selectedZone]);
+
+  const getTourUserListUrl = useCallback((pageNum = 1, searchName = '') => {
+    const params = new URLSearchParams({
+      page: String(pageNum),
+      per_page: '10',
+    });
+
+    if (searchName) params.append('search_name', searchName);
+    if (selectedZone?.label) params.append('zone', selectedZone.label);
+    if (selectedZone?.id) params.append('zone_id', String(selectedZone.id));
+    if (selectedBranch?.label) params.append('branch', selectedBranch.label);
+    if (selectedBranch?.id) params.append('branch_id', String(selectedBranch.id));
+    if (selectedDesignations.length > 0) params.append('designation', selectedDesignations.join(','));
+
+    return `https://ksb-pr.fieldkonnect.in/api/tour/userlist?${params.toString()}`;
+  }, [selectedZone, selectedBranch, selectedDesignations]);
+
+  const resetTourUserList = () => {
+    setUsers([]);
+    setUsersSelect([]);
+    setPage(1);
+    setDropDownpage(1);
+    setHasMore(true);
+    setHasMoreDropDown(true);
+    setSelectedUserId(null);
+    setSelectedUserName('Select User');
+    setUserSearchText('');
+  };
+
+  const clearAllFilters = () => {
+    setSelectedZone(null);
+    setSelectedBranch(null);
+    setTempSelectedDesignations([]);
+    setSelectedDesignations([]);
+    setShowDesignationModal(false);
+    resetTourUserList();
+  };
   useEffect(() => {
     // handleCustomerList()
   }, [])
 
-  // Fetch users once on mount
-  useEffect(() => {
-    fetchUsers();
-    fetchUsersDataSelect()
-  }, []);
-
   const token = store.getState()?.auth?.token;
+
+
+
+  const fetchDesignations = useCallback(async () => {
+    if (!token) return;
+
+    try {
+      const response = await fetch(
+        'https://ksb-pr.fieldkonnect.in/api/designations',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+          },
+        }
+      );
+
+      const result = await response.json();
+      const data = result?.data || [];
+
+      if (result?.status === true && data.length > 0) {
+        const formatted = data.map((item: any) => ({
+          label: item.designation_name,
+          value: item.id.toString(),
+        }));
+
+        setDesignationOptions(formatted);
+
+        const defaultDesignations = formatted.filter((item: any) => {
+          const name = item.label.toLowerCase().trim();
+          return name === 'asr' || name === 'dsr';
+        });
+
+        if (defaultDesignations.length > 0 && selectedDesignations.length === 0) {
+          const defaultValues = defaultDesignations.map((item: any) => item.value);
+          setTempSelectedDesignations(defaultValues);
+          setSelectedDesignations(defaultValues);
+        }
+      } else {
+        setDesignationOptions([]);
+      }
+    } catch (err) {
+      console.error('Failed to fetch designations:', err);
+      setDesignationOptions([]);
+    }
+  }, [token, selectedDesignations.length]);
+
+  const fetchZoneBranchFilters = useCallback(async () => {
+    if (!token) return;
+
+    try {
+      const response = await fetch(
+        'https://ksb-pr.fieldkonnect.in/api/user-attendance-zone-branch',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+          },
+        }
+      );
+
+      const result = await response.json();
+      const filterData = result?.data || result || {};
+
+      setZones((filterData.zones || []).map(formatFilterOption).filter((item: FilterOption) => item.label));
+      setBranches((filterData.branches || []).map(formatFilterOption).filter((item: FilterOption) => item.label));
+    } catch (err) {
+      console.error('Failed to fetch zone/branch filters:', err);
+    }
+  }, [token, formatFilterOption]);
+
+  useEffect(() => {
+    fetchDesignations();
+    fetchZoneBranchFilters();
+  }, [fetchDesignations, fetchZoneBranchFilters]);
 
   // Fetch paginated user list
   const fetchUsers = useCallback(async (pageNum = 1, searchName = '') => {
@@ -54,13 +213,10 @@ const TourPlanPage = ({ navigation }: TourPlanPageProps) => {
       return;
     }
 
-    if (loading || (!hasMore && pageNum > 1)) return;
-
     setLoading(true);
 
     try {
-      const url = `https://ksb-pr.fieldkonnect.in/api/tour/userlist?page=${pageNum}&per_page=10${searchName ? `&search_name=${encodeURIComponent(searchName)}` : ''
-        }`;
+      const url = getTourUserListUrl(pageNum, searchName);
 
       const response = await fetch(url, {
         method: 'GET',
@@ -92,19 +248,16 @@ const TourPlanPage = ({ navigation }: TourPlanPageProps) => {
     } finally {
       setLoading(false);
     }
-  }, [token, loading, hasMore]);
+  }, [token, getTourUserListUrl]);
 
-  const fetchUsersDataSelect = async (pageNum = 1, searchName = '') => {
+  const fetchUsersDataSelect = useCallback(async (pageNum = 1, searchName = '') => {
     setLoadingDropDown(true);
-    const token = store.getState().auth?.token;
-
     if (!token) {
       Toast.show({ type: 'error', text1: 'Authentication token not found' });
       setLoadingDropDown(false);
       return;
     }
-    const url = `https://ksb-pr.fieldkonnect.in/api/tour/userlist?page=${pageNum}&per_page=10${searchName ? `&search_name=${encodeURIComponent(searchName)}` : ''
-      }`;
+    const url = getTourUserListUrl(pageNum, searchName);
     try {
       const response = await fetch(url, {
         method: 'GET',
@@ -144,7 +297,13 @@ const TourPlanPage = ({ navigation }: TourPlanPageProps) => {
     } finally {
       setLoadingDropDown(false);
     }
-  };
+  }, [token, getTourUserListUrl]);
+
+  // Fetch users once on mount and whenever zone/branch filters change.
+  useEffect(() => {
+    fetchUsers(1);
+    fetchUsersDataSelect(1);
+  }, [fetchUsers, fetchUsersDataSelect]);
 
   const loadMore = useCallback(() => {
     if (!loading && hasMore) {
@@ -155,14 +314,29 @@ const TourPlanPage = ({ navigation }: TourPlanPageProps) => {
     if (!loadingDropDown && hasMoreDropDown) {
       fetchUsersDataSelect(dropDownpage + 1, userSearchText);
     }
-  }, [loadingDropDown, hasMoreDropDown, dropDownpage, userSearchText]);
+  }, [loadingDropDown, hasMoreDropDown, dropDownpage, userSearchText, fetchUsersDataSelect]);
+
+
+  const toggleDesignation = (value: string) => {
+    setTempSelectedDesignations(prev =>
+      prev.includes(value)
+        ? prev.filter(item => item !== value)
+        : [...prev, value]
+    );
+  };
+
+  const handleApplyDesignationFilter = () => {
+    setSelectedDesignations(tempSelectedDesignations);
+    resetTourUserList();
+    setShowDesignationModal(false);
+  };
 
   const renderItem: any = useCallback((item: any) => {
     const itemD = item?.item
     const index = item?.index
     console.log(itemD, 'itemDitemDitemD');
     return (
-      <View style={[styles.listItem, index % 2 == 0 && { backgroundColor: 'rgba(255, 255, 255, 0.6)' }, styles.row]}>
+      <View style={[styles.listItem, index % 2 === 0 && { backgroundColor: 'rgba(255, 255, 255, 0.6)' }, styles.row]}>
         <View style={{ flex: 1 }}>
           <AppText color='black' size={16} family='InterRegular' opacity={0.8}>{itemD?.label}</AppText>
         </View>
@@ -178,7 +352,7 @@ const TourPlanPage = ({ navigation }: TourPlanPageProps) => {
         </View>
       </View>
     )
-  }, [users])
+  }, [navigation])
 
   return (
     <View style={[styles.container, ]}> 
@@ -186,6 +360,94 @@ const TourPlanPage = ({ navigation }: TourPlanPageProps) => {
 
         <View style={styles.container}>
           <View style={[styles.container, { paddingHorizontal: rw(19) }]} >
+
+            <View style={[styles.row, { justifyContent: 'space-between', marginTop: 16 }]}>
+              <AppText size={15} color="black" family="InterBold">Filters</AppText>
+              {(selectedZone || selectedBranch || selectedUserId || selectedDesignations.length > 0) && (
+                <Pressable onPress={clearAllFilters} style={styles.clearAllButton}>
+                  <AppText color="#EF4444" size={13} family="InterMedium">Clear</AppText>
+                </Pressable>
+              )}
+            </View>
+
+            <View style={[styles.row, { gap: 10, marginTop: 12 }]}>
+              <View style={{ flex: 1 }}>
+                <Dropdown
+                  style={[styles.dateTimeBox, isZoneFocus && { borderColor: colors.blue }]}
+                  placeholderStyle={{ color: '#718096', fontSize: 14 }}
+                  selectedTextStyle={{ color: 'black', fontSize: 14 }}
+                  data={zones}
+                  search
+                  maxHeight={300}
+                  labelField="label"
+                  valueField="value"
+                  placeholder="Select Zone"
+                  searchPlaceholder="Search zone..."
+                  value={selectedZone?.value}
+                  onFocus={() => setIsZoneFocus(true)}
+                  onBlur={() => setIsZoneFocus(false)}
+                  onChange={(item: FilterOption) => {
+                    setSelectedZone(item);
+                    setSelectedBranch(null);
+                    resetTourUserList();
+                  }}
+                  renderRightIcon={() => <ArrowDownIcon />}
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Dropdown
+                  style={[styles.dateTimeBox, isBranchFocus && { borderColor: colors.blue }]}
+                  placeholderStyle={{ color: '#718096', fontSize: 14 }}
+                  selectedTextStyle={{ color: 'black', fontSize: 14 }}
+                  data={branchOptions}
+                  search
+                  maxHeight={300}
+                  labelField="label"
+                  valueField="value"
+                  placeholder="Select Branch"
+                  searchPlaceholder="Search branch..."
+                  value={selectedBranch?.value}
+                  onFocus={() => setIsBranchFocus(true)}
+                  onBlur={() => setIsBranchFocus(false)}
+                  onChange={(item: FilterOption) => {
+                    setSelectedBranch(item);
+                    resetTourUserList();
+                  }}
+                  renderRightIcon={() => <ArrowDownIcon />}
+                />
+              </View>
+            </View>
+
+
+            <View style={{ gap: 8, marginTop: 12 }}>
+              <Pressable
+                style={[styles.dateTimeBox, styles.row, { justifyContent: 'space-between' }]}
+                onPress={() => setShowDesignationModal(true)}
+              >
+                <AppText
+                  color={tempSelectedDesignations.length > 0 ? 'black' : '#718096'}
+                  size={14}
+                  family="InterRegular"
+                >
+                  {tempSelectedDesignations.length > 0
+                    ? `${tempSelectedDesignations.length} selected`
+                    : 'Select Designation'}
+                </AppText>
+                <ArrowDownIcon />
+              </Pressable>
+              {tempSelectedDesignations.length > 0 && (
+                <Pressable style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }} onPress={() => setShowDesignationModal(true)}>
+                  {designationOptions
+                    .filter(item => tempSelectedDesignations.includes(item.value))
+                    .map(item => (
+                      <View key={item.value} style={styles.designationChip}>
+                        <AppText size={13} color="black">{item.label}</AppText>
+                      </View>
+                    ))}
+                </Pressable>
+              )}
+            </View>
+
             <View style={[styles.row, { gap: 10, marginVertical: 20 }]}>
               <Pressable style={[styles.dateTimeBox, styles.row, { justifyContent: 'space-between', flex: 1 }]}
                 onPress={() => setHasShowDropDown(true)}>
@@ -363,6 +625,63 @@ const TourPlanPage = ({ navigation }: TourPlanPageProps) => {
           </View>
         </View>
       </View>
+
+
+      <Modal
+        visible={showDesignationModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowDesignationModal(false)}
+        statusBarTranslucent
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.designationModal}>
+            <AppText size={18} family="InterBold" style={styles.modalTitle}>
+              Select Designations
+            </AppText>
+
+            <ScrollView>
+              {designationOptions.length > 0 ? (
+                designationOptions.map(item => {
+                  const isSelected = tempSelectedDesignations.includes(item.value);
+                  return (
+                    <Pressable
+                      key={item.value}
+                      onPress={() => toggleDesignation(item.value)}
+                      style={styles.designationOption}
+                    >
+                      <View style={[
+                        styles.designationCheckbox,
+                        isSelected && styles.designationCheckboxSelected,
+                      ]}>
+                        {isSelected && <AppText color="white" size={16}>✓</AppText>}
+                      </View>
+                      <AppText size={15}>{item.label}</AppText>
+                    </Pressable>
+                  );
+                })
+              ) : (
+                <AppText style={styles.emptyDesignationText}>No designations available</AppText>
+              )}
+            </ScrollView>
+
+            <View style={styles.modalActions}>
+              <Pressable
+                onPress={() => {
+                  setTempSelectedDesignations(selectedDesignations);
+                  setShowDesignationModal(false);
+                }}
+                style={styles.cancelButton}
+              >
+                <AppText color="black" family="InterMedium">Cancel</AppText>
+              </Pressable>
+              <Pressable onPress={handleApplyDesignationFilter} style={styles.applyButton}>
+                <AppText color="white" family="InterMedium">Apply</AppText>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
       
     </View>
   )

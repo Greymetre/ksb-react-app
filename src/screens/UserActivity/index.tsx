@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -26,31 +26,61 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 interface User {
   id: number;
   name: string;
+  branch?: string;
+  branch_id?: number | string;
+  zone?: string;
+  zone_id?: number | string;
+}
+
+interface FilterOption {
+  label: string;
+  value: string;
+  id?: number | string | null;
+  zone?: string;
+  zone_id?: number | string | null;
 }
 
 interface ActivityItem {
   user_id: number;
   name: string;
   date: string;
+  reporting?: {
+    name?: string;
+    mobile?: string;
+  };
+  reporting_manager?: {
+    name?: string;
+    mobile?: string;
+  };
+  reporting_manager_name?: string;
+  reporting_manager_mobile?: string;
+  reportingManagerName?: string;
+  reportingManagerMobile?: string;
+  manager_name?: string;
+  manager_mobile?: string;
 }
 
 const UserActivityScreen = ({ navigation }: any) => {
   const [users, setUsers] = useState<User[]>([]);
-  const [branches, setBranches] = useState<any[]>([]);
+  const [zones, setZones] = useState<FilterOption[]>([]);
+  const [branches, setBranches] = useState<FilterOption[]>([]);
   const [activityData, setActivityData] = useState<ActivityItem[]>([]);
 
+  const [selectedZone, setSelectedZone] = useState<FilterOption | null>(null);
+  const [selectedBranch, setSelectedBranch] = useState<FilterOption | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedDesignations, setSelectedDesignations] = useState<string[]>([]);
   const [designationOptions, setDesignationOptions] = useState<any[]>([]);
 
   // Temporary states for filters (changes apply only after clicking Apply in modal)
-  const [tempSelectedUser, setTempSelectedUser] = useState<User | null>(null);
   const [tempSelectedDesignations, setTempSelectedDesignations] = useState<string[]>([]);
 
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   const [isUserFocus, setIsUserFocus] = useState(false);
+  const [isZoneFocus, setIsZoneFocus] = useState(false);
+  const [isBranchFocus, setIsBranchFocus] = useState(false);
   const [showCal, setShowCal] = useState(false);
   const [showDesignationModal, setShowDesignationModal] = useState(false);
 
@@ -76,6 +106,44 @@ const UserActivityScreen = ({ navigation }: any) => {
   const [refreshing, setRefreshing] = useState(false);
 
   const [stats, setStats] = useState<any>(null);
+
+
+  const formatFilterOption = useCallback((item: any): FilterOption => {
+    if (typeof item === 'string') {
+      return { label: item, value: item, id: null };
+    }
+
+    const label =
+      item?.name ||
+      item?.zone ||
+      item?.zone_name ||
+      item?.branch ||
+      item?.branch_name ||
+      item?.label ||
+      '';
+
+    const id = item?.id ?? item?.value ?? null;
+
+    return {
+      label: String(label),
+      value: String(id ?? label),
+      id,
+      zone: item?.zone || item?.zone_name || item?.zone?.name || item?.zone?.zone_name,
+      zone_id: item?.zone_id || item?.zone?.id || null,
+    };
+  }, []);
+
+  const branchOptions = useMemo(() => {
+    if (!selectedZone) return branches;
+
+    return branches.filter((branch) => {
+      if (!branch.zone && !branch.zone_id) return true;
+      return (
+        branch.zone_id?.toString() === selectedZone.id?.toString() ||
+        branch.zone?.toLowerCase() === selectedZone.label.toLowerCase()
+      );
+    });
+  }, [branches, selectedZone]);
 
   // Format date to YYYY-MM-DD
   const formatYYYYMMDD = (date: Date): string => {
@@ -150,6 +218,32 @@ const UserActivityScreen = ({ navigation }: any) => {
     }
   }, []);
 
+
+  const fetchZoneBranchFilters = useCallback(async () => {
+    try {
+      const token = store.getState()?.auth?.token;
+      if (!token) return;
+
+      const response = await fetch(
+        'https://ksb-pr.fieldkonnect.in/api/user-attendance-zone-branch',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+          },
+        }
+      );
+
+      const result = await response.json();
+      const filterData = result?.data || result || {};
+
+      setZones((filterData.zones || []).map(formatFilterOption).filter((item: FilterOption) => item.label));
+      setBranches((filterData.branches || []).map(formatFilterOption).filter((item: FilterOption) => item.label));
+    } catch (err) {
+      console.error('Failed to fetch zone/branch filters:', err);
+    }
+  }, [formatFilterOption]);
+
   // Fetch Activity Data - Uses final applied filters
   const fetchData = useCallback(async (page = 1, isRefresh = false) => {
     try {
@@ -177,6 +271,10 @@ const UserActivityScreen = ({ navigation }: any) => {
           },
           body: JSON.stringify({
             search_name: selectedUser?.id || null,
+            zone: selectedZone?.label || null,
+            zone_id: selectedZone?.id || null,
+            branch: selectedBranch?.label || null,
+            branch_id: selectedBranch?.id || null,
             designation: selectedDesignations.length > 0 ? selectedDesignations.join(',') : null,
             start_date: formatYYYYMMDD(startDate),
             end_date: formatYYYYMMDD(endDate),
@@ -191,7 +289,9 @@ const UserActivityScreen = ({ navigation }: any) => {
       if (response.ok && result.status === "success") {
         console.log(result.users, 'result.usersresult.users')
         setUsers(result.users || []);
-        setBranches(result.branches || []);
+        if (result.branches?.length) {
+          setBranches(result.branches.map(formatFilterOption).filter((item: FilterOption) => item.label));
+        }
 
         if (page === 1) {
           setActivityData(result.data || []);
@@ -212,7 +312,7 @@ const UserActivityScreen = ({ navigation }: any) => {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [selectedUser?.id, selectedDesignations, startDate, endDate]);
+  }, [selectedUser?.id, selectedZone, selectedBranch, selectedDesignations, startDate, endDate, formatFilterOption]);
 
   const loadMore = () => {
     if (loading || !hasMore || currentPage >= totalPages) return;
@@ -237,6 +337,10 @@ const UserActivityScreen = ({ navigation }: any) => {
             startdate: formatYYYYMMDD(startDate),
             enddate: formatYYYYMMDD(endDate),
             user_id: selectedUser?.id,
+            zone: selectedZone?.label,
+            zone_id: selectedZone?.id,
+            branch: selectedBranch?.label,
+            branch_id: selectedBranch?.id,
             designation: selectedDesignations.length > 0 ? selectedDesignations.join(',') : undefined,
           },
         }
@@ -249,7 +353,7 @@ const UserActivityScreen = ({ navigation }: any) => {
       console.error('Stats fetch error:', err);
       Toast.show({ type: 'error', text1: 'Failed to load dashboard stats' });
     }
-  }, [selectedUser?.id, selectedDesignations, startDate, endDate]);
+  }, [selectedUser?.id, selectedZone, selectedBranch, selectedDesignations, startDate, endDate]);
 
   // Apply Filters from Modal
   const handleApplyFilters = () => {
@@ -261,7 +365,8 @@ const UserActivityScreen = ({ navigation }: any) => {
   // Effects
   useEffect(() => {
     fetchDesignations();
-  }, []);
+    fetchZoneBranchFilters();
+  }, [fetchDesignations, fetchZoneBranchFilters]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -272,17 +377,14 @@ const UserActivityScreen = ({ navigation }: any) => {
     fetchHierarchyStats();
   }, [fetchHierarchyStats]);
 
-  const clearUserFilter = () => {
-    setTempSelectedUser(null);
+  const clearAllFilters = () => {
+    setSelectedZone(null);
+    setSelectedBranch(null);
     setSelectedUser(null);
-    setCurrentPage(1);
-  };
-
-  const clearDesignationFilter = () => {
     setTempSelectedDesignations([]);
     setSelectedDesignations([]);
+    setCurrentPage(1);
   };
-
   const toggleDesignation = (value: string) => {
     setTempSelectedDesignations(prev =>
       prev.includes(value)
@@ -325,6 +427,64 @@ const UserActivityScreen = ({ navigation }: any) => {
         {/* Filters */}
         <View style={{ gap: 15, marginTop: 15 }}>
 
+
+          <View style={[styles.row, { justifyContent: 'space-between' }]}>
+            <AppText size={15} color="black" family="InterBold">Filters</AppText>
+            {(selectedZone || selectedBranch || selectedUser || selectedDesignations.length > 0) && (
+              <TouchableOpacity onPress={clearAllFilters} style={styles.clearAllButton}>
+                <AppText color="#EF4444" size={13} family="InterMedium">Clear</AppText>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Zone & Branch Dropdowns */}
+          <View style={[styles.row, { gap: 13, alignItems: 'center' }]}>
+            <View style={{ flex: 1, height: 45 }}>
+              <Dropdown
+                style={[styles.UserBox, isZoneFocus && { borderColor: colors.blue }]}
+                placeholderStyle={{ color: '#718096', fontSize: 14 }}
+                selectedTextStyle={{ color: 'black', fontSize: 14 }}
+                data={zones}
+                search
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder="Select Zone"
+                searchPlaceholder="Search zone..."
+                value={selectedZone?.value}
+                onFocus={() => setIsZoneFocus(true)}
+                onBlur={() => setIsZoneFocus(false)}
+                onChange={(item: FilterOption) => {
+                  setSelectedZone(item);
+                  setSelectedBranch(null);
+                                setCurrentPage(1);
+                }}
+                renderRightIcon={() => <ArrowDownIcon />}
+              />
+            </View>
+            <View style={{ flex: 1, height: 45 }}>
+              <Dropdown
+                style={[styles.UserBox, isBranchFocus && { borderColor: colors.blue }]}
+                placeholderStyle={{ color: '#718096', fontSize: 14 }}
+                selectedTextStyle={{ color: 'black', fontSize: 14 }}
+                data={branchOptions}
+                search
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder="Select Branch"
+                searchPlaceholder="Search branch..."
+                value={selectedBranch?.value}
+                onFocus={() => setIsBranchFocus(true)}
+                onBlur={() => setIsBranchFocus(false)}
+                onChange={(item: FilterOption) => {
+                  setSelectedBranch(item);
+                  setCurrentPage(1);
+                }}
+                renderRightIcon={() => <ArrowDownIcon />}
+              />
+            </View>
+          </View>
           {/* User Dropdown */}
           <View style={[styles.row, { gap: 13, alignItems: 'center' }]}>
             <View style={{ flex: 1, height: 45 }}>
@@ -344,26 +504,11 @@ const UserActivityScreen = ({ navigation }: any) => {
                 onBlur={() => setIsUserFocus(false)}
                 onChange={(item: User) => {
                   setSelectedUser(item);
-                  setTempSelectedUser(item);
                   setCurrentPage(1);
                 }}
                 renderRightIcon={() => <ArrowDownIcon />}
               />
             </View>
-
-            {(tempSelectedUser || selectedUser) && (
-              <TouchableOpacity onPress={clearUserFilter} style={{
-                backgroundColor: '#EF4444',
-                paddingHorizontal: rw(16),
-                paddingVertical: rw(10),
-                borderRadius: 8,
-                minWidth: rw(80),
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}>
-                <AppText color="white" size={14} family="InterMedium">Clear</AppText>
-              </TouchableOpacity>
-            )}
           </View>
 
           {/* Designation Button */}
@@ -381,23 +526,6 @@ const UserActivityScreen = ({ navigation }: any) => {
                 </AppText>
                 <ArrowDownIcon />
               </TouchableOpacity>
-
-              {tempSelectedDesignations.length > 0 && (
-                <TouchableOpacity
-                  onPress={clearDesignationFilter}
-                  style={{
-                    backgroundColor: '#EF4444',
-                    paddingHorizontal: rw(16),
-                    paddingVertical: rw(10),
-                    borderRadius: 8,
-                    minWidth: rw(80),
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}
-                >
-                  <AppText color="white" size={14} family="InterMedium">Clear</AppText>
-                </TouchableOpacity>
-              )}
             </View>
             {tempSelectedDesignations.length > 0 && (
               <Pressable style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, paddingHorizontal: rw(4) }} onPress={() => setShowDesignationModal(true)}>
@@ -494,7 +622,7 @@ const UserActivityScreen = ({ navigation }: any) => {
           ListEmptyComponent={
             <View style={{ marginTop: 60, alignItems: 'center' }}>
               <AppText size={16} color="#718096">
-                {selectedUser || selectedDesignations.length > 0
+                {selectedUser || selectedZone || selectedBranch || selectedDesignations.length > 0
                   ? `No activity found for selected filters`
                   : "No activity data available for selected date range"}
               </AppText>

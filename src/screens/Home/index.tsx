@@ -561,8 +561,8 @@ const Home = () => {
       // ======================================
       const CURRENT_VERSION =
         Platform.OS === 'ios'
-          ? '1.0'
-          : '1.2';
+          ? '1.1'
+          : '1.3';
 
       // ======================================
       // SERVER VERSION
@@ -813,7 +813,7 @@ const Home = () => {
                       <AppText color={colors.blue} family={'InterMedium'} size={11}>YTD</AppText>
                     </View>
                   </View>
-                  <Pressable onPress={() => navigation.navigate("TargetArchieViewAllScreen")} hitSlop={10}>
+                  <Pressable onPress={() => navigation.navigate("RetailersPerformanceViewAllScreen")} hitSlop={10}>
                     <AppText color={colors.blue} family={'InterMedium'} size={13}>View All →</AppText>
                   </Pressable>
                 </View>

@@ -1,32 +1,39 @@
-import { View, Text, ScrollView, FlatList, Pressable } from 'react-native'
-import React, { useEffect } from 'react'
+import { View, FlatList, Linking } from 'react-native'
+import React, { useCallback, useEffect } from 'react'
 import { styles } from './styles';
 import AppText from '../../components/AppText/AppText';
 import { colors } from '../../utils/Colors';
 import { useGetUserActivity } from '../../api/query/CustomerApi';
-import ActivityCard from '../../components/atoms/ActivityCard';
 import UserActivityCard from '../../components/atoms/UserActivityCard';
 import Toast from 'react-native-toast-message';
+
+const formatDateToApi = (dateString: string) => {
+  if (!dateString) return '';
+
+  const [day, month, year] = dateString.split('/');
+  return `${year}-${month}-${day}`;
+};
 
 const IndividualPage = ({ navigation, route }: any) => {
   const routeItem = route?.params?.item;
   const [activityTimeline, setActivityTimeline] = React.useState<any[]>([]);
-  const [activityLoading, setActivityLoading] = React.useState<boolean>(false);
+  const [_activityLoading, setActivityLoading] = React.useState<boolean>(false);
+  const reportingManagerName =
+    routeItem?.reporting?.name ||
+    routeItem?.reporting_manager_name ||
+    routeItem?.reportingManagerName ||
+    routeItem?.manager_name ||
+    routeItem?.reporting_manager?.name;
+  const reportingManagerMobile =
+    routeItem?.reporting?.mobile ||
+    routeItem?.reporting_manager_mobile ||
+    routeItem?.reportingManagerMobile ||
+    routeItem?.manager_mobile ||
+    routeItem?.reporting_manager?.mobile;
 
   const { mutateAsync: muatetGetUserActivity } = useGetUserActivity()
 
-  useEffect(() => {
-    handleUserActivity()
-  }, [])
-
-  const formatDateToApi = (dateString: string) => {
-    if (!dateString) return '';
-
-    const [day, month, year] = dateString.split('/');
-    return `${year}-${month}-${day}`;
-  };
-
-  const handleUserActivity = async () => {
+  const handleUserActivity = useCallback(async () => {
     setActivityLoading(true);
     try {
       const payload = {
@@ -35,7 +42,7 @@ const IndividualPage = ({ navigation, route }: any) => {
       }
       const res: any = await muatetGetUserActivity(payload)
 
-      if (res?.data?.status === true || res?.data?.status == "success") {
+      if (res?.data?.status === true || res?.data?.status === "success") {
         console.log(res?.data, 'res?.datares?.data');
 
         setActivityTimeline(res?.data?.data)
@@ -50,25 +57,49 @@ const IndividualPage = ({ navigation, route }: any) => {
     } finally {
       setActivityLoading(false)
     }
-  }
+  }, [muatetGetUserActivity, routeItem?.date, routeItem?.user_id])
+
+  useEffect(() => {
+    handleUserActivity()
+  }, [handleUserActivity])
+
+  const handleReportingManagerCall = () => {
+    if (!reportingManagerMobile || reportingManagerMobile.length < 10) {
+      Toast.show({ type: 'info', text1: 'Reporting manager mobile not available' });
+      return;
+    }
+
+    Linking.openURL(`tel:${reportingManagerMobile}`);
+  };
+
   return (
     <View style={styles.container}>
-      <ScrollView style={{ flex: 1, marginTop: 20, paddingHorizontal: 20 }} showsVerticalScrollIndicator={false}>
-        <View style={{}}>
-          <AppText size={17} color={colors.blue} family='InterBold'>{routeItem?.name} - {routeItem?.date} {routeItem?.user_id}</AppText>
-          <View style={[styles.graphView]}>
-            <FlatList
-              data={activityTimeline}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item, index }) => (
-                <UserActivityCard index={index} todayPunchInData={undefined} item={item} navigation={navigation} />
-              )}
-            />
-          </View>
-
+      <View style={styles.individualContent}>
+        <View>
+          <AppText size={17} color={colors.blue} family='InterBold'>{routeItem?.name} - {routeItem?.date}</AppText>
+          <AppText
+            size={14}
+            color={reportingManagerMobile ? colors.blue : '#1E1E1E'}
+            family='InterMedium'
+            underline={reportingManagerMobile ? 'underline' : undefined}
+            style={styles.reportingManagerText}
+            onPress={handleReportingManagerCall}
+          >
+            Reporting: {reportingManagerName || 'N/A'}
+          </AppText>
         </View>
-        <View style={{height: 70}} />
-      </ScrollView>
+        <View style={[styles.graphView, styles.activityCardsContainer]}>
+          <FlatList
+            data={activityTimeline}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item, index }) => (
+              <UserActivityCard index={index} todayPunchInData={undefined} item={item} navigation={navigation} />
+            )}
+            contentContainerStyle={styles.activityCardsContent}
+            showsVerticalScrollIndicator={false}
+          />
+        </View>
+      </View>
     </View>
   )
 }

@@ -116,6 +116,82 @@ export const styles = StyleSheet.create({
         // flex: 1
 
     },
+    clearAllButton: {
+        borderColor: '#EF4444',
+        borderWidth: 1,
+        borderRadius: 16,
+        paddingHorizontal: 14,
+        paddingVertical: 6,
+        backgroundColor: 'white',
+    },
+
+    designationChip: {
+        backgroundColor: colors.blue + '20',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 6,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'flex-end',
+    },
+    designationModal: {
+        backgroundColor: colors.white,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        padding: 20,
+        maxHeight: '70%',
+    },
+    modalTitle: {
+        marginBottom: 15,
+    },
+    designationOption: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
+    },
+    designationCheckbox: {
+        width: 24,
+        height: 24,
+        borderRadius: 6,
+        borderWidth: 2,
+        borderColor: '#ccc',
+        backgroundColor: 'transparent',
+        marginRight: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    designationCheckboxSelected: {
+        borderColor: colors.blue,
+        backgroundColor: colors.blue,
+    },
+    emptyDesignationText: {
+        textAlign: 'center',
+        marginTop: 20,
+        color: '#718096',
+    },
+    modalActions: {
+        flexDirection: 'row',
+        gap: 12,
+        marginTop: 20,
+    },
+    cancelButton: {
+        flex: 1,
+        paddingVertical: 14,
+        borderRadius: 8,
+        backgroundColor: '#f1f1f1',
+        alignItems: 'center',
+    },
+    applyButton: {
+        flex: 1,
+        paddingVertical: 14,
+        borderRadius: 8,
+        backgroundColor: colors.blue,
+        alignItems: 'center',
+    },
     listContainer: {
         position: 'absolute',
         width: '100%',

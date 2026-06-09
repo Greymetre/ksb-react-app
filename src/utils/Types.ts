@@ -39,6 +39,7 @@ export type RootStackParamList = {
   IndividualPage:undefined
   AttendanceViewAllScreen:undefined
   TargetArchieViewAllScreen:undefined
+  RetailersPerformanceViewAllScreen:undefined
 };
 
 export type AppTextProps = {

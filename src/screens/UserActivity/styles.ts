@@ -88,4 +88,26 @@ export const styles = StyleSheet.create({
         shadowRadius: 5,
         elevation: 8,
     },
+    individualContent: {
+        flex: 1,
+        marginTop: 20,
+        paddingHorizontal: 20,
+    },
+    activityCardsContainer: {
+        flex: 1,
+    },
+    activityCardsContent: {
+        paddingBottom: 70,
+    },
+    reportingManagerText: {
+        marginTop: 4,
+    },
+    clearAllButton: {
+        borderColor: '#EF4444',
+        borderWidth: 1,
+        borderRadius: 16,
+        paddingHorizontal: 14,
+        paddingVertical: 6,
+        backgroundColor: 'white',
+    },
 })
