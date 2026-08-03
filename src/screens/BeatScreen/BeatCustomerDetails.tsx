@@ -50,7 +50,7 @@ const BeatCustomerDetails = ({ route }: any) => {
 
         try {
             setLoading(true);
-            const url = `https://ksb-pr.fieldkonnect.in/api/getBeatCustomers?beat_id=${beatId}`;
+            const url = `https://app.ksbindia.co.in/FieldKonnect_API/api/getBeatCustomers?beat_id=${beatId}`;
             console.log(url, 'urlurl')
             // Optional: add search if you want server-side filtering
             // if (searchText?.trim()) url += `&search=${encodeURIComponent(searchText.trim())}`;
@@ -98,7 +98,7 @@ const BeatCustomerDetails = ({ route }: any) => {
         try {
             const token = store.getState()?.auth?.token;
 
-            const res = await axios.get('https://ksb-pr.fieldkonnect.in/api/getPunchin', {
+            const res = await axios.get('https://app.ksbindia.co.in/FieldKonnect_API/api/getPunchin', {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     Accept: 'application/json',

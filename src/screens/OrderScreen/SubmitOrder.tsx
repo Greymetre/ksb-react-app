@@ -202,7 +202,7 @@ const SubmitOrder = () => {
 
         try {
             const res = await fetch(
-                'https://ksb-pr.fieldkonnect.in/api/order/secondary-customers',
+                'https://app.ksbindia.co.in/FieldKonnect_API/api/order/secondary-customers',
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -232,7 +232,7 @@ const SubmitOrder = () => {
 
         try {
             const res = await fetch(
-                'https://ksb-pr.fieldkonnect.in/api/order/distributors',
+                'https://app.ksbindia.co.in/FieldKonnect_API/api/order/distributors',
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -369,7 +369,7 @@ const SubmitOrder = () => {
             console.log('Order Payload:', body);
 
             const res = await fetch(
-                'https://ksb-pr.fieldkonnect.in/api/insertOrder',
+                'https://app.ksbindia.co.in/FieldKonnect_API/api/insertOrder',
                 {
                     method: 'POST',
                     headers: {

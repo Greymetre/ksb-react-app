@@ -81,7 +81,7 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
       const token = store.getState().auth?.token; // ← get from auth
 
       const response = await axios.put(
-        `https://ksb-pr.fieldkonnect.in/api/secondary-customers/${routeItem?.id}/status`,
+        `https://app.ksbindia.co.in/FieldKonnect_API/api/secondary-customers/${routeItem?.id}/status`,
         payload,
         {
           headers: {

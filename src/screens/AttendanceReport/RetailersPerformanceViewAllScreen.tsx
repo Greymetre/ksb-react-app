@@ -130,7 +130,7 @@ const RetailersPerformanceViewAllScreen = ({ navigation }: any) => {
     const token = store.getState()?.auth?.token;
     try {
       const res = await fetch(
-        'https://ksb-pr.fieldkonnect.in/api/user-attendance-zone-branch',
+        'https://app.ksbindia.co.in/FieldKonnect_API/api/user-attendance-zone-branch',
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -204,7 +204,7 @@ const RetailersPerformanceViewAllScreen = ({ navigation }: any) => {
   const fetchAttendanceWithFilters = async (customFilters: any, tab?: any) => {
     const token = store.getState()?.auth?.token;
     try {
-      let url = 'https://ksb-pr.fieldkonnect.in/api/sales/retailer-sales-summary?designation=' + (tab || 'asr').toLowerCase();
+      let url = 'https://app.ksbindia.co.in/FieldKonnect_API/api/sales/retailer-sales-summary?designation=' + (tab || 'asr').toLowerCase();
 
       if (customFilters.branch) {
         url += `&branch=${encodeURIComponent(customFilters.branch)}`;

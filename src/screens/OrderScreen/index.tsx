@@ -147,7 +147,7 @@ const OrderList = ({ navigation }: OrderListProps) => {
                 params.append("enddate", formatYYYYMMDD(end));
             }
 
-            const url = `https://ksb-pr.fieldkonnect.in/api/getOrderList?${params.toString()}`;
+            const url = `https://app.ksbindia.co.in/FieldKonnect_API/api/getOrderList?${params.toString()}`;
 
             console.log(url, 'ORDER API');
 

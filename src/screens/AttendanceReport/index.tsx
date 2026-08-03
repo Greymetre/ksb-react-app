@@ -158,7 +158,7 @@ const AttendanceReport = ({ navigation }: any) => {
 
     try {
       const response = await fetch(
-        'https://ksb-pr.fieldkonnect.in/api/designations',
+        'https://app.ksbindia.co.in/FieldKonnect_API/api/designations',
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -203,7 +203,7 @@ const AttendanceReport = ({ navigation }: any) => {
 
     try {
       const response = await fetch(
-        'https://ksb-pr.fieldkonnect.in/api/user-attendance-zone-branch',
+        'https://app.ksbindia.co.in/FieldKonnect_API/api/user-attendance-zone-branch',
         {
           headers: {
             Authorization: `Bearer ${token}`,

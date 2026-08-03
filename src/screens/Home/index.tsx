@@ -181,7 +181,7 @@ const Home = () => {
       setLoadingPunchStatus(true);
       const token = store.getState()?.auth?.token;
 
-      const res = await axios.get('https://ksb-pr.fieldkonnect.in/api/getPunchin', {
+      const res = await axios.get('https://app.ksbindia.co.in/FieldKonnect_API/api/getPunchin', {
         headers: {
           Authorization: `Bearer ${token}`,
           Accept: 'application/json',
@@ -252,7 +252,7 @@ const Home = () => {
       setHomeLoading(true);
       const token = store.getState()?.auth?.token;
 
-      const res = await axios.get('https://ksb-pr.fieldkonnect.in/api/attendance/today-summary', {
+      const res = await axios.get('https://app.ksbindia.co.in/FieldKonnect_API/api/attendance/today-summary', {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -273,7 +273,7 @@ const Home = () => {
       setLoadingBalances(true);
       const token = store.getState()?.auth?.token;
 
-      const res = await axios.get('https://ksb-pr.fieldkonnect.in/api/leaves/balance', {
+      const res = await axios.get('https://app.ksbindia.co.in/FieldKonnect_API/api/leaves/balance', {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -312,7 +312,7 @@ const Home = () => {
       };
 
 
-      const res = await axios.post('https://ksb-pr.fieldkonnect.in/api/addLeaves', payload, {
+      const res = await axios.post('https://app.ksbindia.co.in/FieldKonnect_API/api/addLeaves', payload, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -504,7 +504,7 @@ const Home = () => {
 
     try {
       const response = await fetch(
-        `https://ksb-pr.fieldkonnect.in/api/getMyHierarchyUsers?type=RETAILER`,
+        `https://app.ksbindia.co.in/FieldKonnect_API/api/getMyHierarchyUsers?type=RETAILER`,
         {
           method: 'GET',
           headers: {
@@ -567,7 +567,7 @@ const Home = () => {
       const token = store.getState()?.auth?.token;
 
       const response = await axios.get(
-        'https://ksb-pr.fieldkonnect.in/api/getAppVersion',
+        'https://app.ksbindia.co.in/FieldKonnect_API/api/getAppVersion',
         {
           headers: {
             Authorization: `Bearer ${token}`,

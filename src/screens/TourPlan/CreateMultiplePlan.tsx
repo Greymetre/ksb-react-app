@@ -25,6 +25,7 @@ import { Dropdown } from 'react-native-element-dropdown';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Toast from 'react-native-toast-message';
 import store from '../../components/redux/Store';
+import { BASE_URL } from '../../api/AxiosClient';
 
 const AccordionSection = ({ title, children, defaultExpanded = false }) => {
   const [expanded, setExpanded] = useState(defaultExpanded);
@@ -101,7 +102,7 @@ const AddTourPlan = ({ navigation }) => {
       if (!token) return;
 
       try {
-        const res = await fetch('https://ksb-pr.fieldkonnect.in/api/tour/userlist', {
+        const res = await fetch('https://app.ksbindia.co.in/FieldKonnect_API/api/tour/userlist', {
           method: 'GET',
           headers: {
             Accept: 'application/json',
@@ -119,7 +120,7 @@ const AddTourPlan = ({ navigation }) => {
         } else {
           Toast.show({ type: 'error', text1: 'Failed to load users' });
         }
-      } catch (err) {
+      } catch {
         Toast.show({ type: 'error', text1: 'Network error while loading users' });
       }
     };
@@ -184,7 +185,7 @@ const AddTourPlan = ({ navigation }) => {
     };
 
     try {
-      const res = await fetch(`${BASE_URL}/api/tour/add`, {  // or use the full URL if BASE_URL is not set
+      const res = await fetch(`${BASE_URL}api/tour/add`, {
         method: 'POST',
         headers: {
           Accept: 'application/json',

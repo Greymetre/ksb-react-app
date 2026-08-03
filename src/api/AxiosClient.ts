@@ -3,17 +3,22 @@ import Toast from 'react-native-toast-message';
 import store from '../components/redux/Store';
 import { logout, setToken, setUser } from '../components/redux/slice/AuthSlice';
 import { navigationRef } from '../services/NavigationService';
-export const BASE_URL = 'https://ksb-pr.fieldkonnect.in/';
+export const BASE_URL = 'https://app.ksbindia.co.in/FieldKonnect_API/';
 export const IMAGE_BASE_URL = 'https://fieldkonnect.in/ksb-pr/';
 // export const BASE_URL = 'http://192.168.1.4:8000/';
 
-const axiosClient = axios.create({ baseURL: BASE_URL });
+const axiosClient = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+  },
+});
 
 axiosClient.interceptors.request.use(async config => {
   const token = store.getState()?.auth?.token;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
-    config.headers['Content-Type'] = 'application/json';
   }
   return config;
 });
@@ -24,10 +29,11 @@ axiosClient.interceptors.response.use(
   },
   error => {
     const status = error?.response?.status;
-    const message = error?.response?.data?.message;
-    const errorMsg = error?.response?.data?.error;
+    const data = error?.response?.data;
+    const message = data?.message || data?.title;
+    const errorMsg = data?.error;
     if (
-      status == 500 ||
+      status === 401 ||
       message == 'Server error: Unauthenticated.' ||
       errorMsg == 'Unauthenticated.'
     ) {
@@ -51,17 +57,24 @@ axiosClient.interceptors.response.use(
 
       return Promise.reject(error);
     }
-    if (error?.response?.status === 400) {
+    if (status === 400 || status === 422) {
+      const validationMessage = data?.errors
+        ? Object.values(data.errors).flat().find(Boolean)
+        : undefined;
       Toast.show({
         type: 'error',
-        text1: error?.response?.data?.message || error?.response?.data?.reminders[0]?.message || error?.response?.data ||
-          error?.response?.data?.errorMessage ||
-          error?.response?.data?.message ||
-          error?.response?.data?.errors[0]?.error || 'Something went wrong',
+        text1: String(
+          message ||
+          validationMessage ||
+          data?.reminders?.[0]?.message ||
+          data?.errorMessage ||
+          data?.error ||
+          'Something went wrong',
+        ),
         visibilityTime: 5000
       });
 
-      return error?.response?.data?.message || error?.response?.data?.error;
+      return Promise.reject(error);
     }
 
     return Promise.reject(error);
