@@ -35,6 +35,7 @@ export const API_ENDPOINT = {
   //Attendance api
   GET_ALL_ATTENDANCE: "api/getAllUserPunchInOut",
   ATTENDANCE_DATA: "api/showAttendance?attendance_id=",
+  UPDATE_LIVE_LOCATION: "api/updateLiveLocation",
 
   //Check in api
   CUSTOMER_CHECKIN: "api/submitCheckin",

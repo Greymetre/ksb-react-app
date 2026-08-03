@@ -17,9 +17,11 @@
 		634975B7C2824ECE9C7FD06C /* Inter-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3F6EC497DCD9408F93664A4E /* Inter-Thin.ttf */; };
 		7254A9A536D345DD936D7FE3 /* Inter-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1FD3970859A84E4689BCE473 /* Inter-Black.ttf */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
+		7B42C7413F4D4E5C8C8D1111 /* FieldKonnectNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B42C73F3F4D4E5C8C8D1111 /* FieldKonnectNotifications.swift */; };
+		7B42C7423F4D4E5C8C8D1111 /* FieldKonnectNotifications.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B42C7403F4D4E5C8C8D1111 /* FieldKonnectNotifications.m */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		9B8A135B0FC14A828666A563 /* Inter-ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5CBE7FBE4B4943ADAAD9E90D /* Inter-ExtraLight.ttf */; };
-		B01778EE3ED12BCB7F4CAA80 /* libPods-FieldConnect.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 30A4736E4D808DAA2D6B1319 /* libPods-FieldConnect.a */; };
+		B0D11463D6D96A247359AEC5 /* libPods-FieldConnect.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D918BDF26A2676C4A8104A0 /* libPods-FieldConnect.a */; };
 		C787A369C0DF44CF811F62D5 /* Inter-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CD32C4AABB0F4E3396D1AAB2 /* Inter-SemiBold.ttf */; };
 /* End PBXBuildFile section */
 
@@ -30,17 +32,19 @@
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = FieldConnect/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		1FD3970859A84E4689BCE473 /* Inter-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Black.ttf"; path = "../src/assets/fonts/Inter-Black.ttf"; sourceTree = "<group>"; };
 		25783D7E3857452B8ED48DA2 /* Inter-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Medium.ttf"; path = "../src/assets/fonts/Inter-Medium.ttf"; sourceTree = "<group>"; };
-		257E34492D19A8E17B72B681 /* Pods-FieldConnect.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FieldConnect.release.xcconfig"; path = "Target Support Files/Pods-FieldConnect/Pods-FieldConnect.release.xcconfig"; sourceTree = "<group>"; };
-		30A4736E4D808DAA2D6B1319 /* libPods-FieldConnect.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-FieldConnect.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		328574661D7D8C16A0B5727B /* Pods-FieldConnect.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FieldConnect.debug.xcconfig"; path = "Target Support Files/Pods-FieldConnect/Pods-FieldConnect.debug.xcconfig"; sourceTree = "<group>"; };
 		3F6EC497DCD9408F93664A4E /* Inter-Thin.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Thin.ttf"; path = "../src/assets/fonts/Inter-Thin.ttf"; sourceTree = "<group>"; };
 		5CBE7FBE4B4943ADAAD9E90D /* Inter-ExtraLight.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ExtraLight.ttf"; path = "../src/assets/fonts/Inter-ExtraLight.ttf"; sourceTree = "<group>"; };
 		5CDE9E3F34824A46AF7F0C70 /* Inter-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Regular.ttf"; path = "../src/assets/fonts/Inter-Regular.ttf"; sourceTree = "<group>"; };
 		601FD6EF580047BBB706363A /* Inter-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Bold.ttf"; path = "../src/assets/fonts/Inter-Bold.ttf"; sourceTree = "<group>"; };
+		6D918BDF26A2676C4A8104A0 /* libPods-FieldConnect.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-FieldConnect.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = FieldConnect/AppDelegate.swift; sourceTree = "<group>"; };
+		7B42C73F3F4D4E5C8C8D1111 /* FieldKonnectNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FieldKonnectNotifications.swift; path = FieldConnect/FieldKonnectNotifications.swift; sourceTree = "<group>"; };
+		7B42C7403F4D4E5C8C8D1111 /* FieldKonnectNotifications.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = FieldKonnectNotifications.m; path = FieldConnect/FieldKonnectNotifications.m; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = FieldConnect/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		9DCA5E37B2E66152C1EC39AB /* Pods-FieldConnect.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FieldConnect.debug.xcconfig"; path = "Target Support Files/Pods-FieldConnect/Pods-FieldConnect.debug.xcconfig"; sourceTree = "<group>"; };
 		BF14B686869B4F06964E4B69 /* Inter-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ExtraBold.ttf"; path = "../src/assets/fonts/Inter-ExtraBold.ttf"; sourceTree = "<group>"; };
 		CD32C4AABB0F4E3396D1AAB2 /* Inter-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-SemiBold.ttf"; path = "../src/assets/fonts/Inter-SemiBold.ttf"; sourceTree = "<group>"; };
+		D94D09A9D427F99892B04F9A /* Pods-FieldConnect.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FieldConnect.release.xcconfig"; path = "Target Support Files/Pods-FieldConnect/Pods-FieldConnect.release.xcconfig"; sourceTree = "<group>"; };
 		E196EB1C84BE49219D086641 /* Inter-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Light.ttf"; path = "../src/assets/fonts/Inter-Light.ttf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -50,7 +54,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B01778EE3ED12BCB7F4CAA80 /* libPods-FieldConnect.a in Frameworks */,
+				B0D11463D6D96A247359AEC5 /* libPods-FieldConnect.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -62,6 +66,8 @@
 			children = (
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				761780EC2CA45674006654EE /* AppDelegate.swift */,
+				7B42C73F3F4D4E5C8C8D1111 /* FieldKonnectNotifications.swift */,
+				7B42C7403F4D4E5C8C8D1111 /* FieldKonnectNotifications.m */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
@@ -73,7 +79,7 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				30A4736E4D808DAA2D6B1319 /* libPods-FieldConnect.a */,
+				6D918BDF26A2676C4A8104A0 /* libPods-FieldConnect.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -127,8 +133,8 @@
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				9DCA5E37B2E66152C1EC39AB /* Pods-FieldConnect.debug.xcconfig */,
-				257E34492D19A8E17B72B681 /* Pods-FieldConnect.release.xcconfig */,
+				328574661D7D8C16A0B5727B /* Pods-FieldConnect.debug.xcconfig */,
+				D94D09A9D427F99892B04F9A /* Pods-FieldConnect.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -140,13 +146,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "FieldConnect" */;
 			buildPhases = (
-				092CB2989EA24286775816B2 /* [CP] Check Pods Manifest.lock */,
+				AC8C47EE9536C51605C7FB73 /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				3A337F5F4CE41A92A8CF1B4E /* [CP] Embed Pods Frameworks */,
-				C57F063D7696EC7D54E0BF50 /* [CP] Copy Pods Resources */,
+				870552E5DDA636C6BB61CEB2 /* [CP] Embed Pods Frameworks */,
+				4A5FBD4F3B5847B1DE5DECF2 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -163,7 +169,8 @@
 		83CBB9F71A601CBA00E9B192 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1210;
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2650;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
 						LastSwiftMigration = 1120;
@@ -227,7 +234,49 @@
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \". \\\"$WITH_ENVIRONMENT\\\" && /bin/sh \\\"$REACT_NATIVE_XCODE\\\"\"\n";
 		};
-		092CB2989EA24286775816B2 /* [CP] Check Pods Manifest.lock */ = {
+		4A5FBD4F3B5847B1DE5DECF2 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-FieldConnect/Pods-FieldConnect-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-FieldConnect/Pods-FieldConnect-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-FieldConnect/Pods-FieldConnect-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		870552E5DDA636C6BB61CEB2 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-FieldConnect/Pods-FieldConnect-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-FieldConnect/Pods-FieldConnect-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-FieldConnect/Pods-FieldConnect-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		AC8C47EE9536C51605C7FB73 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -249,48 +298,6 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		3A337F5F4CE41A92A8CF1B4E /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-FieldConnect/Pods-FieldConnect-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			inputPaths = (
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-FieldConnect/Pods-FieldConnect-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-FieldConnect/Pods-FieldConnect-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		C57F063D7696EC7D54E0BF50 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-FieldConnect/Pods-FieldConnect-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-FieldConnect/Pods-FieldConnect-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-FieldConnect/Pods-FieldConnect-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -299,6 +306,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
+				7B42C7413F4D4E5C8C8D1111 /* FieldKonnectNotifications.swift in Sources */,
+				7B42C7423F4D4E5C8C8D1111 /* FieldKonnectNotifications.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -307,12 +316,12 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9DCA5E37B2E66152C1EC39AB /* Pods-FieldConnect.debug.xcconfig */;
+			baseConfigurationReference = 328574661D7D8C16A0B5727B /* Pods-FieldConnect.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_TEAM = 6CBBGW8RJC;
+				CURRENT_PROJECT_VERSION = 5;
+				DEVELOPMENT_TEAM = 3AT8Y7HDP2;
 				ENABLE_BITCODE = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				INFOPLIST_FILE = FieldConnect/Info.plist;
@@ -321,13 +330,13 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.3;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.fieldkonnect.ksb-vicky";
+				PRODUCT_BUNDLE_IDENTIFIER = com.fieldkonnect.ksb;
 				PRODUCT_NAME = FieldConnect;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -337,12 +346,12 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 257E34492D19A8E17B72B681 /* Pods-FieldConnect.release.xcconfig */;
+			baseConfigurationReference = D94D09A9D427F99892B04F9A /* Pods-FieldConnect.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_TEAM = 6CBBGW8RJC;
+				CURRENT_PROJECT_VERSION = 5;
+				DEVELOPMENT_TEAM = 3AT8Y7HDP2;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				INFOPLIST_FILE = FieldConnect/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
@@ -350,13 +359,13 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.3;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.fieldkonnect.ksb-vicky";
+				PRODUCT_BUNDLE_IDENTIFIER = com.fieldkonnect.ksb;
 				PRODUCT_NAME = FieldConnect;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -394,6 +403,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
+				DEVELOPMENT_TEAM = 6CBBGW8RJC;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "";
@@ -434,6 +444,7 @@
 				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
 				USE_HERMES = true;
 			};
@@ -470,6 +481,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
+				DEVELOPMENT_TEAM = 6CBBGW8RJC;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "";
@@ -503,6 +515,8 @@
 				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
 				USE_HERMES = true;
 				VALIDATE_PRODUCT = YES;
 			};

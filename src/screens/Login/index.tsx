@@ -15,10 +15,33 @@ import ICEyeOff from '../../assets/svgs/eye-off';
 import ICEye from '../../assets/svgs/eye';
 import Toast from 'react-native-toast-message';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { initializeLiveLocationTracking } from '../../services/liveLocationService';
+import appPackage from '../../../package.json';
 
 type LoginFormValues = {
   email: string;
   password: string;
+};
+
+const APP_VERSION =
+  Platform.select({
+    android: '1.3',
+    ios: '2.3',
+  }) || appPackage.version;
+
+const getDeviceName = () => {
+  const constants = Platform.constants as Record<string, any>;
+  const androidName = [constants.Brand, constants.Model].filter(Boolean).join(' ');
+
+  if (androidName) {
+    return androidName;
+  }
+
+  if (Platform.OS === 'ios') {
+    return constants.interfaceIdiom || constants.systemName || 'iOS';
+  }
+
+  return Platform.OS;
 };
 
 const LoginScreen = ({ navigation }: { navigation: any }) => {
@@ -52,6 +75,9 @@ const LoginScreen = ({ navigation }: { navigation: any }) => {
       const params = {
         username: values.email.trim(),
         password: values.password,
+        app_version: APP_VERSION,
+        device_name: getDeviceName(),
+        device_type: Platform.OS,
       };
 
       const res = await mutateLogin(params);
@@ -61,6 +87,7 @@ const LoginScreen = ({ navigation }: { navigation: any }) => {
         Toast.show({ type: 'success', text1: res?.data?.message || 'Login successful', visibilityTime: 5000 });
 
         dispatch(setToken(res?.data?.userinfo?.access_token));
+        void initializeLiveLocationTracking();
         resetForm();
         navigation.replace('BottomTab');
       } else {

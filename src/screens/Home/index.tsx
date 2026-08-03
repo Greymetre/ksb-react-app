@@ -34,6 +34,7 @@ import FieldActivitiesCard from '../../components/atoms/FieldActivitiesCard'
 import RetailersOverviewCard from '../../components/atoms/RetailersOverviewCard'
 import TopProductsCard from '../../components/atoms/TopProductsCard'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
+import { startLiveLocationTracking, stopLiveLocationTracking } from '../../services/liveLocationService'
 
 interface DropdownItem {
   label: string;
@@ -145,6 +146,21 @@ const Home = () => {
     setShowCal(false);
   };
 
+  const startLiveLocationFromPunchStatus = () => {
+    startLiveLocationTracking({
+      showDisclosure: false,
+      captureImmediately: true,
+    }).catch(error => {
+      console.log('Failed to start live location from punch status:', error);
+    });
+  };
+
+  const stopLiveLocationFromPunchStatus = () => {
+    stopLiveLocationTracking({ captureFinalLocation: false }).catch(error => {
+      console.log('Failed to stop live location from punch status:', error);
+    });
+  };
+
   const leaveTypes = [
     { label: 'Full Day Leave', value: 'Full Day Leave' },
     { label: 'First Half Leave', value: 'First Half Leave' },
@@ -188,18 +204,22 @@ const Home = () => {
 
         if (isToday && latest?.punchin_date && !latest?.punchout_date) {
           setIsPunchedIn(true);
+          startLiveLocationFromPunchStatus();
 
         } else {
           setIsPunchedIn(false);
           setTodayPunchInData(null);
+          stopLiveLocationFromPunchStatus();
         }
         if (latest?.punchout_date && latest?.punchin_date && isToday) {
           setIsPunchedIn("end");
+          stopLiveLocationFromPunchStatus();
         }
         setTodayPunchInData(latest);
       } else {
         setIsPunchedIn(false);
         setTodayPunchInData(null);
+        stopLiveLocationFromPunchStatus();
       }
     } catch (err) {
       console.error('Failed to fetch punch-in status:', err);
@@ -686,8 +706,9 @@ const Home = () => {
                   data={dashboardTiles}
                   numColumns={3}
                   keyExtractor={(item) => item.id}
-                  columnWrapperStyle={{ justifyContent: "space-between", }}
+                  columnWrapperStyle={{ justifyContent: "space-between" }}
                   contentContainerStyle={{ padding: rw(12), gap: 12, marginTop: rw(21), backgroundColor: 'white', marginHorizontal: 19, borderRadius: 10 }}
+                  scrollEnabled={false}
                   renderItem={({ item }) => (
                     <TileCard item={item} onpress={(item: any) => {
                       if (item?.id == 2 || item?.id == 3) {
@@ -729,17 +750,10 @@ const Home = () => {
                 </View>
               </View>
 
-              <FlatList
-                data={attendanceData}
-                keyExtractor={(item) => item.id}
-                numColumns={4}
-                columnWrapperStyle={{
-                  marginHorizontal: 16,
-                  gap: 8
-                }}
-                scrollEnabled={false} // Since it's small, no need to scroll
-                renderItem={({ item, index }) => (
+              <View style={{ marginHorizontal: 16, gap: 8, flexDirection: 'row' }}>
+                {attendanceData.map((item: any, index: number) => (
                   <AttendanceCard
+                    key={item.id}
                     item={item}
                     index={index}
                     data={homeData}
@@ -749,21 +763,13 @@ const Home = () => {
                       // Example: navigation.navigate('AttendanceDetail', { type: selectedItem.label });
                     }}
                   />
-                )}
-              /> 
+                ))}
+              </View>
 
-              <FlatList
-                data={breakdownData}
-                keyExtractor={(item) => item.id}
-                numColumns={2}
-                columnWrapperStyle={{
-                  marginHorizontal: 16,
-                  gap: 8,
-                  marginTop: 20
-                }}
-                scrollEnabled={false}
-                renderItem={({ item, index }) => (
+              <View style={{ marginHorizontal: 16, gap: 8, marginTop: 20, flexDirection: 'row' }}>
+                {breakdownData.map((item: any, index: number) => (
                   <BreakdownCard
+                    key={item.id}
                     title={item.type}
                     total={item.total}
                     index={index}
@@ -775,8 +781,8 @@ const Home = () => {
                       // TODO: Add navigation or modal if needed
                     }}
                   />
-                )}
-              />
+                ))}
+              </View>
               <View style={styles.mainContainer}>
                 <View style={[styles.row, { justifyContent: 'space-between' }]}>
                   <View style={[styles.row, { gap: 10 }]}>

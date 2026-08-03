@@ -15,6 +15,7 @@ import { colors } from '../../utils/Colors'
 import { BackIcon, UserIcon } from '../../assets/svgs/SvgsFile'
 import axios from 'axios'
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from '../../utils/misc'
+import { stopLiveLocationTracking } from '../../services/liveLocationService'
 
 const data = [
   { id: 1, icon: require('../../assets/images/HomeTabs/myprofile.png'), name: 'My Profile' },
@@ -62,6 +63,7 @@ const ProfileTab = ({ handleDrawerClose }: any) => {
                 },
               );
 
+              await stopLiveLocationTracking({ captureFinalLocation: false });
               dispatch(logout());
               dispatch(setUser(null));
               dispatch(setToken(null));
@@ -150,7 +152,7 @@ const ProfileTab = ({ handleDrawerClose }: any) => {
                   return null;
                 } 
                 return (
-                  <Pressable style={[styles.itemVIew, styles.row]} onPress={() => {
+                  <Pressable key={item.id} style={[styles.itemVIew, styles.row]} onPress={async () => {
                     if (item?.name == "Report") {
                       navigation.navigate('Reports')
                       // navigation.navigate('UserActivityPage')
@@ -161,6 +163,7 @@ const ProfileTab = ({ handleDrawerClose }: any) => {
                       handleDrawerClose()
                     }
                     else if (item?.name == "Logout") {
+                      await stopLiveLocationTracking({ captureFinalLocation: false });
                       navigation?.reset({
                         index: 0,
                         routes: [{ name: 'LoginScreen' }],

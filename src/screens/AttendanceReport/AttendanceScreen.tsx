@@ -34,6 +34,7 @@ import { Dropdown } from 'react-native-element-dropdown';
 import ActionSheet, { ActionSheetRef } from 'react-native-actions-sheet';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import useLocationHook from '../../api/hooks/uselocationhook';
+import { startLiveLocationTracking, stopLiveLocationTracking } from '../../services/liveLocationService';
 
 interface DropdownItem {
   label: string;
@@ -494,7 +495,12 @@ const AttendanceScreen: React.FC<{ navigation: any; route: any }> = ({ navigatio
       formData.append('punchout_longitude', location.longitude.toFixed(6));
       formData.append('punchout_summary', punchSummary.trim() || 'Day completed');
 
-      await submitAttendance('https://ksb-pr.fieldkonnect.in/api/userPunchout', formData, 'Punch-out successful!');
+      const success = await submitAttendance('https://ksb-pr.fieldkonnect.in/api/userPunchout', formData, 'Punch-out successful!');
+      if (success) {
+        await stopLiveLocationTracking({ captureFinalLocation: true }).catch(error => {
+          console.log('Failed to stop live location after punch-out:', error);
+        });
+      }
     } else {
 
       if (selectedBeats?.length > 0) {
@@ -523,7 +529,12 @@ const AttendanceScreen: React.FC<{ navigation: any; route: any }> = ({ navigatio
       formData.append('city', selectedCities.map((c) => c.label).join(', ')); // ← comma separated
       formData.append('punchin_summary', 'Followed tour plan');
       console.log(formData, 'formDataformData')
-      await submitAttendance('https://ksb-pr.fieldkonnect.in/api/userPunchin', formData, 'Punch-in successful!');
+      const success = await submitAttendance('https://ksb-pr.fieldkonnect.in/api/userPunchin', formData, 'Punch-in successful!');
+      if (success) {
+        await startLiveLocationTracking({ showDisclosure: false }).catch(error => {
+          console.log('Failed to start live location after punch-in:', error);
+        });
+      }
     }
   };
 
@@ -545,12 +556,15 @@ const AttendanceScreen: React.FC<{ navigation: any; route: any }> = ({ navigatio
       if (response.ok) {
         Toast.show({ type: 'success', text1: successMessage });
         navigation.goBack();
+        return true;
       } else {
         Toast.show({ type: 'error', text1: json.message || 'Submission failed' });
+        return false;
       }
     } catch (err) {
       Toast.show({ type: 'error', text1: 'Network error. Please try again.' });
       console.error(err);
+      return false;
     } finally {
       setSubmitting(false);
     }

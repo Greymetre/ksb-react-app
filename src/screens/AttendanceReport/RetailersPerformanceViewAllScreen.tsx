@@ -113,6 +113,15 @@ const RetailersPerformanceViewAllScreen = ({ navigation }: any) => {
     zones: [],
   });
 
+  const getFilterName = (item: any) => {
+    if (typeof item === 'string') return item;
+    if (typeof item === 'number') return String(item);
+    return item?.name || item?.branch || item?.branch_name || item?.zone || item?.zone_name || '';
+  };
+
+  const normalizeNameList = (items: any[] = []) =>
+    items.map(getFilterName).filter(Boolean);
+
   useEffect(() => {
     fetchFilters();
   }, []);
@@ -132,10 +141,12 @@ const RetailersPerformanceViewAllScreen = ({ navigation }: any) => {
 
       const json = await res.json();
 
+      const data = json?.data || {};
+
       setFilterData({
-        users: json.data.users,
-        branches: json.data.branches,
-        zones: json.data.zones,
+        users: data.users || [],
+        branches: normalizeNameList(data.branches || []),
+        zones: normalizeNameList(data.zones || []),
       });
     } catch (e) {
       console.log(e);
@@ -156,13 +167,13 @@ const RetailersPerformanceViewAllScreen = ({ navigation }: any) => {
   };
 
   const getLabel = (item: any) => {
-    if (activeModal === 'user') return item.name;
-    return item;
+    if (activeModal === 'user') return item?.name || '';
+    return getFilterName(item);
   };
 
   const getValue = (item: any) => {
-    if (activeModal === 'user') return item.id;
-    return item;
+    if (activeModal === 'user') return item?.id;
+    return getFilterName(item);
   };
 
   const checkSelected = (value: any) => {
@@ -200,7 +211,7 @@ const RetailersPerformanceViewAllScreen = ({ navigation }: any) => {
       }
 
       if (customFilters.zone) {
-        url += `&zone=${customFilters.zone.toLowerCase()}`;
+        url += `&zone=${encodeURIComponent(customFilters.zone.toLowerCase())}`;
       }
 
       if (customFilters.user) {

@@ -39,6 +39,7 @@ const TourPlanPage = ({ navigation }: TourPlanPageProps) => {
   const [selectedDesignations, setSelectedDesignations] = useState<string[]>([]);
   const [tempSelectedDesignations, setTempSelectedDesignations] = useState<string[]>([]);
   const [showDesignationModal, setShowDesignationModal] = useState(false);
+  const [hasAppliedDefaultDesignations, setHasAppliedDefaultDesignations] = useState(false);
   const [hasShowDropDown, setHasShowDropDown] = useState<any>(false)
   const [users, setUsers] = useState<DropdownUser[]>([]);
   const [usersSelect, setUsersSelect] = useState<DropdownUser[]>([]);
@@ -163,11 +164,12 @@ const TourPlanPage = ({ navigation }: TourPlanPageProps) => {
           return name === 'asr' || name === 'dsr';
         });
 
-        if (defaultDesignations.length > 0 && selectedDesignations.length === 0) {
+        if (defaultDesignations.length > 0 && !hasAppliedDefaultDesignations) {
           const defaultValues = defaultDesignations.map((item: any) => item.value);
           setTempSelectedDesignations(defaultValues);
           setSelectedDesignations(defaultValues);
         }
+        setHasAppliedDefaultDesignations(true);
       } else {
         setDesignationOptions([]);
       }
@@ -175,7 +177,7 @@ const TourPlanPage = ({ navigation }: TourPlanPageProps) => {
       console.error('Failed to fetch designations:', err);
       setDesignationOptions([]);
     }
-  }, [token, selectedDesignations.length]);
+  }, [token, hasAppliedDefaultDesignations]);
 
   const fetchZoneBranchFilters = useCallback(async () => {
     if (!token) return;

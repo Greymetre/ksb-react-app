@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Image, Pressable, FlatList } from 'react-native';
+import { View, StyleSheet, Image, Pressable } from 'react-native';
 import AppText from '../AppText/AppText';
 import { rw } from '../../utils/responsive';
 import { stylesss } from './AttendanceCard';
@@ -72,15 +72,8 @@ const RetailersOverviewCard = ({data}: any) => {
                         </View>
                     </View>
 
-                    <FlatList
-                        data={orderData}
-                        keyExtractor={(item) => item.id}
-                        numColumns={4}
-                        columnWrapperStyle={{
-                            gap: 8
-                        }}
-                        scrollEnabled={false} // Since it's small, no need to scroll
-                        renderItem={({ item, index }: { item: any; index: number }) => {
+                    <View style={styles.orderGrid}>
+                        {orderData.map((item: any, index: number) => {
                             let count : any = 0;
                             if(index === 0) {
                                 count = data?.total_orders_current_year || 0;
@@ -91,6 +84,7 @@ const RetailersOverviewCard = ({data}: any) => {
                             }
                             return (
                                 <Pressable
+                                    key={item.id}
                                     style={[stylesss.card,{marginTop:0,width:'31.5%',alignItems:"flex-start"}]}>
                                     <View style={{flexDirection:'row',alignItems:'center',gap:8,marginBottom:4}}>
                                         <View style={[stylesss.imageContainer, { backgroundColor: item?.color }]}>
@@ -113,11 +107,11 @@ const RetailersOverviewCard = ({data}: any) => {
                                         {count}
                                     </AppText>
 
-                                   
+                               
                                 </Pressable>
                             )
-                        }}
-                    />
+                        })}
+                    </View>
 
 
                 </View>
@@ -187,6 +181,10 @@ const styles = StyleSheet.create({
     },
     ytdSection: {
         marginTop: rw(16),
+    },
+    orderGrid: {
+        flexDirection: 'row',
+        gap: 8,
     },
     ytdHeader: {
         flexDirection: 'row',

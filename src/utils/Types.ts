@@ -72,6 +72,9 @@ export type AppTextProps = {
 export type loginParmas ={
   username: any
   password: any
+  app_version?: any
+  device_name?: any
+  device_type?: any
 }
 
 export type signupParmas ={

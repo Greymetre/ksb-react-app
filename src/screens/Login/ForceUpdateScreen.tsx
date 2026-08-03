@@ -9,7 +9,7 @@ import { colors } from '../../utils/Colors';
 
 const PLAY_STORE_URL =
   Platform.OS == "android" 
-  ? 'https://play.google.com/store/apps/details?id=com.fieldkonnectksb'
+  ? 'https://play.google.com/store/apps/details?id=com.fieldkonnect.ksb'
   : 'https://apps.apple.com/us/app/fieldkonnect-ksb/id6760381915';
 
 const ForceUpdateScreen = () => {

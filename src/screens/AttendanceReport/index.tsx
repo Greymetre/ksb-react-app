@@ -1,5 +1,5 @@
-import { View, Text, ScrollView, FlatList, Pressable, Modal, Alert, ActivityIndicator, TextInput, Linking, Platform } from 'react-native'
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { View, Text, ScrollView, FlatList, Pressable, Modal, Alert, ActivityIndicator, TextInput, Linking, Platform, StyleSheet } from 'react-native'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { rw } from '../../utils/responsive'
 import AppText from '../../components/AppText/AppText'
 import { ArrowDownIcon, CalenderIcon, CrossIcon, EyeballIcon, LOcationIcon, ThreeDotIcon } from '../../assets/svgs/SvgsFile'
@@ -15,6 +15,14 @@ import CustomerCalendar from '../../components/CustomCalendar/CalendarPopupView'
 import { useAppSelector } from '../../components/redux/Store'
 import { SCREEN_HEIGHT } from '../../utils/misc'
 import { SafeAreaView } from 'react-native-safe-area-context'
+
+interface FilterOption {
+  label: string;
+  value: string;
+  id?: number | string | null;
+  zone?: string;
+  zone_id?: number | string | null;
+}
 
 const AttendanceReport = ({ navigation }: any) => {
   const [loader, setLoader] = useState(false);
@@ -37,6 +45,17 @@ const AttendanceReport = ({ navigation }: any) => {
   const [statuses, setStatuses] = useState<any[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [zones, setZones] = useState<FilterOption[]>([]);
+  const [branches, setBranches] = useState<FilterOption[]>([]);
+  const [selectedZone, setSelectedZone] = useState<FilterOption | null>(null);
+  const [selectedBranch, setSelectedBranch] = useState<FilterOption | null>(null);
+  const [isZoneFocus, setIsZoneFocus] = useState(false);
+  const [isBranchFocus, setIsBranchFocus] = useState(false);
+  const [designationOptions, setDesignationOptions] = useState<any[]>([]);
+  const [selectedDesignations, setSelectedDesignations] = useState<string[]>([]);
+  const [tempSelectedDesignations, setTempSelectedDesignations] = useState<string[]>([]);
+  const [showDesignationModal, setShowDesignationModal] = useState(false);
+  const [hasAppliedDefaultDesignations, setHasAppliedDefaultDesignations] = useState(false);
   const [switchOption, setSwitchOption] = useState(true); // true = Normal (A), false = Leave (L)
   const [showCal, setShowCal] = useState(false);
 
@@ -93,8 +112,130 @@ const AttendanceReport = ({ navigation }: any) => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const hasLoadedDefaultFilteredAttendance = useRef(false);
 
   const PAGE_SIZE = 10;
+  const token = useAppSelector((state) => state.auth.token);
+
+  const formatFilterOption = useCallback((item: any): FilterOption => {
+    if (typeof item === 'string') {
+      return { label: item, value: item, id: null };
+    }
+
+    const label =
+      item?.name ||
+      item?.zone ||
+      item?.zone_name ||
+      item?.branch ||
+      item?.branch_name ||
+      item?.label ||
+      '';
+    const id = item?.id ?? item?.value ?? null;
+
+    return {
+      label: String(label),
+      value: String(id ?? label),
+      id,
+      zone: item?.zone || item?.zone_name || item?.zone?.name || item?.zone?.zone_name,
+      zone_id: item?.zone_id || item?.zone?.id || null,
+    };
+  }, []);
+
+  const branchOptions = useMemo(() => {
+    if (!selectedZone) return branches;
+
+    return branches.filter((branch) => {
+      if (!branch.zone && !branch.zone_id) return true;
+      return (
+        branch.zone_id?.toString() === selectedZone.id?.toString() ||
+        branch.zone?.toLowerCase() === selectedZone.label.toLowerCase()
+      );
+    });
+  }, [branches, selectedZone]);
+
+  const fetchDesignations = useCallback(async () => {
+    if (!token) return;
+
+    try {
+      const response = await fetch(
+        'https://ksb-pr.fieldkonnect.in/api/designations',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+          },
+        }
+      );
+
+      const result = await response.json();
+      const data = result?.data || [];
+
+      if (result?.status === true && data.length > 0) {
+        const formatted = data.map((item: any) => ({
+          label: item.designation_name,
+          value: item.id.toString(),
+        }));
+
+        setDesignationOptions(formatted);
+
+        const defaultDesignations = formatted.filter((item: any) => {
+          const name = item.label.toLowerCase().trim();
+          return name === 'asr' || name === 'dsr';
+        });
+
+        if (defaultDesignations.length > 0 && !hasAppliedDefaultDesignations) {
+          const defaultValues = defaultDesignations.map((item: any) => item.value);
+          setTempSelectedDesignations(defaultValues);
+          setSelectedDesignations(defaultValues);
+        }
+        setHasAppliedDefaultDesignations(true);
+      } else {
+        setDesignationOptions([]);
+      }
+    } catch (err) {
+      console.error('Failed to fetch designations:', err);
+      setDesignationOptions([]);
+    }
+  }, [token, hasAppliedDefaultDesignations]);
+
+  const fetchZoneBranchFilters = useCallback(async () => {
+    if (!token) return;
+
+    try {
+      const response = await fetch(
+        'https://ksb-pr.fieldkonnect.in/api/user-attendance-zone-branch',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+          },
+        }
+      );
+
+      const result = await response.json();
+      const filterData = result?.data || result || {};
+
+      setZones((filterData.zones || []).map(formatFilterOption).filter((item: FilterOption) => item.label));
+      setBranches((filterData.branches || []).map(formatFilterOption).filter((item: FilterOption) => item.label));
+    } catch (err) {
+      console.error('Failed to fetch zone/branch filters:', err);
+    }
+  }, [token, formatFilterOption]);
+
+  const resetAttendanceList = () => {
+    setAttendanceList([]);
+    setUsers([]);
+    setPage(1);
+    setHasMore(true);
+  };
+
+  const getActiveReportFilters = (overrides?: any) => {
+    const zone = overrides?.zone !== undefined ? overrides.zone : selectedZone;
+    const branch = overrides?.branch !== undefined ? overrides.branch : selectedBranch;
+    const designations = overrides?.designations !== undefined ? overrides.designations : selectedDesignations;
+
+    return { zone, branch, designations };
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -111,6 +252,26 @@ const AttendanceReport = ({ navigation }: any) => {
     }, [])
   );
 
+  useEffect(() => {
+    fetchDesignations();
+    fetchZoneBranchFilters();
+  }, [fetchDesignations, fetchZoneBranchFilters]);
+
+  useEffect(() => {
+    if (!hasAppliedDefaultDesignations || hasLoadedDefaultFilteredAttendance.current) return;
+
+    hasLoadedDefaultFilteredAttendance.current = true;
+    handleAttendanceList(
+      switchOption ? 'normal' : 'leave',
+      selectedUserId,
+      selectedStatus,
+      startDate,
+      endDate,
+      1,
+      false
+    );
+  }, [hasAppliedDefaultDesignations]);
+
 
 
 
@@ -122,7 +283,12 @@ const AttendanceReport = ({ navigation }: any) => {
     start?: any,
     end?: any,
     pageNumber: number = 1,
-    loadMore: boolean = false
+    loadMore: boolean = false,
+    reportFilters?: {
+      zone?: FilterOption | null;
+      branch?: FilterOption | null;
+      designations?: string[];
+    }
   ) => {
 
     if (loadMore) {
@@ -145,6 +311,28 @@ const AttendanceReport = ({ navigation }: any) => {
 
       if (status !== null && status !== '') {
         query += `&status=${status}`;
+      }
+
+      const activeFilters = getActiveReportFilters(reportFilters);
+
+      if (activeFilters.zone?.label) {
+        query += `&zone=${encodeURIComponent(activeFilters.zone.label)}`;
+      }
+
+      if (activeFilters.zone?.id) {
+        query += `&zone_id=${encodeURIComponent(String(activeFilters.zone.id))}`;
+      }
+
+      if (activeFilters.branch?.label) {
+        query += `&branch=${encodeURIComponent(activeFilters.branch.label)}`;
+      }
+
+      if (activeFilters.branch?.id) {
+        query += `&branch_id=${encodeURIComponent(String(activeFilters.branch.id))}`;
+      }
+
+      if (activeFilters.designations?.length > 0) {
+        query += `&designation=${encodeURIComponent(activeFilters.designations.join(','))}`;
       }
 
       if (start && end) {
@@ -173,7 +361,7 @@ const AttendanceReport = ({ navigation }: any) => {
         }
 
         // dropdowns only once
-        if (users.length === 0 && res?.data?.users?.length > 0) {
+        if (!loadMore && res?.data?.users?.length > 0) {
           setUsers([{ id: null, name: 'All Users' }, ...res.data.users]);
         }
 
@@ -311,6 +499,89 @@ const AttendanceReport = ({ navigation }: any) => {
       endDate,
       1,
       false
+    );
+  };
+
+  const onZoneChange = (item: FilterOption) => {
+    setSelectedZone(item);
+    setSelectedBranch(null);
+    setSelectedUserId(null);
+    resetAttendanceList();
+
+    handleAttendanceList(
+      switchOption ? 'normal' : 'leave',
+      null,
+      selectedStatus,
+      startDate,
+      endDate,
+      1,
+      false,
+      { zone: item, branch: null }
+    );
+  };
+
+  const onBranchChange = (item: FilterOption) => {
+    setSelectedBranch(item);
+    setSelectedUserId(null);
+    resetAttendanceList();
+
+    handleAttendanceList(
+      switchOption ? 'normal' : 'leave',
+      null,
+      selectedStatus,
+      startDate,
+      endDate,
+      1,
+      false,
+      { branch: item }
+    );
+  };
+
+  const toggleDesignation = (value: string) => {
+    setTempSelectedDesignations(prev =>
+      prev.includes(value)
+        ? prev.filter(item => item !== value)
+        : [...prev, value]
+    );
+  };
+
+  const handleApplyDesignationFilter = () => {
+    setSelectedDesignations(tempSelectedDesignations);
+    setSelectedUserId(null);
+    resetAttendanceList();
+    setShowDesignationModal(false);
+
+    handleAttendanceList(
+      switchOption ? 'normal' : 'leave',
+      null,
+      selectedStatus,
+      startDate,
+      endDate,
+      1,
+      false,
+      { designations: tempSelectedDesignations }
+    );
+  };
+
+  const clearAllFilters = () => {
+    setSelectedUserId(null);
+    setSelectedStatus(null);
+    setSelectedZone(null);
+    setSelectedBranch(null);
+    setTempSelectedDesignations([]);
+    setSelectedDesignations([]);
+    setShowDesignationModal(false);
+    resetAttendanceList();
+
+    handleAttendanceList(
+      switchOption ? 'normal' : 'leave',
+      null,
+      null,
+      startDate,
+      endDate,
+      1,
+      false,
+      { zone: null, branch: null, designations: [] }
     );
   };
 
@@ -511,6 +782,85 @@ const AttendanceReport = ({ navigation }: any) => {
       >
         {/* Filters */}
         <View style={{ marginTop: 16, }}>
+          <View style={[styles.row, { justifyContent: 'space-between', marginBottom: 12 }]}>
+            <AppText size={15} color="black" family="InterBold">Filters</AppText>
+            {(selectedZone || selectedBranch || selectedUserId || selectedStatus || selectedDesignations.length > 0) && (
+              <Pressable onPress={clearAllFilters} style={localStyles.clearAllButton}>
+                <AppText color="#EF4444" size={13} family="InterMedium">Clear</AppText>
+              </Pressable>
+            )}
+          </View>
+
+          <View style={[styles.row, { gap: 13, marginBottom: 12 }]}>
+            <Dropdown
+              style={[localStyles.dropdown, shadowStyle, isZoneFocus && { borderColor: colors.blue }]}
+              placeholderStyle={localStyles.placeholderStyle}
+              selectedTextStyle={localStyles.selectedTextStyle}
+              inputSearchStyle={localStyles.inputSearchStyle}
+              data={zones}
+              search
+              maxHeight={320}
+              labelField="label"
+              valueField="value"
+              placeholder="Select Zone"
+              searchPlaceholder="Search zone..."
+              value={selectedZone?.value}
+              onFocus={() => setIsZoneFocus(true)}
+              onBlur={() => setIsZoneFocus(false)}
+              onChange={onZoneChange}
+              renderRightIcon={() => <ArrowDownIcon />}
+            />
+
+            <Dropdown
+              style={[localStyles.dropdown, shadowStyle, isBranchFocus && { borderColor: colors.blue }]}
+              placeholderStyle={localStyles.placeholderStyle}
+              selectedTextStyle={localStyles.selectedTextStyle}
+              inputSearchStyle={localStyles.inputSearchStyle}
+              data={branchOptions}
+              search
+              maxHeight={320}
+              labelField="label"
+              valueField="value"
+              placeholder="Select Branch"
+              searchPlaceholder="Search branch..."
+              value={selectedBranch?.value}
+              onFocus={() => setIsBranchFocus(true)}
+              onBlur={() => setIsBranchFocus(false)}
+              onChange={onBranchChange}
+              renderRightIcon={() => <ArrowDownIcon />}
+            />
+          </View>
+
+          <View style={{ gap: 8, marginBottom: 12 }}>
+            <Pressable
+              style={[localStyles.fullDropdown, shadowStyle, styles.row, { justifyContent: 'space-between' }]}
+              onPress={() => setShowDesignationModal(true)}
+            >
+              <AppText
+                color={tempSelectedDesignations.length > 0 ? 'black' : '#718096'}
+                size={14}
+                family="InterRegular"
+              >
+                {tempSelectedDesignations.length > 0
+                  ? `${tempSelectedDesignations.length} selected`
+                  : 'Select Designation'}
+              </AppText>
+              <ArrowDownIcon />
+            </Pressable>
+
+            {tempSelectedDesignations.length > 0 && (
+              <Pressable style={localStyles.chipContainer} onPress={() => setShowDesignationModal(true)}>
+                {designationOptions
+                  .filter(item => tempSelectedDesignations.includes(item.value))
+                  .map(item => (
+                    <View key={item.value} style={localStyles.designationChip}>
+                      <AppText size={13} color="black">{item.label}</AppText>
+                    </View>
+                  ))}
+              </Pressable>
+            )}
+          </View>
+
           <View style={[styles.row, { gap: 13 }]}>
             <Dropdown
               style={[localStyles.dropdown, shadowStyle]}
@@ -653,6 +1003,61 @@ const AttendanceReport = ({ navigation }: any) => {
           calendarType="reminder"
         />
       </View>
+      <Modal
+        visible={showDesignationModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowDesignationModal(false)}
+        statusBarTranslucent
+      >
+        <View style={localStyles.modalOverlay}>
+          <View style={localStyles.designationModal}>
+            <AppText size={18} family="InterBold" style={localStyles.modalTitle}>
+              Select Designations
+            </AppText>
+
+            <ScrollView>
+              {designationOptions.length > 0 ? (
+                designationOptions.map(item => {
+                  const isSelected = tempSelectedDesignations.includes(item.value);
+                  return (
+                    <Pressable
+                      key={item.value}
+                      onPress={() => toggleDesignation(item.value)}
+                      style={localStyles.designationOption}
+                    >
+                      <View style={[
+                        localStyles.designationCheckbox,
+                        isSelected && localStyles.designationCheckboxSelected,
+                      ]}>
+                        {isSelected && <AppText color="white" size={16}>✓</AppText>}
+                      </View>
+                      <AppText size={15}>{item.label}</AppText>
+                    </Pressable>
+                  );
+                })
+              ) : (
+                <AppText style={localStyles.emptyDesignationText}>No designations available</AppText>
+              )}
+            </ScrollView>
+
+            <View style={localStyles.modalActions}>
+              <Pressable
+                onPress={() => {
+                  setTempSelectedDesignations(selectedDesignations);
+                  setShowDesignationModal(false);
+                }}
+                style={localStyles.cancelButton}
+              >
+                <AppText color="black" family="InterMedium">Cancel</AppText>
+              </Pressable>
+              <Pressable onPress={handleApplyDesignationFilter} style={localStyles.applyButton}>
+                <AppText color="white" family="InterMedium">Apply</AppText>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
       <ActionSheet
         ref={actionSheetRef}
         gestureEnabled={false}
@@ -1254,7 +1659,7 @@ const AttendanceReport = ({ navigation }: any) => {
 }
 
 // Local styles for dropdowns (add to your styles file or keep here)
-const localStyles = {
+const localStyles = StyleSheet.create({
   dropdown: {
     height: 50,
     backgroundColor: 'rgba(57, 82, 153, 0.07)',
@@ -1263,6 +1668,14 @@ const localStyles = {
     borderWidth: 1,
     borderColor: '#e2e8f0',
     flex: 1,
+  },
+  fullDropdown: {
+    height: 50,
+    backgroundColor: 'rgba(57, 82, 153, 0.07)',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
   placeholderStyle: {
     fontSize: 14,
@@ -1276,6 +1689,86 @@ const localStyles = {
     height: 40,
     fontSize: 14,
   },
-};
+  clearAllButton: {
+    borderColor: '#EF4444',
+    borderWidth: 1,
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    backgroundColor: 'white',
+  },
+  chipContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  designationChip: {
+    backgroundColor: colors.blue + '20',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  designationModal: {
+    backgroundColor: colors.white,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    maxHeight: '70%',
+  },
+  modalTitle: {
+    marginBottom: 15,
+  },
+  designationOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  designationCheckbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: '#ccc',
+    backgroundColor: 'transparent',
+    marginRight: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  designationCheckboxSelected: {
+    borderColor: colors.blue,
+    backgroundColor: colors.blue,
+  },
+  emptyDesignationText: {
+    textAlign: 'center',
+    marginTop: 20,
+    color: '#718096',
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 20,
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 8,
+    backgroundColor: '#f1f1f1',
+    alignItems: 'center',
+  },
+  applyButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 8,
+    backgroundColor: colors.blue,
+    alignItems: 'center',
+  },
+});
 
 export default AttendanceReport

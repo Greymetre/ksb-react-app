@@ -30,6 +30,10 @@ import store, { persistor } from './src/components/redux/Store';
 import SplashScreen from './src/screens/Splash';
 import Routes from './src/navigations/Routes';
 import { navigationRef } from './src/services/NavigationService';
+import {
+  initializeLiveLocationTracking,
+  runAndroidFirstTimeLiveLocationSetup,
+} from './src/services/liveLocationService';
 ;
 
 
@@ -45,6 +49,11 @@ const App = () => {
       setLoading(false);
     }, 2000);
   }, []);
+
+  const initializeAfterRehydrate = () => {
+    void runAndroidFirstTimeLiveLocationSetup();
+    void initializeLiveLocationTracking();
+  };
 
   const MyTheme = {
     ...DefaultTheme,
@@ -75,7 +84,7 @@ const App = () => {
     <KeyboardProvider statusBarTranslucent navigationBarTranslucent>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <Provider store={store}>
-          <PersistGate persistor={persistor}>
+          <PersistGate persistor={persistor} onBeforeLift={initializeAfterRehydrate}>
             <QueryClientProvider client={queryClient}>
                 <View style={{ flex: 1, backgroundColor: colors.bgColor }}>
                   <StatusBar
@@ -111,4 +120,3 @@ const App = () => {
 };
 
 export default App
-
