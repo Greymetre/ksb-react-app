@@ -10,7 +10,12 @@ import Toast from 'react-native-toast-message';
 const formatDateToApi = (dateString: string) => {
   if (!dateString) return '';
 
+  // Reporting API already returns ISO dates. Do not corrupt them by treating
+  // them as DD/MM/YYYY when opening the activity detail screen.
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return dateString;
+
   const [day, month, year] = dateString.split('/');
+  if (!day || !month || !year) return dateString;
   return `${year}-${month}-${day}`;
 };
 
@@ -45,7 +50,7 @@ const IndividualPage = ({ navigation, route }: any) => {
       if (res?.data?.status === true || res?.data?.status === "success") {
         console.log(res?.data, 'res?.datares?.data');
 
-        setActivityTimeline(res?.data?.data)
+        setActivityTimeline(Array.isArray(res?.data?.data) ? res.data.data : [])
 
       }
     } catch (error: any) {

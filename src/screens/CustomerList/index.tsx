@@ -19,7 +19,9 @@ import useLocationHook from '../../api/hooks/uselocationhook';
 import { current } from '@reduxjs/toolkit';
 const CustomerList = ({ route }: any) => {
   const [focusText, setFocusText] = useState(false);
-  const [loader, setLoader] = useState(false);
+  // Start in loading state so the empty-state message never flashes before
+  // the first customer API response is received.
+  const [loader, setLoader] = useState(true);
   const [loader1, setLoader1] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [customerData, setCustomerData] = useState<any[]>([]);
@@ -41,6 +43,9 @@ const CustomerList = ({ route }: any) => {
   const [showCityModal, setShowCityModal] = useState(false);
   const [cityList, setCityList] = useState([]);
   const [currentCheckin, setCurrentCheckin] = useState<any>();
+  const currentCheckinType = String(currentCheckin?.entity_type || '').trim().toLowerCase().replace(/-/g, '_');
+  const isCurrentDistributor = ['distributor', 'master_distributor', 'dealer'].includes(currentCheckinType);
+  const isCurrentRetailer = ['secondary_customer', 'retailer'].includes(currentCheckinType);
   const [citySearchText, setCitySearchText] = useState('');
   const [selectedCity, setSelectedCity] = useState<any>(null);
 
@@ -86,9 +91,9 @@ const CustomerList = ({ route }: any) => {
   useFocusEffect(
     useCallback(() => {
       navigation.setOptions({
-        headerTitle: `Customers${total ? ` (${total})` : ''}`,     // ← change to whatever you want
+        headerTitle: `${route?.params?.customerTypeName || route?.params?.type || 'Customers'}${total ? ` (${total})` : ''}`,
       });
-    }, [navigation, total])
+    }, [navigation, total, route?.params?.customerTypeName, route?.params?.type])
   );
 
 
@@ -420,9 +425,12 @@ const CustomerList = ({ route }: any) => {
         }
 
         {
-          loader1 && page == 1 ? (
+          loader1 || (loader && customerData.length === 0) ? (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
               <ActivityIndicator size="large" color={colors.blue} />
+              <AppText size={15} family="InterMedium" color={colors.blue}>
+                Loading customers...
+              </AppText>
             </View>
           ) : (
             <FlatList
@@ -431,30 +439,30 @@ const CustomerList = ({ route }: any) => {
               renderItem={({ item, index }) => {
                 if (route?.params?.beatId) {
                   return (
-                    <SecondaryCustomerCard currentLat={currentLat} currentLng={currentLng} locationError={locationError} item={item?.customer} navigation={navigation} index={index} isPunchedIn={isPunchedIn} onCheckInPress={() => {
+                    <SecondaryCustomerCard customerType={route?.params?.customerTypeName || route?.params?.type} currentLat={currentLat} currentLng={currentLng} locationError={locationError} item={item?.customer} navigation={navigation} index={index} isPunchedIn={isPunchedIn} onCheckInPress={() => {
                       handleCUrtrentCheckin()
                     }} />
                   )
                 } else if (isSecondary) {
                   return (
-                    <SecondaryCustomerCard currentLat={currentLat} currentLng={currentLng} locationError={locationError} item={item} navigation={navigation} index={index} isPunchedIn={isPunchedIn} onCheckInPress={() => {
+                    <SecondaryCustomerCard customerType={route?.params?.customerTypeName || route?.params?.type} currentLat={currentLat} currentLng={currentLng} locationError={locationError} item={item} navigation={navigation} index={index} isPunchedIn={isPunchedIn} onCheckInPress={() => {
                       handleCUrtrentCheckin()
                     }} />
                   )
                 } else {
-                  return (<CustomerCard currentLat={currentLng} currentLng={currentLng} locationError={locationError} item={item} navigation={navigation} index={index} isPunchedIn={isPunchedIn} onCheckInPress={() => {
+                  return (<CustomerCard currentLat={currentLat} currentLng={currentLng} locationError={locationError} item={item} navigation={navigation} index={index} isPunchedIn={isPunchedIn} onCheckInPress={() => {
                     handleCUrtrentCheckin()
                   }} />)
                 }
               }}
               ListHeaderComponent={() => {
-                if (currentCheckin?.entity_details && currentCheckin?.entity_type == "secondary_customer") {
+                if (currentCheckin?.entity_details && isCurrentRetailer) {
                   return (
-                    <SecondaryCustomerCard currentLat={currentLat} currentLng={currentLng} locationError={locationError} item={currentCheckin?.entity_details} navigation={navigation} index={-1} isPunchedIn={isPunchedIn} type={currentCheckin} />
+                    <SecondaryCustomerCard customerType={currentCheckin?.entity_type || route?.params?.customerTypeName || route?.params?.type} currentLat={currentLat} currentLng={currentLng} locationError={locationError} item={currentCheckin?.entity_details} navigation={navigation} index={-1} isPunchedIn={isPunchedIn} type={currentCheckin} />
                   )
-                } else if (currentCheckin?.entity_details && currentCheckin?.entity_type == "distributor") {
+                } else if (currentCheckin?.entity_details && isCurrentDistributor) {
                   return (
-                    <CustomerCard currentLat={currentLng} currentLng={currentLng} locationError={locationError} item={currentCheckin?.entity_details} navigation={navigation} index={-1} isPunchedIn={isPunchedIn} type={currentCheckin} />
+                    <CustomerCard currentLat={currentLat} currentLng={currentLng} locationError={locationError} item={currentCheckin?.entity_details} navigation={navigation} index={-1} isPunchedIn={isPunchedIn} type={currentCheckin} />
                   )
                 }
               }}
@@ -463,7 +471,16 @@ const CustomerList = ({ route }: any) => {
               contentContainerStyle={styles.listContainer}
               ListEmptyComponent={() => (
                 <View style={{ justifyContent: 'center', alignItems: 'center', paddingTop: 40 }}>
-                  <AppText size={16} family='InterMedium' color='black'>No customer found</AppText>
+                  {loader ? (
+                    <>
+                      <ActivityIndicator size="large" color={colors.blue} />
+                      <AppText size={15} family="InterMedium" color={colors.blue}>
+                        Loading customers...
+                      </AppText>
+                    </>
+                  ) : (
+                    <AppText size={16} family='InterMedium' color='black'>No customer found</AppText>
+                  )}
                 </View>
               )}
               showsVerticalScrollIndicator={false}

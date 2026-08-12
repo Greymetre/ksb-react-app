@@ -16,18 +16,12 @@ import ICEye from '../../assets/svgs/eye';
 import Toast from 'react-native-toast-message';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { initializeLiveLocationTracking } from '../../services/liveLocationService';
-import appPackage from '../../../package.json';
+import { getDeviceUniqueId, getInstalledAppVersion } from '../../utils/appVersion';
 
 type LoginFormValues = {
   email: string;
   password: string;
 };
-
-const APP_VERSION =
-  Platform.select({
-    android: '1.3',
-    ios: '2.3',
-  }) || appPackage.version;
 
 const getDeviceName = () => {
   const constants = Platform.constants as Record<string, any>;
@@ -72,12 +66,17 @@ const LoginScreen = ({ navigation }: { navigation: any }) => {
     setSubmitting(true);
 
     try {
+      const uniqueId = await getDeviceUniqueId();
+      if (!uniqueId) {
+        throw new Error('Unable to identify this device. Please restart the app and try again.');
+      }
       const params = {
         username: values.email.trim(),
         password: values.password,
-        app_version: APP_VERSION,
+        app_version: getInstalledAppVersion(),
         device_name: getDeviceName(),
         device_type: Platform.OS,
+        unique_id: uniqueId,
       };
 
       const res = await mutateLogin(params);
@@ -97,12 +96,17 @@ const LoginScreen = ({ navigation }: { navigation: any }) => {
       }
     } catch (error: any) {
       console.log('Login error:', error);
-      Toast.show({ type: 'error', text1: error?.response?.data?.message || 'Login failed', visibilityTime: 5000 });
+      const loginErrorMessage =
+        error?.response?.data?.message ||
+        (error?.request
+          ? 'Unable to connect to FieldKonnect server. Please check your internet connection and try again.'
+          : error?.message) ||
+        'Login failed';
+
+      Toast.show({ type: 'error', text1: loginErrorMessage, visibilityTime: 5000 });
 
       setServerError(
-        error?.response?.data?.message ||
-        error?.message ||
-        'Something went wrong. Please try again.'
+        loginErrorMessage
       );
       if (error?.response?.data?.message == "Account deactivated. Contact admin.") {
         navigation.replace('AccountPendingScreen')
@@ -131,6 +135,11 @@ const LoginScreen = ({ navigation }: { navigation: any }) => {
             style={styles.logo}
             resizeMode="contain"
             source={require('../../assets/images/FieldKonnectLogo.png')}
+          />
+          <FastImage
+            style={styles.ksbLogo}
+            resizeMode="contain"
+            source={require('../../assets/images/KsbLogo.png')}
           />
         </View>
 

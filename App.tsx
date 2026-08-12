@@ -51,8 +51,12 @@ const App = () => {
   }, []);
 
   const initializeAfterRehydrate = () => {
-    void runAndroidFirstTimeLiveLocationSetup();
-    void initializeLiveLocationTracking();
+    void runAndroidFirstTimeLiveLocationSetup().catch(error => {
+      console.warn('Initial permission setup failed', error);
+    });
+    void initializeLiveLocationTracking().catch(error => {
+      console.warn('Live location initialization failed', error);
+    });
   };
 
   const MyTheme = {

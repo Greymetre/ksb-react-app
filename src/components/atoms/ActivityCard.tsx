@@ -52,8 +52,8 @@ const ActivityCard = ({ todayPunchInData, item, navigation, index }: any) => {
               <>
                 <Pressable style={styles.row} onPress={() => {
                   openGoogleMaps(
-                    todayPunchInData?.punchin_longitude,
                     todayPunchInData?.punchin_latitude,
+                    todayPunchInData?.punchin_longitude,
                     todayPunchInData?.punchin_address
                   )
                 }}>

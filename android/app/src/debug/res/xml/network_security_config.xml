@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <base-config>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- Metro serves the development bundle over HTTP through adb reverse. -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">localhost</domain>
+        <!-- Android Emulator's special alias for the development host. -->
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+
+    <domain-config>
+        <domain includeSubdomains="false">app.ksbindia.co.in</domain>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="@raw/sectigo_public_server_authentication_ca_ov_r36" />
+        </trust-anchors>
+    </domain-config>
+</network-security-config>

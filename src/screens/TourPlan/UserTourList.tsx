@@ -203,10 +203,10 @@ const UserTourList = ({ navigation, route }: any) => {
       statusSheetRef.current?.hide();
       loadTourPlans();
 
-    } catch (e) {
+    } catch (e: any) {
       Toast.show({
         type: 'error',
-        text1: 'Failed to update status',
+        text1: e?.response?.data?.message || 'Failed to update status',
       });
     } finally {
       setStatusLoading(false);

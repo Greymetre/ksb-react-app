@@ -87,11 +87,11 @@ android {
 
     namespace "com.fieldkonnect.ksb"
     defaultConfig {
-        applicationId "com.fieldkonnect.ksb"
+        applicationId "com.fieldkonnectksb"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 15
-        versionName "1.3"
+        versionCode 24
+        versionName "24.0"
     }
     packagingOptions {
         pickFirst '**/libworklets.so'
@@ -103,15 +103,19 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            storeFile file('fieldKonnectksb.jks')
+            storePassword '123456'
+            keyAlias 'key0'
+            keyPassword '123456'
+        }
     }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }

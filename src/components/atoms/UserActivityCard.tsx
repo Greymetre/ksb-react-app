@@ -34,7 +34,7 @@ const UserActivityCard = ({ todayPunchInData, item, navigation, index }: any) =>
     // if (gps && gps.includes(',')) {
     //   const [lat, lng] = gps.split(',').map((s: string) => s.trim());
     if (lat && lang) {
-      query = `${lang},${lat}`;
+      query = `${lat},${lang}`;
     }
     // }
 
@@ -108,11 +108,7 @@ const UserActivityCard = ({ todayPunchInData, item, navigation, index }: any) =>
             {
               (item?.latitude != "" && item?.longitude != "") && (
                 <Pressable style={styles.row} onPress={() => {
-                  if (item?.title == "Checkin" || item?.title == "Checkout") {
-                    handleLocation(item?.longitude, item?.latitude, item?.location)
-                  } else {
-                    handleLocation(item?.latitude, item?.longitude, item?.location)
-                  }
+                  handleLocation(item?.latitude, item?.longitude, item?.location)
                 }}>
                   <LocationIcon />
                   <AppText

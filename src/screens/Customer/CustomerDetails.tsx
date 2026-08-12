@@ -7,7 +7,7 @@ import FastImage from 'react-native-fast-image'
 import { BuyOrderIcon, CalenderAddIcon, CalenderIcon, CrossIcon, OrderBoxIcon, OrderHistoryIcon } from '../../assets/svgs/SvgsFile'
 import { colors } from '../../utils/Colors'
 import { useGetCustomerData, useGetSecondaryCustomerData, useGetSubmitCheckIN } from '../../api/query/CustomerApi'
-import { BASE_URL, IMAGE_BASE_URL } from '../../api/AxiosClient'
+import axiosClient, { resolveMediaUrl } from '../../api/AxiosClient'
 import { CheckIcon } from '../../assets/svgs/HomePageSvgs'
 import Toast from 'react-native-toast-message'
 import Geolocation from '@react-native-community/geolocation'
@@ -16,8 +16,7 @@ import useLocationHook from '../../api/hooks/uselocationhook'
 import Gallery, { GalleryRef } from 'react-native-awesome-gallery'
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import ActionSheet, { ActionSheetRef } from 'react-native-actions-sheet'
-import axios from 'axios'
-import store, { useAppSelector } from '../../components/redux/Store'
+import { useAppSelector } from '../../components/redux/Store'
 
 type CustomerDetailsProps = {
   navigation: any
@@ -33,6 +32,7 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
   const [loader, setLoader] = useState<boolean>(false)
   const [checkInLoading, setCheckInLoading] = useState<boolean>(false)
   const [customerData, setCustomerData] = useState<any>(null)
+  const [hierarchyLevel, setHierarchyLevel] = useState<number>(-1)
   const [data, setData] = useState<any>(null)
   const [checkInHanlde, seCheckInHandle] = useState<any>(null)
   const [modalVisible, setModalVisible] = useState(false);
@@ -42,6 +42,8 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
   const { user } = useAppSelector(
     (state) => state.auth
   );
+  const canManageRetailerApproval = Array.isArray(user?.permissions)
+    && user.permissions.some((permission: string) => permission.toLowerCase() === 'retailer_approve');
   const [punchInStatus, setPunchInStatus] = useState("Random");
   // ── New states for location ────────────────────────────────
 
@@ -49,7 +51,6 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
 
   const routeItem = route?.params?.item
   const [statusLoading, setStatusLoading] = useState(false);
-  const [hirarchyLevel, setHirarchyLevel] = useState(4);
   const [remark, setRemark] = useState('');
   const rejectSheetRef = useRef<ActionSheetRef>(null);
 
@@ -77,19 +78,9 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
     };
 
     try {
-      // Replace with your real token source (context / storage / interceptor)
-      const token = store.getState().auth?.token; // ← get from auth
-
-      const response = await axios.put(
-        `https://app.ksbindia.co.in/FieldKonnect_API/api/secondary-customers/${routeItem?.id}/status`,
+      const response = await axiosClient.put(
+        `api/secondary-customers/${routeItem?.id}/status`,
         payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-        }
       );
 
       if (response?.data?.status === true) {
@@ -152,6 +143,7 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
         console.log(res?.data, 'res?.datares?.data')
         if (route?.params?.type) {
           const data = res?.data?.data
+          setHierarchyLevel(Number(res?.data?.hierarchy_level ?? -1))
           setPunchInStatus(data?.status)
           setData(data)
           const distributorNames = res?.data?.distributors
@@ -197,7 +189,6 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
           setData(res?.data?.data)
           setCustomerData({ ...res?.data?.data, check_status: res?.data?.check_status })
         }
-        setHirarchyLevel(res?.data?.hierarchy_level)
         seCheckInHandle(
           !!res?.data?.check_status?.last_checkin?.checkin_datetime &&
           !res?.data?.check_status?.last_checkin?.checkout_datetime
@@ -315,6 +306,16 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
     !customerData?.check_status?.last_checkin?.checkout_datetime
 
   const documents = customerData?.documents ? JSON.parse(customerData.documents) : []
+  const isRetailerCustomer = [
+    data?.type,
+    data?.customer_type,
+    data?.customertype_name,
+    customerData?.registration_type,
+    routeItem?.type,
+    routeItem?.customer_type,
+    routeItem?.customertype_name,
+  ].some(value => typeof value === 'string' && /retailer/i.test(value));
+
   const handleLocation = async () => {
     const gps = customerData?.gps_location?.trim();
     const addr = customerData?.address_line?.trim();
@@ -419,14 +420,24 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
         </View>
 
         {
-          activeTab == 2 && route?.params?.type && (
+          activeTab == 2 && route?.params?.type && isRetailerCustomer && (
             <>
               <View style={[styles.approveRejectView, styles.row, { gap: 20 }]}>
                 <View style={[styles.approveView, styles.row]}>
                   <Pressable
                     style={[styles.circle, styles.center]}
                     onPress={() => {
-                      if (user?.id == customerData?.created_by || hirarchyLevel > 2) {
+                      if (!canManageRetailerApproval || hierarchyLevel < 1 || hierarchyLevel > 2 || user?.id == customerData?.created_by) {
+                        Toast.show({
+                          type: 'error',
+                          text1: 'Approval not allowed',
+                          text2: !canManageRetailerApproval
+                            ? 'Retailer approval permission is required.'
+                            : hierarchyLevel < 1 || hierarchyLevel > 2
+                              ? 'Retailer creator must be within your first two reporting levels.'
+                              : 'You cannot approve a retailer created by you.',
+                          position: 'top',
+                        });
                         return
                       }
                       // If already approved → just toggle off (your existing logic)
@@ -473,7 +484,17 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
 
                 <View style={[styles.approveView, styles.row]}>
                   <Pressable style={[styles.circle, styles.center, { borderColor: "#FF3333" }]} onPress={() => {
-                    if (user?.id == customerData?.created_by || hirarchyLevel > 2) {
+                    if (!canManageRetailerApproval || hierarchyLevel < 1 || hierarchyLevel > 2 || user?.id == customerData?.created_by) {
+                      Toast.show({
+                        type: 'error',
+                        text1: 'Approval not allowed',
+                        text2: !canManageRetailerApproval
+                          ? 'Retailer approval permission is required.'
+                          : hierarchyLevel < 1 || hierarchyLevel > 2
+                            ? 'Retailer creator must be within your first two reporting levels.'
+                            : 'You cannot update a retailer created by you.',
+                        position: 'top',
+                      });
                       return
                     }
                     if (punchInStatus == "REJECTED") {
@@ -490,7 +511,17 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
 
                 <View style={[styles.approveView, styles.row]}>
                   <Pressable style={[styles.circle, styles.center, { borderColor: "#d1c10c" }]} onPress={() => {
-                    if (user?.id == customerData?.created_by || hirarchyLevel > 2) {
+                    if (!canManageRetailerApproval || hierarchyLevel < 1 || hierarchyLevel > 2 || user?.id == customerData?.created_by) {
+                      Toast.show({
+                        type: 'error',
+                        text1: 'Approval not allowed',
+                        text2: !canManageRetailerApproval
+                          ? 'Retailer approval permission is required.'
+                          : hierarchyLevel < 1 || hierarchyLevel > 2
+                            ? 'Retailer creator must be within your first two reporting levels.'
+                            : 'You cannot update a retailer created by you.',
+                        position: 'top',
+                      });
                       return
                     }
                     if (punchInStatus == "PENDING") {
@@ -523,7 +554,7 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
             <View style={styles.imageView}>
               <Pressable onPress={() => {
                 if (customerData?.shop_image) {
-                  setImages([`${IMAGE_BASE_URL}public/storage/${customerData.shop_image}`])
+                  setImages([resolveMediaUrl(customerData.shop_image)])
                   setInitialIndex(0);
                   setModalVisible(true)
                 }
@@ -531,7 +562,7 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
               }}>
                 <FastImage
                   source={customerData?.shop_image
-                    ? { uri: `${IMAGE_BASE_URL}public/storage/${customerData?.shop_image}` } : require('../../assets/images/Dummy/Customer2.png')}
+                    ? { uri: resolveMediaUrl(customerData?.shop_image) } : require('../../assets/images/Dummy/Customer2.png')}
                   style={styles.firstImage}
 
                 />
@@ -821,14 +852,14 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
                 </AppText>
                 <View style={[styles.row, { flex: 1, gap: 27, marginTop: 20 }]}>
                   <Pressable style={styles.firstAttachemnt} onPress={() => {
-                    setImages([`${IMAGE_BASE_URL}public/storage/${customerData.shop_image}`])
+                  setImages([resolveMediaUrl(customerData.shop_image)])
                     setInitialIndex(0);
                     setModalVisible(true)
                   }}>
                     <FastImage
                       style={styles.attImg}
                       source={customerData?.shop_image
-                        ? { uri: `${IMAGE_BASE_URL}public/storage/${customerData.shop_image}` }
+                        ? { uri: resolveMediaUrl(customerData.shop_image) }
                         : require('../../assets/images/Dummy/Customer2.png')}
                     />
                     <AppText align="center" size={14} color="black" family="InterBold">
@@ -842,7 +873,7 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
                         <FastImage
                           style={styles.attImg}
                           source={customerData?.owner_photo
-                            ? { uri: `${IMAGE_BASE_URL}public/storage/${customerData?.owner_photo}` }
+                            ? { uri: resolveMediaUrl(customerData?.owner_photo) }
                             : require('../../assets/images/Dummy/Customer2.png')}
                         />
                         : (
@@ -852,7 +883,7 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
                                 <FastImage
                                   style={styles.attImg}
                                   source={documents[0]
-                                    ? { uri: `${IMAGE_BASE_URL}public/storage/${documents[0]}` }
+                                    ? { uri: resolveMediaUrl(documents[0]) }
                                     : require('../../assets/images/Dummy/Customer2.png')}
                                 />
                               )
@@ -1226,7 +1257,7 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
                   style={{ width: '48%', marginBottom: 16 }}
                   onPress={() => {
                     if (customerData?.shop_image) {
-                      setImages([`${IMAGE_BASE_URL}public/storage/${customerData.shop_image}`]);
+                      setImages([resolveMediaUrl(customerData.shop_image)]);
                       setInitialIndex(0);
                       setModalVisible(true);
                     }
@@ -1236,7 +1267,7 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
                     style={{ height: 140, width: '100%', borderRadius: 12 }}
                     source={
                       customerData?.shop_image
-                        ? { uri: `${IMAGE_BASE_URL}public/storage/${customerData.shop_image}` }
+                        ? { uri: resolveMediaUrl(customerData.shop_image) }
                         : require('../../assets/images/Dummy/Customer2.png')
                     }
                     resizeMode="cover"
@@ -1250,14 +1281,14 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
                   <Pressable
                     style={{ width: '48%', marginBottom: 16 }}
                     onPress={() => {
-                      setImages([`${IMAGE_BASE_URL}public/storage/${customerData.gst_attachment}`]);
+                      setImages([resolveMediaUrl(customerData.gst_attachment)]);
                       setInitialIndex(0);
                       setModalVisible(true);
                     }}
                   >
                     <FastImage
                       style={{ height: 140, width: '100%', borderRadius: 12 }}
-                      source={{ uri: `${IMAGE_BASE_URL}public/storage/${customerData.gst_attachment}` }}
+                      source={{ uri: resolveMediaUrl(customerData.gst_attachment) }}
                       resizeMode="cover"
                     />
                     <AppText align="center" size={13} color="black" family="InterBold" style={{ marginTop: 6 }}>
@@ -1270,14 +1301,14 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
                   <Pressable
                     style={{ width: '48%', marginBottom: 16 }}
                     onPress={() => {
-                      setImages([`${IMAGE_BASE_URL}public/storage/${customerData.pan_attachment}`]);
+                      setImages([resolveMediaUrl(customerData.pan_attachment)]);
                       setInitialIndex(0);
                       setModalVisible(true);
                     }}
                   >
                     <FastImage
                       style={{ height: 140, width: '100%', borderRadius: 12 }}
-                      source={{ uri: `${IMAGE_BASE_URL}public/storage/${customerData.pan_attachment}` }}
+                      source={{ uri: resolveMediaUrl(customerData.pan_attachment) }}
                       resizeMode="cover"
                     />
                     <AppText align="center" size={13} color="black" family="InterBold" style={{ marginTop: 6 }}>
@@ -1290,14 +1321,14 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
                   <Pressable
                     style={{ width: '48%', marginBottom: 16 }}
                     onPress={() => {
-                      setImages([`${IMAGE_BASE_URL}public/storage/${customerData.bank_proof}`]);
+                      setImages([resolveMediaUrl(customerData.bank_proof)]);
                       setInitialIndex(0);
                       setModalVisible(true);
                     }}
                   >
                     <FastImage
                       style={{ height: 140, width: '100%', borderRadius: 12 }}
-                      source={{ uri: `${IMAGE_BASE_URL}public/storage/${customerData.bank_proof}` }}
+                      source={{ uri: resolveMediaUrl(customerData.bank_proof) }}
                       resizeMode="cover"
                     />
                     <AppText align="center" size={13} color="black" family="InterBold" style={{ marginTop: 6 }}>

@@ -1,6 +1,6 @@
 
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   ScrollView,
@@ -35,6 +35,7 @@ import ActionSheet, { ActionSheetRef } from 'react-native-actions-sheet';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import useLocationHook from '../../api/hooks/uselocationhook';
 import { startLiveLocationTracking, stopLiveLocationTracking } from '../../services/liveLocationService';
+import { useFocusEffect } from '@react-navigation/native';
 
 interface DropdownItem {
   label: string;
@@ -292,11 +293,15 @@ const AttendanceScreen: React.FC<{ navigation: any; route: any }> = ({ navigatio
   // ────────────────────────────────────────────────
   // Load today's tour plan
   // ────────────────────────────────────────────────
-  useEffect(() => {
-    if (isPunchOutMode) return;
-    loadTourPlan();
-    loadBeatPlan()
-  }, [isPunchOutMode]);
+  useFocusEffect(
+    useCallback(() => {
+      if (isPunchOutMode) return;
+
+      // Refresh when this screen is opened again after creating a tour plan.
+      loadTourPlan();
+      loadBeatPlan();
+    }, [isPunchOutMode])
+  );
 
   const loadTourPlan = async () => {
     setTourLoading(true);
@@ -469,6 +474,13 @@ const AttendanceScreen: React.FC<{ navigation: any; route: any }> = ({ navigatio
     }
 
     if (!isPunchOutMode) {
+      if (tourPlans.length === 0) {
+        Toast.show({
+          type: 'error',
+          text1: 'Please create today\'s tour plan first',
+        });
+        return;
+      }
       if (selectedObjectives.length === 0) {
         Toast.show({ type: 'error', text1: 'Please select at least one objective' });
         return;
@@ -576,7 +588,7 @@ const AttendanceScreen: React.FC<{ navigation: any; route: any }> = ({ navigatio
 
   const isFormValid = isPunchOutMode
     ? !!location && !submitting
-    : selectedObjectives.length > 0 && selectedCities.length > 0 && !!location && !submitting;
+    : tourPlans.length > 0 && selectedObjectives.length > 0 && selectedCities.length > 0 && !!location && !submitting;
 
 
 
@@ -589,10 +601,34 @@ const AttendanceScreen: React.FC<{ navigation: any; route: any }> = ({ navigatio
 
     if (!tourPlan) {
       return (
-        <View style={{ marginTop: rw(8) }}>
-          <AppText size={13} color="#666">
-            No tour plan scheduled for today.
+        <View
+          style={{
+            marginTop: rw(8),
+            padding: rw(14),
+            backgroundColor: '#FFF7ED',
+            borderRadius: rw(8),
+            borderWidth: 1,
+            borderColor: '#FDBA74',
+          }}
+        >
+          <AppText size={14} color="#9A3412" family="InterSemiBold">
+            Please create today's tour plan before punching in.
           </AppText>
+          <Pressable
+            onPress={() => navigation.navigate('CreatePlan', { item: user?.id })}
+            style={{
+              alignSelf: 'flex-start',
+              marginTop: rw(12),
+              paddingHorizontal: rw(16),
+              paddingVertical: rw(10),
+              backgroundColor: colors.blue,
+              borderRadius: rw(8),
+            }}
+          >
+            <AppText size={14} color="white" family="InterSemiBold">
+              Create Tour Plan
+            </AppText>
+          </Pressable>
         </View>
       );
     }

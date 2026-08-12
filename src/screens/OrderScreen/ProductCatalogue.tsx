@@ -22,6 +22,7 @@ type ProductCatalogueProps = {
 
 interface CartItem {
     productId: number | string;
+    productDetailId?: number | string | null;
     productName: string;
     quantity: number;
     price: number;
@@ -280,16 +281,7 @@ const ProductCatalogue = ({ navigation, route }: ProductCatalogueProps) => {
             return;
         }
 
-        if (!productDetails?.mrp) {
-            Toast.show({
-                type: 'error',
-                text1: 'Product price not available',
-                position: 'top',
-            });
-            return;
-        }
-
-        const itemPrice = Number(productDetails.mrp); // or productDetails.selling_price if you have it
+        const itemPrice = Number(productDetails?.mrp ?? 0);
 
         setCart((prevCart) => {
             const existingIndex = prevCart.findIndex(
@@ -303,6 +295,7 @@ const ProductCatalogue = ({ navigation, route }: ProductCatalogueProps) => {
                     ...updatedCart[existingIndex],
                     quantity: quantity,
                     price: itemPrice,           // ← keep consistent price
+                    productDetailId: productDetails?.detail_id ?? null,
                 };
 
                 Toast.show({
@@ -318,6 +311,7 @@ const ProductCatalogue = ({ navigation, route }: ProductCatalogueProps) => {
             const newItem: CartItem = {
                 productId: selectedProduct.value,
                 productName: selectedProduct.label,
+                productDetailId: productDetails?.detail_id ?? null,
                 quantity: quantity,
                 price: itemPrice,
             };

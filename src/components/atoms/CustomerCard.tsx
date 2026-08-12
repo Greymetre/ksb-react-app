@@ -24,7 +24,7 @@ import { AddToCartIcon, ArrowCardDownIcon, CheckIcon, CrossIconCard, EmailIcon, 
 import AppText from '../AppText/AppText';
 import { rw } from '../../utils/responsive';
 import { SCREEN_WIDTH } from '../../utils/misc';
-import { BASE_URL, IMAGE_BASE_URL } from '../../api/AxiosClient';
+import { BASE_URL, resolveMediaUrl } from '../../api/AxiosClient';
 import FastImage from 'react-native-fast-image';
 import Toast from 'react-native-toast-message';
 import { useGetSubmitCheckIN } from '../../api/query/CustomerApi';
@@ -79,14 +79,21 @@ const CustomerCard: React.FC<SolarCardProps> = ({
   isPunchedIn,
   type
 }) => {
+  const isVisitOpen = (customer: any): boolean => {
+    if (customer?.current_visit_is_open !== undefined && customer?.current_visit_is_open !== null) {
+      return customer.current_visit_is_open === true || customer.current_visit_is_open === 1 || customer.current_visit_is_open === '1';
+    }
+    // A historical check-in without checkout fields in a compact list response
+    // must not be treated as a currently open visit. The API flag is authoritative.
+    return false;
+  };
   const [isExpanded, setIsExpanded] = useState(false);
   const animationHeight = useSharedValue(0);
   const [newCheckInData, setNewCheckInData] = useState<boolean>(false)
 
   const [checkInLoading, setCheckInLoading] = useState<boolean>(false)
-  const [checkIn, setCheckIn] = useState<boolean>(item?.last_checkin_date && !item?.last_checkout_date)
-  const [checkInHandle, setCheckInHanlde] = useState<boolean>(!!item?.last_checkin_date &&
-    !item?.last_checkout_date)
+  const [checkIn, setCheckIn] = useState<boolean>(isVisitOpen(item))
+  const [checkInHandle, setCheckInHanlde] = useState<boolean>(isVisitOpen(item))
   const { mutateAsync: submitCheckIn } = useGetSubmitCheckIN()
   function isCheckoutBeforeCheckin(checkinDate: any, checkinTime: any, checkoutDate: any, checkoutTime: any) {
     // Combine date + time into full ISO strings
@@ -108,22 +115,9 @@ const CustomerCard: React.FC<SolarCardProps> = ({
 
   useEffect(() => {
 
-    if (item?.last_checkin_date && item?.last_checkout_date) {
-      const result: any = isCheckoutBeforeCheckin(
-        item?.last_checkin_date,
-        item?.last_checkin_time,
-        item?.last_checkout_date,
-        item?.last_checkout_time
-      );
-      if (result != "NA") {
-        setCheckIn(result)
-        setCheckInHanlde(result)
-      }
-    } else {
-      setCheckIn(item?.last_checkin_date && !item?.last_checkout_date)
-      setCheckInHanlde(!!item?.last_checkin_date &&
-        !item?.last_checkout_date)
-    }
+    const open = isVisitOpen(item)
+    setCheckIn(open)
+    setCheckInHanlde(open)
 
   }, [item])
 
@@ -145,14 +139,12 @@ const CustomerCard: React.FC<SolarCardProps> = ({
     transform: [{ rotate: animationHeight.value * (180 / 175) + 'deg' }],
   }));
 
-  const hasOpenCheckIn =
-    !!item?.last_checkin_date &&
-    !item?.last_checkout_date
+  const hasOpenCheckIn = isVisitOpen(item)
 
   const handleCheckInOut = async () => {
     if (checkInLoading) return
     // Check if we have location
-    if (currentLat === null || currentLng === null) {
+    if (currentLat == null || currentLng == null) {
       Toast.show({
         type: 'error',
         text1: 'Location not available',
@@ -166,7 +158,7 @@ const CustomerCard: React.FC<SolarCardProps> = ({
     }
 
     if (checkInHandle || type) {
-      if (currentLat === null || currentLng === null) {
+      if (currentLat == null || currentLng == null) {
         Toast.show({
           type: 'error',
           text1: 'Location not available',
@@ -378,7 +370,7 @@ const CustomerCard: React.FC<SolarCardProps> = ({
               resizeMode="cover"
             />
             <FastImage
-              source={{ uri: `${IMAGE_BASE_URL}/public/storage/${item?.shop_image}` }}
+              source={{ uri: resolveMediaUrl(item?.shop_image) }}
               style={styles.mainImage}
               resizeMode="cover"
             />
@@ -465,15 +457,9 @@ const CustomerCard: React.FC<SolarCardProps> = ({
             <TouchableOpacity style={[styles.viewButton, { width: '33%', }]}
               onPress={() => {
 
-                if (isPunchedIn == true) {
-                  handleCheckInOut()
-                } else {
-                  if (isPunchedIn == false) {
-                    Toast.show({ type: "error", text1: "Please Punch in your attendance" })
-                  } else {
-                    Toast.show({ type: "error", text1: "Your Today shift is end" })
-                  }
-                }
+                // The backend validates the current attendance in real time.
+                // Do not block dealer check-in using a potentially stale screen flag.
+                handleCheckInOut()
                 // onCheckInPress()
                 // onCheckInPress(item?.last_checkin_date ? "Check Out" : "Check In", item?.id)
               }}>
@@ -486,15 +472,7 @@ const CustomerCard: React.FC<SolarCardProps> = ({
             <TouchableOpacity style={[styles.viewButton, { width: '33%', }]}
               onPress={() => {
 
-                if (isPunchedIn == true) {
-                  handleCheckInOut()
-                } else {
-                  if (isPunchedIn == false) {
-                    Toast.show({ type: "error", text1: "Please Punch in your attendance" })
-                  } else {
-                    Toast.show({ type: "error", text1: "Your Today shift is end" })
-                  }
-                }
+                handleCheckInOut()
                 // onCheckInPress()
                 // onCheckInPress(item?.last_checkin_date ? "Check Out" : "Check In", item?.id)
               }}>
@@ -505,36 +483,6 @@ const CustomerCard: React.FC<SolarCardProps> = ({
             </TouchableOpacity>
           )
         }
-        {/* {
-          !type ? ( */}
-            <TouchableOpacity style={[styles.addOrderButton, { width: '36%' }]} onPress={() => {
-              if (item?.status == "APPROVED") {
-                Toast.show({
-                  type: 'error',
-                  text1: "Your customer is not approved"
-                })
-                return
-              }
-              navigation.navigate("ProductCatalogue", {
-                distributor_id: item?.id,
-                type: "Distributor"
-              });
-            }}>
-              <FastImage
-                source={require('../../assets/images/HomeTabs/addorder.png')}
-                style={{ height: 22, width: 22 }}
-                resizeMode="cover"
-              />
-              <AppText size={14} color="#FFFFFF" family="InterMedium">
-                Add Order
-              </AppText>
-            </TouchableOpacity>
-          {/* ) : (
-            <View style={{ width: '36%' }}>
-            </View>
-          )
-        } */}
-
       </View>
     </Pressable>
   );

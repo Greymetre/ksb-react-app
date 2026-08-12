@@ -10,7 +10,7 @@ import { useNavigation } from '@react-navigation/native'
 import { logout, setToken, setUser } from '../../components/redux/slice/AuthSlice'
 import { useDispatch } from 'react-redux'
 import { useAppSelector } from '../../components/redux/Store'
-import { BASE_URL, IMAGE_BASE_URL } from '../../api/AxiosClient'
+import { BASE_URL, resolveMediaUrl } from '../../api/AxiosClient'
 import { colors } from '../../utils/Colors'
 import { BackIcon, UserIcon } from '../../assets/svgs/SvgsFile'
 import axios from 'axios'
@@ -31,7 +31,7 @@ const ProfileTab = ({ handleDrawerClose }: any) => {
   const navigation: any = useNavigation()
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
-  const { user } = useAppSelector(
+  const { user, token } = useAppSelector(
     (state) => state.auth
   );
 
@@ -59,6 +59,7 @@ const ProfileTab = ({ handleDrawerClose }: any) => {
                 {
                   headers: {
                     'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
                   },
                 },
               );
@@ -128,11 +129,11 @@ const ProfileTab = ({ handleDrawerClose }: any) => {
             <View style={{ height: 101, width: 101, borderRadius: 55, marginLeft: 16, marginBottom: 20, backgroundColor: 'rgba(255,255,255,0.2)', overflow: 'hidden', justifyContent: 'center', alignItems: 'center', }}>
               <UserIcon />
               {/* <FastImage source={require('../../assets/images/HomeTabs/profile.png')} style={{ height: 101, width: 101, borderRadius: 101, position: 'absolute' }} /> */}
-              {/* {
+              {
                 user?.profile_image && (
-                  <FastImage source={{ uri: `${IMAGE_BASE_URL}/public/storage/${user?.profile_image}` }} style={{ height: 101, width: 101, borderRadius: 101, position: 'absolute' }} />
+                  <FastImage source={{ uri: resolveMediaUrl(user?.profile_image) }} style={{ height: 101, width: 101, borderRadius: 101, position: 'absolute' }} />
                 )
-              } */}
+              }
 
             </View>
             <View style={{ gap: 5, paddingLeft: 20, marginBottom: 20 }}>
@@ -163,14 +164,30 @@ const ProfileTab = ({ handleDrawerClose }: any) => {
                       handleDrawerClose()
                     }
                     else if (item?.name == "Logout") {
-                      await stopLiveLocationTracking({ captureFinalLocation: false });
-                      navigation?.reset({
-                        index: 0,
-                        routes: [{ name: 'LoginScreen' }],
-                      });
-                      dispatch(logout());
-                      dispatch(setUser(null))
-                      dispatch(setToken(null))
+                      if (loading) return;
+                      setLoading(true);
+                      try {
+                        await stopLiveLocationTracking({ captureFinalLocation: false });
+                        if (token) {
+                          await axios.post(`${BASE_URL}api/logout`, null, {
+                            headers: {
+                              Accept: 'application/json',
+                              Authorization: `Bearer ${token}`,
+                            },
+                          });
+                        }
+                      } catch (error) {
+                        console.log('Logout API Error:', error);
+                      } finally {
+                        dispatch(logout());
+                        dispatch(setUser(null));
+                        dispatch(setToken(null));
+                        navigation?.reset({
+                          index: 0,
+                          routes: [{ name: 'LoginScreen' }],
+                        });
+                        setLoading(false);
+                      }
                     }
                     else if (item?.name == "Delete Account") {
                       handleDeleteAccount();

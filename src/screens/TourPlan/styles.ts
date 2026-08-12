@@ -193,15 +193,14 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
     },
     listContainer: {
-        position: 'absolute',
         width: '100%',
         backgroundColor: colors.white,
         borderRadius: 10,
-        maxHeight: 300,
+        height: 260,
         overflow: 'hidden',
-        zIndex:999,
-        top:100,
-        left:20
+        zIndex: 999,
+        marginTop: -10,
+        marginBottom: 16,
     },
 
 });

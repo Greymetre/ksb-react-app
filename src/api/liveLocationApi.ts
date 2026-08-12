@@ -1,6 +1,7 @@
 import axiosClient from './AxiosClient';
 import { API_ENDPOINT } from './ApiUrls';
 import type { LiveLocationQueueItem } from '../storage/liveLocationQueue';
+import { getInstalledAppVersion } from '../utils/appVersion';
 
 export interface UpdateLiveLocationPayload {
   locations: Array<{
@@ -24,4 +25,5 @@ export const updateLiveLocation = (locations: LiveLocationQueueItem[]) =>
   axiosClient.post(
     API_ENDPOINT.UPDATE_LIVE_LOCATION,
     buildLiveLocationPayload(locations),
+    { headers: { 'X-App-Version': getInstalledAppVersion() } },
   );

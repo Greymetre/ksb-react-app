@@ -33,7 +33,7 @@ import FastImage from 'react-native-fast-image';
 import { Asset, ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import Toast from 'react-native-toast-message';
 import store from '../../components/redux/Store';
-import { BASE_URL, IMAGE_BASE_URL } from '../../api/AxiosClient';
+import { BASE_URL, resolveMediaUrl } from '../../api/AxiosClient';
 import { API_ENDPOINT } from '../../api/ApiUrls';
 import ActionSheet, { ActionSheetRef } from 'react-native-actions-sheet';
 import Geolocation from '@react-native-community/geolocation';
@@ -381,23 +381,23 @@ const AddCustomer = ({ navigation, route }: any) => {
       // Show existing image from server
       switch (fieldName) {
         case 'shopImage':
-          displayImage = data?.shop_image ? `${IMAGE_BASE_URL}public/storage/${data.shop_image}` : null;
+          displayImage = data?.shop_image ? resolveMediaUrl(data.shop_image) : null;
           console.log(displayImage, 'data?.shop_imagedata?.shop_image')
           break;
         case 'profileImage':
-          displayImage = data?.profile_image ? `${IMAGE_BASE_URL}public/storage/${data.profile_image}` : null;
+          displayImage = data?.profile_image ? resolveMediaUrl(data.profile_image) : null;
           break;
         case 'cancelledCheque':
-          displayImage = data?.cancelled_cheque ? `${IMAGE_BASE_URL}public/storage/${data.cancelled_cheque}` : null;
+          displayImage = data?.cancelled_cheque ? resolveMediaUrl(data.cancelled_cheque) : null;
           break;
         case 'mouDocument':
-          displayImage = data?.mou_file ? `${IMAGE_BASE_URL}public/storage/${data.mou_file}` : null;
+          displayImage = data?.mou_file ? resolveMediaUrl(data.mou_file) : null;
           break;
         case 'additionalDocument':
           const parsed = JSON.parse(data?.documents);
           if (Array.isArray(parsed)) {
             if (parsed.length > 0) {
-              displayImage = `${IMAGE_BASE_URL}public/storage/${parsed[0]}`;
+              displayImage = resolveMediaUrl(parsed[0]);
             } else {
               displayImage = null
             }
@@ -766,7 +766,7 @@ console.log(billingPincode,'sksk');
       if (res?.data?.status === 'success') {
         const formattedBeats = res?.data?.data?.map((beat) => ({
           label: beat.beat_name,
-          value: beat.beat_id,
+          value: String(beat.beat_id),
         }));
 
         setBeats(formattedBeats);
@@ -1012,6 +1012,7 @@ console.log(billingPincode,'sksk');
     payload.append('sales_zone', formData.salesZone || '');
     payload.append('area_territory', formData.areaTerritory || '');
     payload.append('beat_route', formData.beatRoute || '');
+    payload.append('beat_id', formData.beatRoute || '');
     payload.append('market_classification', formData.marketClassification || '');
     payload.append('competitor_brands', formData.competitorBrands || '');
 
@@ -1181,7 +1182,7 @@ console.log(billingPincode,'sksk');
 
         salesZone: data.sales_zone || '',
         areaTerritory: data.area_territory || '',
-        beatRoute: data.beat_route || '',
+        beatRoute: String(data.beat_id || data.beat_route || data.beat?.beat_id || data.beat?.id || ''),
         marketClassification: data.market_classification || '',
         competitorBrands: data.competitor_brands || '',
 
@@ -1799,7 +1800,7 @@ const [locationLoading, setLocationLoading] = useState(false);
             placeholder="Beat Route *"
             searchPlaceholder="Search beat route..."
             value={formData.beatRoute}
-            onChange={(item) => handleChange('beatRoute', item.value)}
+            onChange={(item) => handleChange('beatRoute', String(item.value))}
             renderRightIcon={() => <ArrowDownIcon />}
           />
 

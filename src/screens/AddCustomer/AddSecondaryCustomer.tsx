@@ -41,7 +41,7 @@ import { Asset, ImagePickerResponse, launchCamera, launchImageLibrary } from 're
 import FastImage from 'react-native-fast-image';
 import Toast from 'react-native-toast-message';
 import store from '../../components/redux/Store';
-import { BASE_URL, IMAGE_BASE_URL } from '../../api/AxiosClient';
+import { BASE_URL, resolveMediaUrl } from '../../api/AxiosClient';
 import ActionSheet, { ActionSheetRef } from 'react-native-actions-sheet';
 import useLocationHook from '../../api/hooks/uselocationhook';
 import { fonts } from '../../utils/typography';
@@ -111,7 +111,7 @@ const AccordionSection = ({ title, children, defaultExpanded = false }: any) => 
   );
 };
 
-const CustomTextInput = ({ placeholder, value, onChangeText, keyboardType = 'default', maxLength, editable = true }: any) => (
+const CustomTextInput = ({ placeholder, value, onChangeText, keyboardType = 'default', maxLength, editable = true, autoCapitalize = 'sentences' }: any) => (
   <View style={[styles.selectUser, styles.row]}>
     <TextInput
       style={styles.textInput}
@@ -121,7 +121,7 @@ const CustomTextInput = ({ placeholder, value, onChangeText, keyboardType = 'def
       maxLength={maxLength}
       onChangeText={onChangeText}
       keyboardType={keyboardType}
-      autoCapitalize="sentences"
+      autoCapitalize={autoCapitalize}
       editable={editable}
     />
   </View>
@@ -137,6 +137,7 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
     sub_type: '',
     owner_name: '',
     shop_name: '',
+    email: '',
     mobile_numbers: [] as string[],
     address_line: '',
     country_id: '1',
@@ -155,9 +156,11 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
     shop_photo: null,
     gst_attachment: null,
     pan_attachment: null,
+    aadhar_attachment: null,
     bank_proof: null,
     gst_number: '',
     pan_number: '',
+    aadhar_no: '',
     bank_account_type: '',
     bank_account_number: '',
     bank_account_number_confirm: '',
@@ -165,6 +168,9 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
     ifsc_code: '',
     account_holder_name: '',
   });
+  const isDealer = ['DEALER', 'DISTRIBUTOR', 'MASTER_DISTRIBUTOR'].includes(
+    String(formData.type || type).trim().toUpperCase(),
+  );
 
   const [mobileInput, setMobileInput] = useState('');
   const [pinCode, setPincode] = useState('');
@@ -192,8 +198,10 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
   const [showCityDropdown, setShowCityDropdown] = useState(false);
   useEffect(() => {
     loadBeats();
-    loadDistributors();
-  }, []);
+    if (!['DEALER', 'DISTRIBUTOR', 'MASTER_DISTRIBUTOR'].includes(String(type).trim().toUpperCase())) {
+      loadDistributors();
+    }
+  }, [type]);
 
   const loadBeats = async () => {
     try {
@@ -201,7 +209,7 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
       if (res?.data?.status === 'success') {
         setBeats(res.data.data.map((beat: any) => ({
           label: beat.beat_name,
-          value: beat.beat_id,
+          value: String(beat.beat_id),
         })));
       }
     } catch (error) {
@@ -557,15 +565,17 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
 
   const getAdditionalCount = () => {
     let count = 0;
-    if (formData.distributor_name) count++;
+    if (!isDealer && formData.distributor_name) count++;
     if (formData.beat_id) count++;
     return count;
   };
 
+  const requiredAdditionalCount = isDealer ? 1 : 2;
+
   const isFormValid =
     getBasicCount() === 3 &&
     getAddressCount() === 5 &&
-    getAdditionalCount() === 2 &&
+    getAdditionalCount() === requiredAdditionalCount &&
     isBankInfoValid();
 
   const handleChange = (field: string, value: any) => {
@@ -586,6 +596,7 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
     fd.append('sub_type', formData.sub_type || '');
     fd.append('owner_name', formData.owner_name);
     fd.append('shop_name', formData.shop_name);
+    fd.append('email', formData.email?.trim() || '');
     fd.append('mobile_number', formData.mobile_numbers.join(','));
     fd.append('address_line', formData.address_line);
     fd.append('country_id', formData.country_id);
@@ -593,8 +604,10 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
     fd.append('district_id', formData.district_id);
     fd.append('city_id', formData.city_id);
     fd.append('pincode_id', formData.pincode_id);
-    fd.append('distributor_name', formData.distributor_name);
-    fd.append('agri_distributor', formData.agri_distributor);
+    if (!isDealer) {
+      fd.append('distributor_name', formData.distributor_name);
+      fd.append('agri_distributor', formData.agri_distributor);
+    }
     fd.append('beat_id', formData.beat_id);
     fd.append('belt_area_market_name', formData.belt_area_market_name || '');
     fd.append('gps_location', formData.gps_location || '');
@@ -602,6 +615,7 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
     if (formData.type === 'RETAILER') {
       fd.append('gst_number', formData.gst_number || '');
       fd.append('pan_number', formData.pan_number || '');
+      fd.append('aadhar_no', formData.aadhar_no || '');
       fd.append('bank_account_type', formData.bank_account_type || '');
       fd.append('bank_account_number', formData.bank_account_number || '');
       fd.append('bank_name', formData.bank_name || '');
@@ -626,6 +640,7 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
     addPhoto('shop_photo', formData.shop_photo);
     addPhoto('gst_attachment', formData.gst_attachment);
     addPhoto('pan_attachment', formData.pan_attachment);
+    addPhoto('aadhar_attachment', formData.aadhar_attachment);
     addPhoto('bank_proof', formData.bank_proof);
 
     return fd;
@@ -706,25 +721,33 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
         sub_type: existingCustomer.sub_type || '',
         owner_name: existingCustomer.owner_name || '',
         shop_name: existingCustomer.shop_name || '',
+        email: existingCustomer.email || '',
         mobile_numbers: mobiles,
-        address_line: existingCustomer.address_line || '',
+        address_line: existingCustomer.address_line || existingCustomer.address1 || existingCustomer.shipping_address || '',
         country_id: existingCustomer.country_id || '1',
         state_id: existingCustomer.state_id || '',
         district_id: existingCustomer.district_id || '',
         city_id: existingCustomer.city_id || '',
         pincode_id: existingCustomer.pincode_id || '',
-        distributor_name: existingCustomer.distributor_name || '',
-        agri_distributor: existingCustomer.agri_distributor || '',
-        beat_id: existingCustomer.beat_id,
+        distributor_name: ['DEALER', 'DISTRIBUTOR', 'MASTER_DISTRIBUTOR'].includes(String(existingCustomer.type || type).trim().toUpperCase()) ? '' : existingCustomer.distributor_name || '',
+        agri_distributor: ['DEALER', 'DISTRIBUTOR', 'MASTER_DISTRIBUTOR'].includes(String(existingCustomer.type || type).trim().toUpperCase()) ? '' : existingCustomer.agri_distributor || '',
+        beat_id: String(
+          existingCustomer.beat_id ||
+          existingCustomer.beat?.beat_id ||
+          existingCustomer.beat?.id ||
+          '',
+        ),
         belt_area_market_name: existingCustomer.belt_area_market_name || '',
         saathi_awareness_status: existingCustomer.saathi_awareness_status || '',
-        shop_photo: existingCustomer.shop_photo ? { uri: `${IMAGE_BASE_URL}public/storage/${existingCustomer.shop_photo}` } : null,
+        shop_photo: existingCustomer.shop_photo ? { uri: resolveMediaUrl(existingCustomer.shop_photo) } : null,
         gst_number: existingCustomer.gst_number || '',
         gps_location: existingCustomer.gps_location || '',
-        gst_attachment: existingCustomer.gst_attachment ? { uri: `${IMAGE_BASE_URL}public/storage/${existingCustomer.gst_attachment}` } : null,
-        pan_attachment: existingCustomer.pan_attachment ? { uri: `${IMAGE_BASE_URL}public/storage/${existingCustomer.pan_attachment}` } : null,
-        bank_proof: existingCustomer.bank_proof ? { uri: `${IMAGE_BASE_URL}public/storage/${existingCustomer.bank_proof}` } : null,
+        gst_attachment: existingCustomer.gst_attachment ? { uri: resolveMediaUrl(existingCustomer.gst_attachment) } : null,
+        pan_attachment: existingCustomer.pan_attachment ? { uri: resolveMediaUrl(existingCustomer.pan_attachment) } : null,
+        bank_proof: existingCustomer.bank_proof ? { uri: resolveMediaUrl(existingCustomer.bank_proof) } : null,
         pan_number: existingCustomer.pan_number || '',
+        aadhar_no: existingCustomer.aadhar_no || existingCustomer.aadhaar_number || '',
+        aadhar_attachment: existingCustomer.aadhar_attachment ? { uri: resolveMediaUrl(existingCustomer.aadhar_attachment) } : null,
         bank_account_type: existingCustomer.bank_account_type || '',
         bank_account_number: existingCustomer.bank_account_number || '',
         bank_account_number_confirm: existingCustomer.bank_account_number || '',
@@ -747,8 +770,12 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
         }
       }
 
+      setStateName(existingCustomer.state?.state_name || existingCustomer.state_name || '');
+      setDistrictName(existingCustomer.district?.district_name || existingCustomer.district_name || '');
+      setCityName(existingCustomer.city?.city_name || existingCustomer.city_name || '');
+
     }
-  }, [isEdit, existingCustomer, beats]);
+  }, [isEdit, existingCustomer, type]);
 
 
   const getFirstMissingFieldMessage = () => {
@@ -765,7 +792,7 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
     if (!formData.city_id) return "City is required";
 
     // Additional
-    if (!formData.distributor_name) return "Distributor is required";
+    if (!isDealer && !formData.distributor_name) return "Distributor is required";
     if (!formData.beat_id) return "Beat is required";
 
     // Bank validation
@@ -814,6 +841,14 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
                 placeholder="Owner Name *"
                 value={formData.owner_name}
                 onChangeText={(v: string) => handleChange('owner_name', v)}
+              />
+
+              <CustomTextInput
+                placeholder="Email (optional)"
+                value={formData.email}
+                onChangeText={(v: string) => handleChange('email', v.trim())}
+                keyboardType="email-address"
+                autoCapitalize="none"
               />
 
               <View style={{ marginTop: 8 }}>
@@ -943,10 +978,10 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
               <View style={{ alignItems: 'center', marginBottom: 16 }}>
                 <AppText
                   size={16}
-                  color={getAdditionalCount() === 2 ? '#22C55E' : '#64748B'}
+                  color={getAdditionalCount() === requiredAdditionalCount ? '#22C55E' : '#64748B'}
                   family="InterSemiBold"
                 >
-                  {getAdditionalCount()}/2 completed
+                  {getAdditionalCount()}/{requiredAdditionalCount} completed
                 </AppText>
               </View>
               <CustomTextInput
@@ -955,37 +990,41 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
                 onChangeText={(v: string) => handleChange('belt_area_market_name', v)}
               />
 
-              <Dropdown
-                style={[styles.selectUser, { padding: 14, marginTop: 12 }]}
-                data={distributors}
-                value={formData.distributor_name}
-                onChange={(item) => handleChange('distributor_name', item.value)}
-                labelField="label"
-                valueField="value"
-                placeholder="Select Domestic Distributor *"
-                placeholderStyle={{ color: 'gray', fontFamily: fonts.InterRegular, fontSize: 14 }}
-                search
-                renderRightIcon={() => <ArrowDownIcon />}
-              />
+              {!isDealer && (
+                <>
+                  <Dropdown
+                    style={[styles.selectUser, { padding: 14, marginTop: 12 }]}
+                    data={distributors}
+                    value={formData.distributor_name}
+                    onChange={(item) => handleChange('distributor_name', item.value)}
+                    labelField="label"
+                    valueField="value"
+                    placeholder="Select Domestic Distributor *"
+                    placeholderStyle={{ color: 'gray', fontFamily: fonts.InterRegular, fontSize: 14 }}
+                    search
+                    renderRightIcon={() => <ArrowDownIcon />}
+                  />
 
-              <Dropdown
-                style={[styles.selectUser, { padding: 14, marginTop: 12 }]}
-                data={distributors} // ← using same list; change if different API
-                value={formData.agri_distributor}
-                onChange={(item) => handleChange('agri_distributor', item.value)}
-                labelField="label"
-                valueField="value"
-                placeholder="Select Agri Distributor (optional)"
-                placeholderStyle={{ color: 'gray', fontFamily: fonts.InterRegular, fontSize: 14 }}
-                search
-                renderRightIcon={() => <ArrowDownIcon />}
-              />
+                  <Dropdown
+                    style={[styles.selectUser, { padding: 14, marginTop: 12 }]}
+                    data={distributors}
+                    value={formData.agri_distributor}
+                    onChange={(item) => handleChange('agri_distributor', item.value)}
+                    labelField="label"
+                    valueField="value"
+                    placeholder="Select Agri Distributor (optional)"
+                    placeholderStyle={{ color: 'gray', fontFamily: fonts.InterRegular, fontSize: 14 }}
+                    search
+                    renderRightIcon={() => <ArrowDownIcon />}
+                  />
+                </>
+              )}
 
               <Dropdown
                 style={[styles.selectUser, { padding: 14, marginTop: 12 }]}
                 data={beats}
                 value={formData.beat_id}
-                onChange={(item) => handleChange('beat_id', item.value)}
+                onChange={(item) => handleChange('beat_id', String(item.value))}
                 labelField="label"
                 valueField="value"
                 placeholder="Select Beat *"
@@ -1034,6 +1073,13 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
                 value={formData.pan_number}
                 onChangeText={(v: string) => handleChange('pan_number', v.toUpperCase())}
                 maxLength={10}
+              />
+              <CustomTextInput
+                placeholder="Aadhaar Number (optional)"
+                value={formData.aadhar_no}
+                onChangeText={(v: string) => handleChange('aadhar_no', v.replace(/\D/g, ''))}
+                keyboardType="numeric"
+                maxLength={12}
               />
               <CustomTextInput
                 placeholder="Account Holder Name (optional)"
@@ -1110,6 +1156,12 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
                   field="pan_attachment"
                   value={formData.pan_attachment}
                   existingUri={isEdit ? formData.pan_attachment?.uri : null}
+                />
+                <ImageUploadBox
+                  label="Aadhaar Attachment (optional)"
+                  field="aadhar_attachment"
+                  value={formData.aadhar_attachment}
+                  existingUri={isEdit ? formData.aadhar_attachment?.uri : null}
                 />
                 <ImageUploadBox
                   label="Bank Proof / Cheque (optional)"

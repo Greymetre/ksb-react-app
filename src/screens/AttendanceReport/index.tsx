@@ -725,7 +725,7 @@ const AttendanceReport = ({ navigation }: any) => {
 
     // Prefer coordinates if available
     if (attendanceData?.punchin_latitude && attendanceData?.punchin_longitude) {
-      query = `${attendanceData?.punchin_longitude},${attendanceData?.punchin_latitude}`;
+      query = `${attendanceData?.punchin_latitude},${attendanceData?.punchin_longitude}`;
     }
 
     // Fallback to address
@@ -1425,7 +1425,7 @@ const AttendanceReport = ({ navigation }: any) => {
               try {
                 // Prepare payload
                 const payload: any = {
-                  attendance_id: attendanceData?.id,
+                  attendance_id: String(attendanceData?.id ?? ''),
                   status: punchInStatus,           // 1 = Approve, 2 = Reject
                 };
 
@@ -1597,7 +1597,7 @@ const AttendanceReport = ({ navigation }: any) => {
               try {
                 // Prepare payload
                 const payload: any = {
-                  attendance_id: attendanceData?.id,
+                  attendance_id: String(attendanceData?.id ?? ''),
                   status: punchInStatus,           // 1 = Approve, 2 = Reject
                 };
 

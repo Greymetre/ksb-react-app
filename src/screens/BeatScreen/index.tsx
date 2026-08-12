@@ -5,6 +5,7 @@ import { rw } from '../../utils/responsive';
 import { colors } from '../../utils/Colors';
 import store, { useAppSelector } from '../../components/redux/Store';
 import { NavigationProp, ParamListBase, useFocusEffect, useNavigation } from '@react-navigation/native';
+import axiosClient from '../../api/AxiosClient';
 
 interface BeatItem {
     beatscheduleid: number;
@@ -19,8 +20,6 @@ interface BeatItem {
     new_customers: number;
     is_today: boolean;
 }
-
-const API_BASE = 'https://app.ksbindia.co.in/FieldKonnect_API/api';
 
 const BeatsScreen = () => {
     const navigation = useNavigation<NavigationProp<ParamListBase>>();
@@ -44,23 +43,10 @@ const BeatsScreen = () => {
 
         try {
             setErrorMsg(null);
-            const today = new Date().toISOString().split('T')[0];
-
-            const url = `${API_BASE}/getBeatList?beat_date=${today}&user_id=${userId}`;
-
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
+            const response = await axiosClient.get('api/getBeatList', {
+                params: { user_id: userId, pageSize: 50 },
             });
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-
-            const json = await response.json();
+            const json = response.data;
 
             if (json.status === 'success' && Array.isArray(json.data?.data)) {
                 setBeats(json.data.data);

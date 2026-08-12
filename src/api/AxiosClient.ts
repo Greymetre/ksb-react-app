@@ -4,9 +4,23 @@ import store from '../components/redux/Store';
 import { logout, setToken, setUser } from '../components/redux/slice/AuthSlice';
 import { navigationRef } from '../services/NavigationService';
 export const BASE_URL = 'https://app.ksbindia.co.in/FieldKonnect_API/';
-export const IMAGE_BASE_URL = 'https://fieldkonnect.in/ksb-pr/';
-// export const BASE_URL = 'http://192.168.1.4:8000/';
+export const API_BASE_URL = `${BASE_URL}api`;
+export const IMAGE_BASE_URL = BASE_URL;
+export const resolveMediaUrl = (value?: string | null): string => {
+  if (!value) return '';
+  const mediaPath = String(value).trim();
+  if (!mediaPath) return '';
+  if (/^(https?:)?\/\//i.test(mediaPath) || mediaPath.startsWith('file:') || mediaPath.startsWith('data:')) {
+    return mediaPath;
+  }
 
+  const cleanPath = mediaPath.replace(/^\/+/, '');
+  if (/^(storage|public\/storage|uploads|public\/uploads)\//i.test(cleanPath)) {
+    return `${BASE_URL}${cleanPath}`;
+  }
+
+  return `${BASE_URL}storage/${cleanPath}`;
+};
 const axiosClient = axios.create({
   baseURL: BASE_URL,
   headers: {
@@ -17,8 +31,16 @@ const axiosClient = axios.create({
 
 axiosClient.interceptors.request.use(async config => {
   const token = store.getState()?.auth?.token;
-  if (token) {
+  const requestUrl = String(config.url || '').replace(/^\/+/, '').toLowerCase();
+  const isPublicAuthRequest = requestUrl === 'api/login' || requestUrl === 'api/signup';
+
+  // Login/signup must never carry a persisted token from an older session.
+  // An invalid bearer token can make an otherwise valid login fail before the
+  // new credentials are processed by the server.
+  if (token && !isPublicAuthRequest) {
     config.headers.Authorization = `Bearer ${token}`;
+  } else if (isPublicAuthRequest && config.headers.Authorization) {
+    delete config.headers.Authorization;
   }
   return config;
 });

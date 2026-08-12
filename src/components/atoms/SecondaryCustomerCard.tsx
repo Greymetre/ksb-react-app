@@ -24,7 +24,7 @@ import { AddToCartIcon, ArrowCardDownIcon, CheckIcon, CrossIconCard, EmailIcon, 
 import AppText from '../AppText/AppText';
 import { rw } from '../../utils/responsive';
 import { SCREEN_WIDTH } from '../../utils/misc';
-import { BASE_URL, IMAGE_BASE_URL } from '../../api/AxiosClient';
+import { BASE_URL, resolveMediaUrl } from '../../api/AxiosClient';
 import FastImage from 'react-native-fast-image';
 import { useGetSubmitCheckIN } from '../../api/query/CustomerApi';
 import Toast from 'react-native-toast-message';
@@ -45,6 +45,7 @@ interface SolarCardProps {
   locationError?: any;
   index?: number
   type?: string;
+  customerType?: string;
   isPunchedIn?: any
   locationLoading?: any;
   onViewPress?: () => void;
@@ -66,16 +67,34 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
   locationError,
   index,
   isPunchedIn,
-  type
+  type,
+  customerType
 }) => {
+  const customerTypeText = [
+    customerType,
+    item?.customer_type,
+    item?.customer_type_name,
+    item?.customertype_name,
+    item?.registration_type,
+    item?.type,
+  ].filter(Boolean).join(' ');
+  const isDealerOrDistributor = /dealer|distributor/i.test(customerTypeText);
+  const isVisitOpen = (customer: any): boolean => {
+    if (customer?.current_visit_is_open !== undefined && customer?.current_visit_is_open !== null) {
+      return customer.current_visit_is_open === true ||
+        customer.current_visit_is_open === 1 ||
+        customer.current_visit_is_open === '1';
+    }
+
+    return false;
+  };
   const [isExpanded, setIsExpanded] = useState(false);
   const animationHeight = useSharedValue(0);
   const [newCheckInData, setNewCheckInData] = useState<boolean>(false)
 
   const [checkInLoading, setCheckInLoading] = useState<boolean>(false)
-  const [checkIn, setCheckIn] = useState<boolean>(item?.last_checkin_date && !item?.last_checkout_date)
-  const [checkInHandle, setCheckInHanlde] = useState<boolean>(!!item?.last_checkin_date &&
-    !item?.last_checkout_date)
+  const [checkIn, setCheckIn] = useState<boolean>(isVisitOpen(item))
+  const [checkInHandle, setCheckInHanlde] = useState<boolean>(isVisitOpen(item))
   const { mutateAsync: submitCheckIn } = useGetSubmitCheckIN()
 
   function isCheckoutBeforeCheckin(checkinDate: any, checkinTime: any, checkoutDate: any, checkoutTime: any) {
@@ -97,22 +116,9 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
 
   useEffect(() => {
 
-    if (item?.last_checkin_date && item?.last_checkout_date) {
-      const result: any = isCheckoutBeforeCheckin(
-        item?.last_checkin_date,
-        item?.last_checkin_time,
-        item?.last_checkout_date,
-        item?.last_checkout_time
-      );
-      if (result != "NA") {
-        setCheckIn(result)
-        setCheckInHanlde(result)
-      }
-    } else {
-      setCheckIn(item?.last_checkin_date && !item?.last_checkout_date)
-      setCheckInHanlde(!!item?.last_checkin_date &&
-        !item?.last_checkout_date)
-    }
+    const open = isVisitOpen(item)
+    setCheckIn(open)
+    setCheckInHanlde(open)
 
   }, [item])
   const toggleExpand = () => {
@@ -137,7 +143,7 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
     if (checkInLoading) return
     // Check if we have location
 
-    if (currentLat === null || currentLng === null) {
+    if (currentLat == null || currentLng == null) {
       Toast.show({
         type: 'error',
         text1: 'Location not available',
@@ -364,7 +370,7 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
               resizeMode="cover"
             />
             <FastImage
-              source={{ uri: `${IMAGE_BASE_URL}/public/storage/${item?.shop_photo}` }}
+              source={{ uri: resolveMediaUrl(item?.shop_photo) }}
               style={styles.mainImage}
               resizeMode="cover"
             />
@@ -398,7 +404,7 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
               reducedTransparencyFallbackColor="rgba(255, 255, 255, 0.8)"
             />
             <View style={[styles.playIconContainer, { backgroundColor: 'rgba(255, 255, 255, 0.9)' }]}>
-              <Text style={styles.tagText}>{item?.status}</Text>
+              <Text style={styles.tagText}>{String(item?.status || 'PENDING').trim().toUpperCase()}</Text>
             </View>
           </TouchableOpacity>
         )
@@ -463,15 +469,7 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
                   })
                   return
                 }
-                if (isPunchedIn == true) {
-                  handleCheckInOut()
-                } else {
-                  if (isPunchedIn == false) {
-                    Toast.show({ type: "error", text1: "Please Punch in your attendance" })
-                  } else {
-                    Toast.show({ type: "error", text1: "Your Today shift is end" })
-                  }
-                }
+                handleCheckInOut()
                 // onCheckInPress(item?.last_checkin_date ? "Check Out" : "Check In", item?.id)
               }}>
               <CheckIcon />
@@ -489,15 +487,7 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
                   })
                   return
                 }
-                if (isPunchedIn == true) {
-                  handleCheckInOut()
-                } else {
-                  if (isPunchedIn == false) {
-                    Toast.show({ type: "error", text1: "Please Punch in your attendance" })
-                  } else {
-                    Toast.show({ type: "error", text1: "Your Today shift is end" })
-                  }
-                }
+                handleCheckInOut()
                 // onCheckInPress(item?.last_checkin_date ? "Check Out" : "Check In", item?.id)
               }}>
               <CheckIcon />
@@ -510,6 +500,7 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
 
         {/* {
           !type ? ( */}
+            {!isDealerOrDistributor && (
             <TouchableOpacity style={[styles.addOrderButton, { width: '36%' }]}
               onPress={() => {
                 if (item?.status != "APPROVED") {
@@ -534,6 +525,7 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
                 Add Order
               </AppText>
             </TouchableOpacity>
+            )}
           {/* ) : (
             <View style={{ width: '36%' }}>
             </View>

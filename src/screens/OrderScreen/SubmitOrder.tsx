@@ -13,11 +13,12 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
 
 interface OrderItem {
-    id: string;               // unique key
+    id: string | number;      // unique key
     productName: string;
     quantity: number;
     rate: number;             // editable
     amount: number;           // calculated = qty × rate
+    productDetailId?: number | string | null;
 }
 
 const TableHeader = () => (
@@ -50,9 +51,9 @@ interface TableRowProps {
 
 interface TableRowProps {
     item: OrderItem;
-    onRateChange: (id: string, newRate: number) => void;
-    onQuantityChange?: (id: string, newQty: number) => void; // optional for future
-    onRemove: (id: string) => void;
+    onRateChange: (id: string | number, newRate: number) => void;
+    onQuantityChange?: (id: string | number, newQty: number) => void; // optional for future
+    onRemove: (id: string | number) => void;
 }
 
 const TableRow: React.FC<TableRowProps> = ({ item, onRateChange, onRemove }) => {
@@ -189,6 +190,7 @@ const SubmitOrder = () => {
                     quantity: item.quantity,
                     rate: price,
                     amount: item.quantity * price,    // ← correct calculation
+                    productDetailId: item.productDetailId ?? null,
                 };
             });
 
@@ -262,7 +264,7 @@ const SubmitOrder = () => {
 
     const totalQuantity = orderItems.reduce((sum, item) => sum + item.quantity, 0);
 
-    const handleRateChange = (id: string, newRate: number) => {
+    const handleRateChange = (id: string | number, newRate: number) => {
         setOrderItems((prev) =>
             prev.map((item) =>
                 item.id === id
@@ -283,6 +285,8 @@ const SubmitOrder = () => {
                 productId: item.id,
                 productName: item.productName,
                 quantity: item.quantity,
+                price: item.rate,
+                productDetailId: item.productDetailId ?? null,
             }));
 
             if (updateCart) {
@@ -313,20 +317,6 @@ const SubmitOrder = () => {
             return;
         }
 
-        // ✅ NEW VALIDATION: Check if any item has price/rate = 0
-        const zeroPriceItems = orderItems.filter((item: any) =>
-            !item.rate || Number(item.rate) <= 0
-        );
-
-        if (zeroPriceItems.length > 0) {
-            Toast.show({
-                type: 'error',
-                text1: 'Price cannot be 0',
-                text2: `Found ${zeroPriceItems.length} item(s) with zero price`,
-            });
-            return;
-        }
-
         if (customerType === 'retailer' && !selectedRetailer) {
             Toast.show({
                 type: 'error',
@@ -351,7 +341,7 @@ const SubmitOrder = () => {
             // ✅ Order Details
             const orderdetail = orderItems.map((item: any) => ({
                 product_id: item.id,
-                product_detail_id: item.id,
+                product_detail_id: item.productDetailId ?? null,
                 quantity: item.quantity,
                 price: item.rate,
                 ebd_amount: item.rate,

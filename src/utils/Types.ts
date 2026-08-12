@@ -75,6 +75,7 @@ export type loginParmas ={
   app_version?: any
   device_name?: any
   device_type?: any
+  unique_id?: any
 }
 
 export type signupParmas ={

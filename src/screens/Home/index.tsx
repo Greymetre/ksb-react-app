@@ -35,6 +35,8 @@ import RetailersOverviewCard from '../../components/atoms/RetailersOverviewCard'
 import TopProductsCard from '../../components/atoms/TopProductsCard'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import { startLiveLocationTracking, stopLiveLocationTracking } from '../../services/liveLocationService'
+import { API_BASE_URL } from '../../api/AxiosClient'
+import { getDeviceUniqueId, getInstalledAppVersion, isAppUpdateRequired } from '../../utils/appVersion'
 
 interface DropdownItem {
   label: string;
@@ -48,11 +50,19 @@ const userTypes = [
   // { id: '4', title: 'Garage', icon: <FourthUserIcon />, navigateTO: "AddCustomer", title2: 'GARAGE' },
   // { id: '5', title: 'Mechanic', icon: <FifthUserIcon />, navigateTO: "AddSecondaryCustomer", title2: 'MECHANIC' },
 ];
+type CustomerTypeOption = {
+  id: string;
+  title: string;
+  title2: string;
+  navigateTO: string;
+  icon: React.ReactNode;
+};
 const Home = () => {
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const dispatch = useDispatch();
   const actionSheetRef = useRef<ActionSheetRef>(null);
   const [pressType, setPressType] = useState<string | null>(null)
+  const [customerTypeOptions, setCustomerTypeOptions] = useState<CustomerTypeOption[]>(userTypes);
   const { user } = useAppSelector(
     (state) => state.auth
   );
@@ -361,22 +371,44 @@ const Home = () => {
     console.log('Selected:', type);
     // Example: navigation.navigate('SomeScreen', { type }); 
     if (pressType == 'add') {
-      if (title == "Distributor") {
+      if (title == "Distributor" || title == "Dealer") {
         navigation.navigate(type)
       } else {
         navigation.navigate('AddSecondaryCustomer', { type: title })
       }
     } else {
-      if (title == "Distributor") {
-        navigation.navigate("CustomerList")
-      } else {
-        navigation.navigate("CustomerList", { type: title })
-      }
+      navigation.navigate("CustomerList", { type: String(title).toUpperCase(), customerTypeName: title })
 
     }
 
 
     // Or dispatch an action, show toast, etc.
+  };
+
+  const openCustomerTypes = async (mode: 'add' | 'view') => {
+    setPressType(mode);
+    if (mode === 'view') {
+      try {
+        const response = await axios.get('https://app.ksbindia.co.in/FieldKonnect_API/api/masters/customer-types');
+        const types = Array.isArray(response?.data?.data) ? response.data.data : [];
+        if (types.length > 0) {
+          setCustomerTypeOptions(types.map((item: any, index: number) => {
+            const name = String(item?.name || item?.type_name || item?.customertype_name || '').trim();
+            return {
+              id: String(item?.id ?? index + 1),
+              title: name,
+              title2: name,
+              navigateTO: name.toLowerCase() === 'dealer' ? 'AddCustomer' : 'AddSecondaryCustomer',
+              icon: index === 0 ? <FirstUserIcon /> : <SecondUserIcon />,
+            };
+          }));
+        }
+      } catch (error) {
+        console.warn('Customer types could not be loaded; using local fallback.', error);
+        setCustomerTypeOptions(userTypes);
+      }
+    }
+    actionSheetRef.current?.show();
   };
 
   function getFirstName(fullName: string | null | undefined) {
@@ -492,7 +524,7 @@ const Home = () => {
   const filteredUserTypes =
     pressType === 'add'
       ? userTypes.filter(item => item.title === 'Retailer')
-      : userTypes;
+      : customerTypeOptions;
 
 
   const fetchUsers = async (pageNum = 1) => {
@@ -567,7 +599,7 @@ const Home = () => {
       const token = store.getState()?.auth?.token;
 
       const response = await axios.get(
-        'https://app.ksbindia.co.in/FieldKonnect_API/api/getAppVersion',
+        `${API_BASE_URL}/getAppVersion`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -579,10 +611,17 @@ const Home = () => {
       // ======================================
       // CURRENT APP VERSION
       // ======================================
-      const CURRENT_VERSION =
-        Platform.OS === 'ios'
-          ? '1.1'
-          : '1.3';
+      const CURRENT_VERSION = getInstalledAppVersion();
+
+      // Keep User App Details current after an in-place store update. This is
+      // independent of login/logout and runs whenever the home screen checks
+      // the force-update setting.
+      const deviceUniqueId = await getDeviceUniqueId();
+      await axios.post(
+        `${API_BASE_URL}/mobile-session/heartbeat`,
+        { app_version: CURRENT_VERSION, unique_id: deviceUniqueId || undefined },
+        { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } },
+      );
 
       // ======================================
       // SERVER VERSION
@@ -598,10 +637,7 @@ const Home = () => {
       // ======================================
       // VERSION CHECK
       // ======================================
-      if (
-        SERVER_VERSION &&
-        SERVER_VERSION != CURRENT_VERSION
-      ) {
+      if (SERVER_VERSION && isAppUpdateRequired(CURRENT_VERSION, String(SERVER_VERSION))) {
 
         navigation.reset({
           index: 0,
@@ -713,12 +749,11 @@ const Home = () => {
                     <TileCard item={item} onpress={(item: any) => {
                       if (item?.id == 2 || item?.id == 3) {
                         if (item?.id == 2) {
-                          setPressType('add')
+                          void openCustomerTypes('add')
                         }
                         if (item?.id == 3) {
-                          setPressType('view')
+                          void openCustomerTypes('view')
                         }
-                        actionSheetRef.current?.show();
                       } else if (item?.id == 5 || item?.id == 6) {
                         Toast.show({
                           type: 'info',
@@ -1161,7 +1196,7 @@ const Home = () => {
             family="InterSemiBold"
             align="center"
           >
-            Select User Type
+            Select Customer Type
           </AppText>
 
           {/* Options */}

@@ -5,7 +5,6 @@ import {
   TextInput,
   Pressable,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { styles } from '../ExpenseReport/styles'; // adjust path
@@ -17,6 +16,8 @@ import { useGetSubmitCheckout } from '../../api/query/CustomerApi'; // ← add t
 import { ArrowDownIcon } from '../../assets/svgs/SvgsFile';
 import axios from 'axios';
 import store from '../../components/redux/Store';
+import axiosClient from '../../api/AxiosClient';
+import useLocationHook from '../../api/hooks/uselocationhook';
 
 interface VisitReportProps {
   navigation: any;
@@ -30,6 +31,8 @@ interface VisitType {
 
 const VisitReport: React.FC<VisitReportProps> = ({ navigation, route }) => {
   const { checkin_id, entity_type, entity_id, latitude, longitude, customerData } = route.params || {};
+  const [activeCheckin, setActiveCheckin] = useState<any>(null);
+  const [activeCheckinLoading, setActiveCheckinLoading] = useState(false);
   const [description, setDescription] = useState('');
   const [visitType, setVisitType] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -38,16 +41,32 @@ const VisitReport: React.FC<VisitReportProps> = ({ navigation, route }) => {
   const [visitTypes, setVisitTypes] = useState<VisitType[]>([]);
   const [visitTypesLoading, setVisitTypesLoading] = useState(true);
   const [visitTypesError, setVisitTypesError] = useState(false);
+  const { coords } = useLocationHook();
+  const checkoutLatitude = latitude ?? coords?.latitude;
+  const checkoutLongitude = longitude ?? coords?.longitude;
 
-  const visitTypeOptions = [
-    { label: 'First Time Visit (New Visit)', value: 'First Time Visit (New Visit)' },
-    { label: 'New Dealer/Distributor Appointment', value: 'New Dealer/Distributor Appointment' },
-    { label: 'For Payment Collection', value: 'For Payment Collection' },
-    { label: 'Visit For Order Collection', value: 'Visit For Order Collection' },
-    { label: 'Revisit', value: 'Revisit' },
-    { label: 'Retailer Visit', value: 'Retailer Visit' },
-    { label: 'Dealer Distributor Existing Visit', value: 'Dealer Distributor Existing Visit' },
-  ];
+  const getCheckoutContext = async () => {
+    if (checkin_id && entity_type && entity_id) {
+      return { checkin_id, entity_type, entity_id };
+    }
+
+    if (activeCheckin?.checkin_id && activeCheckin?.entity_type && activeCheckin?.entity_id) {
+      return activeCheckin;
+    }
+
+    setActiveCheckinLoading(true);
+    try {
+      const response = await axiosClient.get('api/getCurrentOpenCheckin');
+      const openCheckin = response?.data?.open_checkin;
+      if (response?.data?.has_open_checkin && openCheckin) {
+        setActiveCheckin(openCheckin);
+        return openCheckin;
+      }
+      return null;
+    } finally {
+      setActiveCheckinLoading(false);
+    }
+  };
 
   const handleSubmit = async () => {
     if (!description.trim()) {
@@ -65,11 +84,34 @@ const VisitReport: React.FC<VisitReportProps> = ({ navigation, route }) => {
       return;
     }
 
-    if (!checkin_id || !entity_type || !entity_id || latitude == null || longitude == null) {
+    let checkoutContext;
+    try {
+      checkoutContext = await getCheckoutContext();
+    } catch (error: any) {
       Toast.show({
         type: 'error',
-        text1: 'Missing data',
-        text2: 'Cannot proceed with checkout',
+        text1: 'Unable to verify active visit',
+        text2: error?.response?.data?.message || 'Please try again',
+        position: 'top',
+      });
+      return;
+    }
+
+    if (!checkoutContext?.checkin_id || !checkoutContext?.entity_type || !checkoutContext?.entity_id) {
+      Toast.show({
+        type: 'error',
+        text1: 'No active check-in found',
+        text2: 'Please check in before submitting a visit report',
+        position: 'top',
+      });
+      return;
+    }
+
+    if (checkoutLatitude == null || checkoutLongitude == null) {
+      Toast.show({
+        type: 'error',
+        text1: 'Location not available',
+        text2: 'Please enable location and try again',
         position: 'top',
       });
       return;
@@ -78,11 +120,11 @@ const VisitReport: React.FC<VisitReportProps> = ({ navigation, route }) => {
     setLoading(true);
 
     const payload = {
-      checkin_id: checkin_id,
-      entity_type: entity_type,
-      entity_id: entity_id,
-      checkout_latitude: latitude,
-      checkout_longitude: longitude,
+      checkin_id: checkoutContext.checkin_id,
+      entity_type: checkoutContext.entity_type,
+      entity_id: checkoutContext.entity_id,
+      checkout_latitude: checkoutLatitude,
+      checkout_longitude: checkoutLongitude,
       description: description.trim(),
       visit_type_id: visitType,
       //   visit_type_id: visitType ? parseInt(visitType) : undefined, // if your API expects ID
@@ -238,7 +280,7 @@ const VisitReport: React.FC<VisitReportProps> = ({ navigation, route }) => {
         <Pressable
           style={[
             {
-              backgroundColor: loading || visitTypesLoading || !visitType ? 'rgba(0,0,0,0.3)' : colors.blue,
+              backgroundColor: loading || activeCheckinLoading || visitTypesLoading || !visitType ? 'rgba(0,0,0,0.3)' : colors.blue,
               paddingVertical: rw(14),
               borderRadius: rw(12),
               alignItems: 'center',
@@ -247,13 +289,13 @@ const VisitReport: React.FC<VisitReportProps> = ({ navigation, route }) => {
             loading && { opacity: 0.7 },
           ]}
           onPress={handleSubmit}
-          disabled={loading || visitTypesLoading || !visitType}
+          disabled={loading || activeCheckinLoading || visitTypesLoading || !visitType}
         >
           {loading ? (
             <ActivityIndicator color="white" />
           ) : (
             <AppText size={16} color="white" family="InterSemiBold">
-              Submit Report & Check Out
+              {activeCheckinLoading ? 'Checking active visit...' : 'Submit Report & Check Out'}
             </AppText>
           )}
         </Pressable>

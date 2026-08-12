@@ -56,19 +56,19 @@ class LocationForegroundService : Service() {
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
     when (intent?.action) {
       ACTION_STOP -> {
+        ensureForeground("Stopping live location tracking")
         if (!LocationStorage.isActive(this)) {
           stopSelf()
           return START_NOT_STICKY
         }
-        ensureForeground("Stopping live location tracking")
         stopTracking()
       }
       ACTION_SYNC -> {
+        ensureForeground("Syncing pending live locations")
         if (!LocationStorage.isActive(this)) {
           stopSelf()
           return START_NOT_STICKY
         }
-        ensureForeground("Syncing pending live locations")
         syncPendingLocations(stopIfInactive = true)
       }
       ACTION_CAPTURE_NOW -> {

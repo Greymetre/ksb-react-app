@@ -22,7 +22,11 @@ export const styles = StyleSheet.create({
     logo:{
         height: 55,
         width: "100%",
-        bottom: -15
+    },
+    ksbLogo:{
+        height: 42,
+        width: 140,
+        marginTop: 20
     },
     center:{
         justifyContent:"center",
