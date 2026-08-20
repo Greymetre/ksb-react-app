@@ -1,4 +1,4 @@
-import axiosClient from './AxiosClient';
+import axiosClient, { resolveMediaUrl } from './AxiosClient';
 
 /**
  * Expense claims. The same endpoints the CRM uses - every list is already scoped
@@ -80,7 +80,9 @@ export const normalizeExpense = (row: any) => ({
     fileName: item?.file_name ?? item?.fileName ?? '',
     mimeType: item?.mime_type ?? item?.mimeType ?? '',
     size: num(item?.size),
-    url: item?.url ?? '',
+    // Older rows may carry a path rather than a full URL, and the API is mounted
+    // under a prefix on live, so both shapes go through the shared resolver.
+    url: resolveMediaUrl(item?.url ?? ''),
   })),
 });
 

@@ -25,11 +25,16 @@ export const resolveMediaUrl = (value?: string | null): string => {
   if (!value) return '';
   const mediaPath = String(value).trim();
   if (!mediaPath) return '';
-  if (
-    /^(https?:)?\/\//i.test(mediaPath) ||
-    mediaPath.startsWith('file:') ||
-    mediaPath.startsWith('data:')
-  ) {
+  if (mediaPath.startsWith('file:') || mediaPath.startsWith('data:')) {
+    return mediaPath;
+  }
+
+  if (/^(https?:)?\/\//i.test(mediaPath)) {
+    // A full URL from the API is built from the API's own host and can leave out
+    // the path it is mounted on, which makes the file unreachable. Anything under
+    // uploads is re-anchored to the origin this app is configured with.
+    const uploadsAt = mediaPath.indexOf('/uploads/');
+    if (uploadsAt >= 0) return `${BASE_URL}${mediaPath.slice(uploadsAt + 1)}`;
     return mediaPath;
   }
 
