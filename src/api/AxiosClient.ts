@@ -1,10 +1,24 @@
 import axios from 'axios';
+import { Platform } from 'react-native';
 import Toast from 'react-native-toast-message';
 import store from '../components/redux/Store';
 import { logout, setToken, setUser } from '../components/redux/slice/AuthSlice';
 import { navigationRef } from '../services/NavigationService';
-// Single production API and media origin for both Android and iOS.
-export const BASE_URL = 'https://app.ksbindia.co.in/FieldKonnect_API/';
+
+// Single API and media origin for both Android and iOS.
+export const LIVE_BASE_URL = 'https://app.ksbindia.co.in/FieldKonnect_API/';
+
+// The local backend from docker compose. The Android emulator reaches the host
+// machine through 10.0.2.2; on a real device put this machine's LAN IP here.
+export const LOCAL_BASE_URL = Platform.select({
+  android: 'http://10.0.2.2:8080/',
+  default: 'http://localhost:8080/',
+});
+
+// !! Ship with LIVE_BASE_URL. A build made against the local one cannot reach
+// !! the server from any device. Point this at LOCAL_BASE_URL while developing
+// !! against the docker backend, and switch it back before any build.
+export const BASE_URL = LIVE_BASE_URL;
 export const API_BASE_URL = `${BASE_URL}api`;
 export const IMAGE_BASE_URL = BASE_URL;
 export const resolveMediaUrl = (value?: string | null): string => {

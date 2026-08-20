@@ -82,7 +82,7 @@ const Routes = () => {
         }} />
         <Stack.Screen name='ExpenseReport' component={ExpenseReport} options={{
           headerShown: true,
-          title: 'Expense Approval'
+          title: 'Expenses'
         }} />
         <Stack.Screen name='OrderHistoryDetailsScreen' component={OrderHistoryDetailsScreen} options={{
           headerShown: true,

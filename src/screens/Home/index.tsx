@@ -754,7 +754,7 @@ const Home = () => {
                         if (item?.id == 3) {
                           void openCustomerTypes('view')
                         }
-                      } else if (item?.id == 5 || item?.id == 6) {
+                      } else if (item?.id == 6) {
                         Toast.show({
                           type: 'info',
                           text1: 'This feature is coming soon',
