@@ -40,6 +40,8 @@ export type RootStackParamList = {
   AttendanceViewAllScreen:undefined
   TargetArchieViewAllScreen:undefined
   RetailersPerformanceViewAllScreen:undefined
+  ActivityForm: {id?: number; type: 'nukkad'|'retailer'|'farmer'|'influencer'; readOnly?: boolean};
+  ActivitySummary: undefined;
 };
 
 export type AppTextProps = {

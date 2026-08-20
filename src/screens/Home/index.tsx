@@ -35,7 +35,7 @@ import RetailersOverviewCard from '../../components/atoms/RetailersOverviewCard'
 import TopProductsCard from '../../components/atoms/TopProductsCard'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import { startLiveLocationTracking, stopLiveLocationTracking } from '../../services/liveLocationService'
-import { API_BASE_URL } from '../../api/AxiosClient'
+import { API_BASE_URL, BASE_URL } from '../../api/AxiosClient'
 import { getDeviceUniqueId, getInstalledAppVersion, isAppUpdateRequired } from '../../utils/appVersion'
 
 interface DropdownItem {
@@ -191,7 +191,7 @@ const Home = () => {
       setLoadingPunchStatus(true);
       const token = store.getState()?.auth?.token;
 
-      const res = await axios.get('https://app.ksbindia.co.in/FieldKonnect_API/api/getPunchin', {
+      const res = await axios.get(`${BASE_URL}api/getPunchin`, {
         headers: {
           Authorization: `Bearer ${token}`,
           Accept: 'application/json',
@@ -262,7 +262,7 @@ const Home = () => {
       setHomeLoading(true);
       const token = store.getState()?.auth?.token;
 
-      const res = await axios.get('https://app.ksbindia.co.in/FieldKonnect_API/api/attendance/today-summary', {
+      const res = await axios.get(`${BASE_URL}api/attendance/today-summary`, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -283,7 +283,7 @@ const Home = () => {
       setLoadingBalances(true);
       const token = store.getState()?.auth?.token;
 
-      const res = await axios.get('https://app.ksbindia.co.in/FieldKonnect_API/api/leaves/balance', {
+      const res = await axios.get(`${BASE_URL}api/leaves/balance`, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -322,7 +322,7 @@ const Home = () => {
       };
 
 
-      const res = await axios.post('https://app.ksbindia.co.in/FieldKonnect_API/api/addLeaves', payload, {
+      const res = await axios.post(`${BASE_URL}api/addLeaves`, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -389,7 +389,7 @@ const Home = () => {
     setPressType(mode);
     if (mode === 'view') {
       try {
-        const response = await axios.get('https://app.ksbindia.co.in/FieldKonnect_API/api/masters/customer-types');
+        const response = await axios.get(`${BASE_URL}api/masters/customer-types`);
         const types = Array.isArray(response?.data?.data) ? response.data.data : [];
         if (types.length > 0) {
           setCustomerTypeOptions(types.map((item: any, index: number) => {
@@ -536,7 +536,7 @@ const Home = () => {
 
     try {
       const response = await fetch(
-        `https://app.ksbindia.co.in/FieldKonnect_API/api/getMyHierarchyUsers?type=RETAILER`,
+        `${BASE_URL}api/getMyHierarchyUsers?type=RETAILER&page=${pageNum}&per_page=20`,
         {
           method: 'GET',
           headers: {
@@ -558,10 +558,10 @@ const Home = () => {
       const updatedUsers =
         pageNum === 1 ? userList : [...users, ...userList];
 
-      setUsers(userList);
+      setUsers(updatedUsers);
 
-      // setPage(pageNum);
-      // setHasMore(json.data.current_page < json.data.last_page);
+      setPage(pageNum);
+      setHasMore(Number(json?.pagination?.current_page || pageNum) < Number(json?.pagination?.last_page || pageNum));
 
     } catch (err) {
       console.error('Fetch users error:', err);
@@ -840,12 +840,12 @@ const Home = () => {
                   <View style={[styles.row, { gap: 10 }]}>
                     <AppText color={colors.black} size={18} family="InterSemiBold">Promotional Activities</AppText>
                   </View>
-                  {/* <Pressable>
-                    <AppText color={colors.blue} family={'InterMedium'} size={13}>View All →</AppText>
-                  </Pressable> */}
+                  <Pressable onPress={() => navigation.navigate('ActivitySummary')} hitSlop={10}>
+                    <AppText color={colors.blue} family={'InterMedium'} size={13}>View Summary →</AppText>
+                  </Pressable>
                 </View>
               </View>
-              <FieldActivitiesCard data={homeData} />
+              <FieldActivitiesCard />
               <View style={styles.mainContainer}>
                 <View style={[styles.row, { justifyContent: 'space-between' }]}>
                   <View style={[styles.row, { gap: 10 }]}>

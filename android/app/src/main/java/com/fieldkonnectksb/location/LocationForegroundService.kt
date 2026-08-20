@@ -219,28 +219,13 @@ class LocationForegroundService : Service() {
           LocationStorage.removeQueued(this, queue.map { it.id }.toSet())
           Log.d(TAG, "Pending locations synced: ${queue.size}")
           updateNotification("Location synced at ${LocationStorage.apiDateTime()}")
-          showApiResultNotification(
-            title = "Location API success",
-            message = "${queue.size} location(s) sent at ${LocationStorage.apiDateTime()} | HTTP ${response.code}",
-            body = response.body,
-          )
         } else {
           Log.e(TAG, "API hit failed and saved locally: HTTP ${response.code} ${response.body.take(LOG_BODY_LIMIT)}")
           updateNotification("Location sync failed")
-          showApiResultNotification(
-            title = "Location API failed",
-            message = "${queue.size} location(s) kept pending | HTTP ${response.code}",
-            body = response.body,
-          )
         }
       } catch (error: Exception) {
         Log.e(TAG, "API hit failed and saved locally", error)
         updateNotification("Location sync failed")
-        showApiResultNotification(
-          title = "Location API error",
-          message = "${queue.size} location(s) kept pending",
-          body = error.message ?: "Unknown error",
-        )
       } finally {
         finish()
       }
@@ -347,38 +332,9 @@ class LocationForegroundService : Service() {
       .build()
   }
 
-  private fun apiResultNotification(title: String, message: String, body: String): Notification {
-    val launchIntent = Intent(this, MainActivity::class.java)
-    val pendingIntent = PendingIntent.getActivity(
-      this,
-      0,
-      launchIntent,
-      PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-    )
-    val detail = listOf(message, body.take(NOTIFICATION_BODY_LIMIT))
-      .filter { it.isNotBlank() }
-      .joinToString("\n")
-
-    return NotificationCompat.Builder(this, CHANNEL_ID)
-      .setContentTitle(title)
-      .setContentText(message)
-      .setStyle(NotificationCompat.BigTextStyle().bigText(detail))
-      .setSmallIcon(R.mipmap.ic_launcher)
-      .setAutoCancel(true)
-      .setOnlyAlertOnce(false)
-      .setContentIntent(pendingIntent)
-      .build()
-  }
-
   private fun updateNotification(message: String) {
     val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     manager.notify(NOTIFICATION_ID, notification(message))
-  }
-
-  private fun showApiResultNotification(title: String, message: String, body: String) {
-    val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    val notificationId = API_RESULT_NOTIFICATION_ID_BASE + (System.currentTimeMillis() % 100000).toInt()
-    manager.notify(notificationId, apiResultNotification(title, message, body))
   }
 
   private fun scheduleServiceRestart() {
@@ -402,10 +358,8 @@ class LocationForegroundService : Service() {
     private const val BASE_URL = "https://app.ksbindia.co.in/FieldKonnect_API/"
     private const val CHANNEL_ID = "fieldkonnect_live_location"
     private const val NOTIFICATION_ID = 9301
-    private const val API_RESULT_NOTIFICATION_ID_BASE = 9400
-    private const val LOCATION_SYNC_INTERVAL_MS = 3 * 60 * 1000L
+    private const val LOCATION_SYNC_INTERVAL_MS = 7 * 60 * 1000L
     private const val LOG_BODY_LIMIT = 500
-    private const val NOTIFICATION_BODY_LIMIT = 220
 
     const val ACTION_START = "com.fieldkonnect.ksb.location.START"
     const val ACTION_STOP = "com.fieldkonnect.ksb.location.STOP"

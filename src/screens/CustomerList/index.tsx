@@ -17,6 +17,7 @@ import store from '../../components/redux/Store';
 import axios from 'axios';
 import useLocationHook from '../../api/hooks/uselocationhook';
 import { current } from '@reduxjs/toolkit';
+import { BASE_URL } from "../../api/AxiosClient";
 const CustomerList = ({ route }: any) => {
   const [focusText, setFocusText] = useState(false);
   // Start in loading state so the empty-state message never flashes before
@@ -102,7 +103,7 @@ const CustomerList = ({ route }: any) => {
       const token = store.getState()?.auth?.token;
 
       const res = await axios.get(
-        'https://app.ksbindia.co.in/FieldKonnect_API/api/getMyHierarchyUsers', // ← your endpoint
+        `${BASE_URL}api/getMyHierarchyUsers`, // ← your endpoint
         {
           headers: { Authorization: `Bearer ${token}` },
           params: { type: route.params.type }, // optional, if backend needs it
@@ -140,7 +141,7 @@ const CustomerList = ({ route }: any) => {
     try {
       const token = store.getState()?.auth?.token;
 
-      const res = await axios.get('https://app.ksbindia.co.in/FieldKonnect_API/api/getPunchin', {
+      const res = await axios.get(`${BASE_URL}api/getPunchin`, {
         headers: {
           Authorization: `Bearer ${token}`,
           Accept: 'application/json',
@@ -193,7 +194,7 @@ const CustomerList = ({ route }: any) => {
       const token = store.getState()?.auth?.token;
 
       const res = await axios.get(
-        'https://app.ksbindia.co.in/FieldKonnect_API/api/secondary-customer/cities',
+        `${BASE_URL}api/secondary-customer/cities`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -211,7 +212,7 @@ const CustomerList = ({ route }: any) => {
       const token = store.getState()?.auth?.token;
 
       const res = await axios.get(
-        'https://app.ksbindia.co.in/FieldKonnect_API/api/getCurrentOpenCheckin',
+        `${BASE_URL}api/getCurrentOpenCheckin`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -296,7 +297,9 @@ const CustomerList = ({ route }: any) => {
 
       const newData = res?.data?.data?.data || [];
       if (isLoadMore) {
-        setCustomerData(prev => [...prev, ...newData]);
+        setCustomerData(prev => Array.from(new Map(
+          [...prev, ...newData].map((row: any) => [String(row?.id ?? row?.customer_id ?? row?.customer?.id), row])
+        ).values()));
       } else {
         // if(route?.params?.beatId) return
         if (newData?.length == 0 && pageNumber == 1) {
@@ -307,7 +310,10 @@ const CustomerList = ({ route }: any) => {
       }
 
 
-      setHasMore(newData.length > 0);
+      const currentPage = Number(res?.data?.data?.current_page ?? pageNumber);
+      const lastPage = Number(res?.data?.data?.last_page ?? res?.data?.page_count ?? currentPage);
+      setHasMore(currentPage < lastPage);
+      setPage(currentPage);
       setTotal(res?.data?.data?.total);
 
     } catch (error) {

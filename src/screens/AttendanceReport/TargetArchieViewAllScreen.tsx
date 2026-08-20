@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
-import {
-  View,
+import { BASE_URL } from "../../api/AxiosClient";
+import {  View,
   StyleSheet,
   ScrollView,
   SectionList,
@@ -248,7 +248,7 @@ const TargetArchieViewAllScreen = ({ navigation }: any) => {
     const token = store.getState()?.auth?.token;
     try {
       const res = await fetch(
-        'https://app.ksbindia.co.in/FieldKonnect_API/api/user-attendance-zone-branch',
+        `${BASE_URL}api/user-attendance-zone-branch`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -330,7 +330,7 @@ const TargetArchieViewAllScreen = ({ navigation }: any) => {
   const fetchAttendanceWithFilters = async (customFilters: any, tab?: any) => {
     const token = store.getState()?.auth?.token;
     try {
-      let url = 'https://app.ksbindia.co.in/FieldKonnect_API/api/sales/sales-summary?designation=' + (tab || 'asr');
+      let url = `${BASE_URL}api/sales/sales-summary?designation=` + (tab || 'asr');
 
       if (customFilters.branch) {
         url += `&branch=${encodeURIComponent(customFilters.branch)}`;

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
+import { BASE_URL } from "../../api/AxiosClient";
+import {  ActivityIndicator,
   FlatList,
   ScrollView,
   View,
@@ -181,7 +181,7 @@ const UserActivityScreen = ({ navigation }: any) => {
       if (!token) return;
 
       const response = await axios.get(
-        'https://app.ksbindia.co.in/FieldKonnect_API/api/designations',
+        `${BASE_URL}api/designations`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -225,7 +225,7 @@ const UserActivityScreen = ({ navigation }: any) => {
       if (!token) return;
 
       const response = await fetch(
-        'https://app.ksbindia.co.in/FieldKonnect_API/api/user-attendance-zone-branch',
+        `${BASE_URL}api/user-attendance-zone-branch`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -262,7 +262,7 @@ const UserActivityScreen = ({ navigation }: any) => {
         end_date: formatYYYYMMDD(endDate)
       }, 'sadjfhaksjhdfkja', page)
       const response = await fetch(
-        'https://app.ksbindia.co.in/FieldKonnect_API/api/reporting/users',
+        `${BASE_URL}api/reporting/users`,
         {
           method: 'POST',
           headers: {
@@ -330,7 +330,7 @@ const UserActivityScreen = ({ navigation }: any) => {
       if (!token) return;
 
       const response = await axios.get(
-        `https://app.ksbindia.co.in/FieldKonnect_API/api/getHierarchyOrderStats`,
+        `${BASE_URL}api/getHierarchyOrderStats`,
         {
           headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
           params: {

@@ -102,7 +102,7 @@ const AddTourPlan = ({ navigation }) => {
       if (!token) return;
 
       try {
-        const res = await fetch('https://app.ksbindia.co.in/FieldKonnect_API/api/tour/userlist', {
+        const res = await fetch(`${BASE_URL}api/tour/userlist`, {
           method: 'GET',
           headers: {
             Accept: 'application/json',

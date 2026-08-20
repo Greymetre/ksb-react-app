@@ -26,8 +26,8 @@ export const useMutateTourPlanSelectApi = () => {
 
 export const useMutateTourPlanSelectUserApi = () => {
   return useMutation({
-    mutationFn: (payload: { user_id: any; start_date?: string; end_date?: string }) => {
-      let url = `${API_ENDPOINT.TOUR_PLAN_GET}?user_id=${payload.user_id}`;
+    mutationFn: (payload: { user_id: any; start_date?: string; end_date?: string; page?: number; per_page?: number }) => {
+      let url = `${API_ENDPOINT.TOUR_PLAN_GET}?user_id=${payload.user_id}&page=${payload.page || 1}&per_page=${payload.per_page || 20}`;
 
       if (payload.start_date) {
         url += `&start_date=${payload.start_date}`;

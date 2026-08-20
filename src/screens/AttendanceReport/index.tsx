@@ -15,6 +15,7 @@ import CustomerCalendar from '../../components/CustomCalendar/CalendarPopupView'
 import { useAppSelector } from '../../components/redux/Store'
 import { SCREEN_HEIGHT } from '../../utils/misc'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { BASE_URL } from "../../api/AxiosClient";
 
 interface FilterOption {
   label: string;
@@ -158,7 +159,7 @@ const AttendanceReport = ({ navigation }: any) => {
 
     try {
       const response = await fetch(
-        'https://app.ksbindia.co.in/FieldKonnect_API/api/designations',
+        `${BASE_URL}api/designations`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -203,7 +204,7 @@ const AttendanceReport = ({ navigation }: any) => {
 
     try {
       const response = await fetch(
-        'https://app.ksbindia.co.in/FieldKonnect_API/api/user-attendance-zone-branch',
+        `${BASE_URL}api/user-attendance-zone-branch`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

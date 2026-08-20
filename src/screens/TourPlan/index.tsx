@@ -9,6 +9,7 @@ import { colors } from '../../utils/Colors'
 import Toast from 'react-native-toast-message'
 import store from '../../components/redux/Store'
 import { fonts, shadowStyle } from '../../utils/typography'
+import { BASE_URL } from "../../api/AxiosClient";
 
 interface DropdownUser {
   label: string;
@@ -103,7 +104,7 @@ const TourPlanPage = ({ navigation }: TourPlanPageProps) => {
     if (selectedBranch?.id) params.append('branch_id', String(selectedBranch.id));
     if (selectedDesignations.length > 0) params.append('designation', selectedDesignations.join(','));
 
-    return `https://app.ksbindia.co.in/FieldKonnect_API/api/tour/userlist?${params.toString()}`;
+    return `${BASE_URL}api/tour/userlist?${params.toString()}`;
   }, [selectedZone, selectedBranch, selectedDesignations]);
 
   const resetTourUserList = () => {
@@ -139,7 +140,7 @@ const TourPlanPage = ({ navigation }: TourPlanPageProps) => {
 
     try {
       const response = await fetch(
-        'https://app.ksbindia.co.in/FieldKonnect_API/api/designations',
+        `${BASE_URL}api/designations`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -184,7 +185,7 @@ const TourPlanPage = ({ navigation }: TourPlanPageProps) => {
 
     try {
       const response = await fetch(
-        'https://app.ksbindia.co.in/FieldKonnect_API/api/user-attendance-zone-branch',
+        `${BASE_URL}api/user-attendance-zone-branch`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

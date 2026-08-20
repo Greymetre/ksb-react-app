@@ -12,6 +12,7 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeModules } from 'react-native';
 import ReactNativeBlobUtil from 'react-native-blob-util';
+import { BASE_URL } from "../../api/AxiosClient";
 const { HtmlToPdf } = NativeModules;
 import { Platform } from 'react-native';
 
@@ -107,7 +108,7 @@ const OrderHistoryDetailsScreen = () => {
 
         try {
             const response = await fetch(
-                `https://app.ksbindia.co.in/FieldKonnect_API/api/getOrderDetails?order_id=${orderId}`,
+                `${BASE_URL}api/getOrderDetails?order_id=${orderId}`,
                 {
                     method: 'GET',
                     headers: {

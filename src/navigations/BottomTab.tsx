@@ -12,7 +12,7 @@ import { ActiveHomeIcon, ActiveTaskIcon, ActiveTwoMenIcon, HomeIcon, MessageIcon
 import AppText from '../components/AppText/AppText';
 import Home from '../screens/Home';
 import OrderList from '../screens/OrderScreen';
-import MarketIntelligenceScreen from '../screens/MarketIntelligence';
+import ActivitiesScreen from '../screens/Activities';
 import BeatsScreen from '../screens/BeatScreen';
 import Toast from 'react-native-toast-message';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -104,22 +104,10 @@ const BottomTab = () => {
         ),
       }} /> */}
       <Tab.Screen
-        name="MarketIntelligenceScreen"
-        component={MarketIntelligenceScreen}
-        listeners={{
-          tabPress: (e) => {
-            e.preventDefault(); // ❌ stop navigation
-
-            Toast.show({
-              type: 'info',
-              text1: 'This feature is coming soon',
-              position: 'top',
-            });
-          },
-        }}
+        name="Activities"
+        component={ActivitiesScreen}
         options={{
-          headerShown: true,
-          title: 'Market Intelligence',
+          headerShown: false,
           tabBarIcon: ({ focused }) => (
             <View
               style={{
@@ -141,7 +129,7 @@ const BottomTab = () => {
                 family={focused ? 'InterRegular' : 'InterMedium'}
                 size={13}
               >
-                Intelligence
+                Activity
               </AppText>
             </View>
           ),

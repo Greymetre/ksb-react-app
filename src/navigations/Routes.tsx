@@ -34,6 +34,8 @@ import RetailersPerformanceViewAllScreen from '../screens/AttendanceReport/Retai
 import SignUpScreen from '../screens/Login/SignUpScreen';
 import AccountPendingScreen from '../screens/Login/AccountPendingScreen';
 import ForceUpdateScreen from '../screens/Login/ForceUpdateScreen';
+import ActivityFormScreen from '../screens/Activities/ActivityForm';
+import ActivitySummaryScreen from '../screens/Activities/ActivitySummary';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -68,6 +70,8 @@ const Routes = () => {
         />
         <Stack.Screen name='AccountPendingScreen' component={AccountPendingScreen} />
         <Stack.Screen name='BottomTab' component={BottomTab} />
+        <Stack.Screen name='ActivityForm' component={ActivityFormScreen} />
+        <Stack.Screen name='ActivitySummary' component={ActivitySummaryScreen} />
         <Stack.Screen name='CustomerDetails' component={CustomerDetails} options={{
           headerShown: true,
           title: 'Customer Details'

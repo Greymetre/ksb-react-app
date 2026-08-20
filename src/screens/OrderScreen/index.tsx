@@ -10,6 +10,7 @@ import store from '../../components/redux/Store';
 import Toast from 'react-native-toast-message';
 import { Dropdown } from 'react-native-element-dropdown';
 import CustomerCalendar from '../../components/CustomCalendar/CalendarPopupView';
+import { BASE_URL } from "../../api/AxiosClient";
 
 interface DropdownUser {
     label: string;
@@ -133,7 +134,7 @@ const OrderList = ({ navigation }: OrderListProps) => {
 
             // pagination
             params.append("page", String(pageNumber));
-            params.append("pageSqueryize", String(PAGE_SIZE));
+            params.append("pageSize", String(PAGE_SIZE));
 
             if (userId) {
                 params.append("user_id", String(userId));
@@ -147,7 +148,7 @@ const OrderList = ({ navigation }: OrderListProps) => {
                 params.append("enddate", formatYYYYMMDD(end));
             }
 
-            const url = `https://app.ksbindia.co.in/FieldKonnect_API/api/getOrderList?${params.toString()}`;
+            const url = `${BASE_URL}api/getOrderList?${params.toString()}`;
 
             console.log(url, 'ORDER API');
 

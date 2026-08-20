@@ -15,11 +15,10 @@ import {
 import { formatDateTimeForApi } from '../utils/dateTime';
 import { createMMKV } from 'react-native-mmkv';
 
-const LOCATION_SYNC_INTERVAL_MS = 3 * 60 * 1000;
+const LOCATION_SYNC_INTERVAL_MS = 7 * 60 * 1000;
 const ANDROID_PERMISSION_SETUP_SHOWN_KEY = 'android_live_location_permission_setup_shown_v1';
-const IOS_PERMISSION_SETUP_SHOWN_KEY = 'ios_live_location_permission_setup_shown_v1';
 
-const { LocationTracking, FieldKonnectNotifications } = NativeModules;
+const { LocationTracking } = NativeModules;
 const permissionStorage = createMMKV({ id: 'live-location-permission-storage' });
 
 let configured = false;
@@ -36,11 +35,6 @@ type GeoPosition = {
     latitude: number;
     longitude: number;
   };
-};
-
-type IosNotificationModule = {
-  requestAuthorization?: () => Promise<boolean>;
-  showNotification?: (title: string, message: string) => Promise<boolean>;
 };
 
 const devLog = (...args: unknown[]) => {
@@ -151,30 +145,6 @@ const requestIosPermission = () =>
       () => resolve(false),
     );
   });
-
-const requestIosNotificationPermission = async () => {
-  if (Platform.OS !== 'ios') return true;
-
-  try {
-    const notifications = FieldKonnectNotifications as IosNotificationModule | undefined;
-    if (!notifications?.requestAuthorization) return false;
-    return await notifications.requestAuthorization();
-  } catch (error) {
-    devLog('iOS notification permission failed', error);
-    return false;
-  }
-};
-
-const showIosLocationNotification = async (title: string, message: string) => {
-  if (Platform.OS !== 'ios') return;
-
-  try {
-    const notifications = FieldKonnectNotifications as IosNotificationModule | undefined;
-    await notifications?.showNotification?.(title, message);
-  } catch (error) {
-    devLog('iOS notification failed', error);
-  }
-};
 
 const getCurrentPosition = () =>
   new Promise<GeoPosition>((resolve, reject) => {
@@ -328,11 +298,7 @@ const attachAppStateListener = () => {
 
 export const runAndroidFirstTimeLiveLocationSetup = async () => {
   if (Platform.OS === 'ios') {
-    if (permissionStorage.getBoolean(IOS_PERMISSION_SETUP_SHOWN_KEY)) return;
-
-    permissionStorage.set(IOS_PERMISSION_SETUP_SHOWN_KEY, true);
     configureGeolocation();
-    await requestIosNotificationPermission();
     await requestIosPermission();
     return;
   }
@@ -376,8 +342,6 @@ export const startLocationTrackingAfterPunchIn = async (userData?: unknown, toke
       configureGeolocation();
       const granted = await requestIosPermission();
       if (!granted) return false;
-      await requestIosNotificationPermission();
-
       const existingState = getLiveLocationTrackingState();
       const shouldCaptureImmediately = !existingState.active && !existingState.lastCapturedAt;
 
@@ -441,10 +405,6 @@ export const syncPendingLocations = async () => {
   const netState = await NetInfo.fetch();
   if (!netState.isConnected || netState.isInternetReachable === false) {
     devLog('API hit failed and saved locally');
-    void showIosLocationNotification(
-      'Location API offline',
-      `${queue.length} location(s) pending at ${formatDateTimeForApi(new Date())}`,
-    );
     return false;
   }
 
@@ -456,24 +416,12 @@ export const syncPendingLocations = async () => {
       removeQueuedLiveLocations(sentIds);
       devLog('API hit success');
       devLog('Pending locations synced');
-      void showIosLocationNotification(
-        'Location API success',
-        `${queue.length} location(s) sent at ${formatDateTimeForApi(new Date())} | HTTP ${response?.status ?? '-'}`,
-      );
       return true;
     }
     devLog('API hit failed and saved locally', response?.data);
-    void showIosLocationNotification(
-      'Location API failed',
-      `${queue.length} location(s) kept pending at ${formatDateTimeForApi(new Date())} | HTTP ${response?.status ?? '-'}`,
-    );
     return false;
   } catch (error) {
     devLog('API hit failed and saved locally', error);
-    void showIosLocationNotification(
-      'Location API error',
-      `${queue.length} location(s) kept pending at ${formatDateTimeForApi(new Date())}`,
-    );
     return false;
   } finally {
     flushing = false;

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
+import { BASE_URL } from "../../api/AxiosClient";
+import {  View,
   ScrollView,
   TextInput,
   Pressable,
@@ -175,7 +175,7 @@ const VisitReport: React.FC<VisitReportProps> = ({ navigation, route }) => {
         setVisitTypesLoading(true);
         setVisitTypesError(false);
         const token = store.getState().auth?.token;
-        const response = await axios.get('https://app.ksbindia.co.in/FieldKonnect_API/api/getVisitTypes', {
+        const response = await axios.get(`${BASE_URL}api/getVisitTypes`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',

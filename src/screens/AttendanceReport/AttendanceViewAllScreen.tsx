@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
+import { BASE_URL } from "../../api/AxiosClient";
+import {  View,
   Text,
   StyleSheet,
   Pressable,
@@ -126,7 +126,7 @@ const AttendanceViewAllScreen = ({ navigation }: any) => {
     const token = store.getState()?.auth?.token;
     try {
       const res = await fetch(
-        'https://app.ksbindia.co.in/FieldKonnect_API/api/user-attendance-zone-branch',
+        `${BASE_URL}api/user-attendance-zone-branch`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -326,8 +326,8 @@ const AttendanceViewAllScreen = ({ navigation }: any) => {
   const fetchAttendanceWithFilters = async (customFilters: any, tab?: any) => {
     const token = store.getState()?.auth?.token;
     try {
-      // let url = 'https://app.ksbindia.co.in/FieldKonnect_API/api/today-attendance-zone?user_id=1';
-      let url = 'https://app.ksbindia.co.in/FieldKonnect_API/api/today-attendance-zone?designation=' + (tab || 'asr');
+      // let url = `${BASE_URL}api/today-attendance-zone?user_id=1`;
+      let url = `${BASE_URL}api/today-attendance-zone?designation=` + (tab || 'asr');
 
       if (customFilters.branch) {
         url += `&branch=${encodeURIComponent(customFilters.branch)}`;
@@ -366,7 +366,7 @@ const AttendanceViewAllScreen = ({ navigation }: any) => {
   // const fetchAttendance = async () => {
   //   const token = store.getState()?.auth?.token;
   //   try {
-  //     let url = 'https://app.ksbindia.co.in/FieldKonnect_API/api/today-attendance-zone?designation=asr';
+  //     let url = `${BASE_URL}api/today-attendance-zone?designation=asr`;
 
   //     // 👉 Append only if selected
   //     if (filters.branch) {

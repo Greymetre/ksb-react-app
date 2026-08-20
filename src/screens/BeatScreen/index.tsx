@@ -32,8 +32,11 @@ const BeatsScreen = () => {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
 
-    const fetchBeats = async () => {
+    const fetchBeats = async (pageNumber = 1, append = false) => {
         if (!token || !userId) {
             setErrorMsg('Authentication information missing');
             setLoading(false);
@@ -42,14 +45,22 @@ const BeatsScreen = () => {
         }
 
         try {
+            if (append) setLoadingMore(true);
             setErrorMsg(null);
             const response = await axiosClient.get('api/getBeatList', {
-                params: { user_id: userId, pageSize: 50 },
+                params: { user_id: userId, page: pageNumber, pageSize: 20 },
             });
             const json = response.data;
 
             if (json.status === 'success' && Array.isArray(json.data?.data)) {
-                setBeats(json.data.data);
+                setBeats(previous => {
+                    const combined = append ? [...previous, ...json.data.data] : json.data.data;
+                    return Array.from(new Map(combined.map((row: BeatItem) => [String(row.beatscheduleid), row])).values());
+                });
+                const currentPage = Number(json?.data?.current_page ?? json?.pagination?.current_page ?? pageNumber);
+                const lastPage = Number(json?.data?.last_page ?? json?.pagination?.last_page ?? currentPage);
+                setPage(currentPage);
+                setHasMore(currentPage < lastPage);
             } else {
                 setErrorMsg(json.message || 'Failed to load beat list');
             }
@@ -59,6 +70,7 @@ const BeatsScreen = () => {
         } finally {
             setLoading(false);
             setRefreshing(false);
+            setLoadingMore(false);
         }
     };
 
@@ -71,7 +83,9 @@ const BeatsScreen = () => {
 
     const onRefresh = () => {
         setRefreshing(true);
-        fetchBeats();
+        setPage(1);
+        setHasMore(true);
+        fetchBeats(1, false);
     };
 
     const renderBeatItem = ({ item }: any) => (
@@ -171,6 +185,10 @@ const BeatsScreen = () => {
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
                 }
                 showsVerticalScrollIndicator={false}
+                onEndReached={() => {
+                    if (!loading && !loadingMore && hasMore) fetchBeats(page + 1, true);
+                }}
+                onEndReachedThreshold={0.5}
                 contentContainerStyle={styles.listContent}
                 ListEmptyComponent={
                     <View style={{ marginTop: 20 }}>
@@ -180,7 +198,7 @@ const BeatsScreen = () => {
                     </View>
                 }
                 ListFooterComponent={
-                    errorMsg && !beats.length ? (
+                    loadingMore ? <ActivityIndicator size="small" color={colors.blue} /> : errorMsg && !beats.length ? (
                         <AppText size={14} color="red" style={{ textAlign: 'center', marginTop: rw(20) }}>
                             {errorMsg}
                         </AppText>

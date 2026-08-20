@@ -10,6 +10,7 @@ import Toast from 'react-native-toast-message';
 import store from '../../components/redux/Store';
 import { Dropdown } from 'react-native-element-dropdown';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { BASE_URL } from "../../api/AxiosClient";
 
 
 interface OrderItem {
@@ -204,7 +205,7 @@ const SubmitOrder = () => {
 
         try {
             const res = await fetch(
-                'https://app.ksbindia.co.in/FieldKonnect_API/api/order/secondary-customers',
+                `${BASE_URL}api/order/secondary-customers`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -234,7 +235,7 @@ const SubmitOrder = () => {
 
         try {
             const res = await fetch(
-                'https://app.ksbindia.co.in/FieldKonnect_API/api/order/distributors',
+                `${BASE_URL}api/order/distributors`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -359,7 +360,7 @@ const SubmitOrder = () => {
             console.log('Order Payload:', body);
 
             const res = await fetch(
-                'https://app.ksbindia.co.in/FieldKonnect_API/api/insertOrder',
+                `${BASE_URL}api/insertOrder`,
                 {
                     method: 'POST',
                     headers: {

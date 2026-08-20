@@ -113,7 +113,7 @@ const CreatePlan: React.FC = ({ navigation, route }: any) => {
     if (!token) return;
 
     try {
-      const res = await fetch('https://app.ksbindia.co.in/FieldKonnect_API/api/tour/userlist', {
+      const res = await fetch(`${BASE_URL}api/tour/userlist`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const json = await res.json();
@@ -135,7 +135,7 @@ const CreatePlan: React.FC = ({ navigation, route }: any) => {
     if (!token) return;
 
     try {
-      const res = await fetch('https://app.ksbindia.co.in/FieldKonnect_API/api/userDistrictList', {
+      const res = await fetch(`${BASE_URL}api/userDistrictList`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const json = await res.json();
@@ -161,7 +161,7 @@ const CreatePlan: React.FC = ({ navigation, route }: any) => {
 
     try {
       const res = await fetch(
-        `https://app.ksbindia.co.in/FieldKonnect_API/api/userCitiesByDistrict?district_id=${districtId}`,
+        `${BASE_URL}api/userCitiesByDistrict?district_id=${districtId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

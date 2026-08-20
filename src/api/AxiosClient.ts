@@ -3,6 +3,7 @@ import Toast from 'react-native-toast-message';
 import store from '../components/redux/Store';
 import { logout, setToken, setUser } from '../components/redux/slice/AuthSlice';
 import { navigationRef } from '../services/NavigationService';
+// Single production API and media origin for both Android and iOS.
 export const BASE_URL = 'https://app.ksbindia.co.in/FieldKonnect_API/';
 export const API_BASE_URL = `${BASE_URL}api`;
 export const IMAGE_BASE_URL = BASE_URL;
@@ -10,7 +11,11 @@ export const resolveMediaUrl = (value?: string | null): string => {
   if (!value) return '';
   const mediaPath = String(value).trim();
   if (!mediaPath) return '';
-  if (/^(https?:)?\/\//i.test(mediaPath) || mediaPath.startsWith('file:') || mediaPath.startsWith('data:')) {
+  if (
+    /^(https?:)?\/\//i.test(mediaPath) ||
+    mediaPath.startsWith('file:') ||
+    mediaPath.startsWith('data:')
+  ) {
     return mediaPath;
   }
 
@@ -31,8 +36,11 @@ const axiosClient = axios.create({
 
 axiosClient.interceptors.request.use(async config => {
   const token = store.getState()?.auth?.token;
-  const requestUrl = String(config.url || '').replace(/^\/+/, '').toLowerCase();
-  const isPublicAuthRequest = requestUrl === 'api/login' || requestUrl === 'api/signup';
+  const requestUrl = String(config.url || '')
+    .replace(/^\/+/, '')
+    .toLowerCase();
+  const isPublicAuthRequest =
+    requestUrl === 'api/login' || requestUrl === 'api/signup';
 
   // Login/signup must never carry a persisted token from an older session.
   // An invalid bearer token can make an otherwise valid login fail before the
@@ -42,11 +50,25 @@ axiosClient.interceptors.request.use(async config => {
   } else if (isPublicAuthRequest && config.headers.Authorization) {
     delete config.headers.Authorization;
   }
+  const requestData =
+    config.data instanceof FormData ? '<multipart form data>' : config.data;
+  console.log('[API REQUEST]', {
+    method: String(config.method || 'get').toUpperCase(),
+    url: `${config.baseURL || ''}${config.url || ''}`,
+    params: config.params,
+    data: requestData,
+  });
   return config;
 });
 
 axiosClient.interceptors.response.use(
   response => {
+    console.log('[API RESPONSE]', {
+      method: String(response.config.method || 'get').toUpperCase(),
+      url: `${response.config.baseURL || ''}${response.config.url || ''}`,
+      status: response.status,
+      data: response.data,
+    });
     return response;
   },
   error => {
@@ -54,20 +76,26 @@ axiosClient.interceptors.response.use(
     const data = error?.response?.data;
     const message = data?.message || data?.title;
     const errorMsg = data?.error;
+    console.log('[API ERROR]', {
+      method: String(error?.config?.method || 'get').toUpperCase(),
+      url: `${error?.config?.baseURL || ''}${error?.config?.url || ''}`,
+      status,
+      data,
+      message: error?.message,
+    });
     if (
       status === 401 ||
       message == 'Server error: Unauthenticated.' ||
       errorMsg == 'Unauthenticated.'
     ) {
-
       Toast.show({
         type: 'error',
         text1: 'Session expired. Please login again',
       });
       // navigation.navigate('LoginScreen')
       store.dispatch(logout());
-      store.dispatch(setUser(null))
-      store.dispatch(setToken(null))
+      store.dispatch(setUser(null));
+      store.dispatch(setToken(null));
       // ✅ clear redux auth
       store.dispatch(logout());
 
@@ -87,13 +115,13 @@ axiosClient.interceptors.response.use(
         type: 'error',
         text1: String(
           message ||
-          validationMessage ||
-          data?.reminders?.[0]?.message ||
-          data?.errorMessage ||
-          data?.error ||
-          'Something went wrong',
+            validationMessage ||
+            data?.reminders?.[0]?.message ||
+            data?.errorMessage ||
+            data?.error ||
+            'Something went wrong',
         ),
-        visibilityTime: 5000
+        visibilityTime: 5000,
       });
 
       return Promise.reject(error);

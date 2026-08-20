@@ -13,6 +13,7 @@ import store from '../../components/redux/Store';
 import { useFocusEffect, useRoute } from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { BASE_URL } from "../../api/AxiosClient";
 
 
 type ProductCatalogueProps = {
@@ -129,7 +130,7 @@ const ProductCatalogue = ({ navigation, route }: ProductCatalogueProps) => {
     const fetchSegments = async () => {
         try {
             const res = await fetch(
-                `https://app.ksbindia.co.in/FieldKonnect_API/api/getCategoryList`,
+                `${BASE_URL}api/getCategoryList`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -163,8 +164,8 @@ const ProductCatalogue = ({ navigation, route }: ProductCatalogueProps) => {
         try {
             const res = await fetch(
                 !selectedSegmentId 
-                ? `https://app.ksbindia.co.in/FieldKonnect_API/api/getSubCategoryList`
-                : `https://app.ksbindia.co.in/FieldKonnect_API/api/getSubCategoryList?category_id=${selectedSegmentId}`,
+                ? `${BASE_URL}api/getSubCategoryList`
+                : `${BASE_URL}api/getSubCategoryList?category_id=${selectedSegmentId}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -200,8 +201,8 @@ const ProductCatalogue = ({ navigation, route }: ProductCatalogueProps) => {
 
         try {
             const url = subcategoryId
-                ? `https://app.ksbindia.co.in/FieldKonnect_API/api/getProductList?subcategory_id=${subcategoryId}`
-                : `https://app.ksbindia.co.in/FieldKonnect_API/api/getProductList`;
+                ? `${BASE_URL}api/getProductList?subcategory_id=${subcategoryId}`
+                : `${BASE_URL}api/getProductList`;
 
             const res = await fetch(url, {
                 headers: {
@@ -236,7 +237,7 @@ const ProductCatalogue = ({ navigation, route }: ProductCatalogueProps) => {
     const fetchProductDetails = async (productId: number | string) => {
         try {
             const res = await fetch(
-                `https://app.ksbindia.co.in/FieldKonnect_API/api/getProductDetails?product_id=${productId}`,
+                `${BASE_URL}api/getProductDetails?product_id=${productId}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,

@@ -19,6 +19,9 @@ const UserTourList = ({ navigation, route }: any) => {
   const [loader, setLoader] = useState<boolean>(false)
   const { mutateAsync: mutateTOurSelectPlan } = useMutateTourPlanSelectUserApi();
   const [loading, setLoading] = useState<boolean>(false);
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [fullPlanData, setFullPlanData] = useState<any>(null);
@@ -40,12 +43,12 @@ const UserTourList = ({ navigation, route }: any) => {
     return date.toISOString().split('T')[0];
   };
 
-  const loadTourPlans = async () => {
+  const loadTourPlans = async (pageNumber = 1, append = false) => {
     if (!userId) return;
 
-    setLoading(true);
+    append ? setLoadingMore(true) : setLoading(true);
     try {
-      const payload: any = { user_id: userId };
+      const payload: any = { user_id: userId, page: pageNumber, per_page: 20 };
 
       if (startDate && endDate) {
         payload.start_date = formatYYYYMMDD(startDate);
@@ -55,7 +58,14 @@ const UserTourList = ({ navigation, route }: any) => {
       const res = await mutateTOurSelectPlan(payload);
 
       if (res?.data?.status === 'success') {
-        setTourPlanData(res?.data?.data?.data || res?.data?.data || []);
+        const newRows = res?.data?.data?.data || res?.data?.data || [];
+        setTourPlanData(previous => {
+          const combined = append ? [...previous, ...newRows] : newRows;
+          return Array.from(new Map(combined.map((row: any) => [String(row?.id), row])).values());
+        });
+        const pagination = res?.data?.pagination || {};
+        setPage(Number(pagination.current_page || pageNumber));
+        setHasMore(Number(pagination.current_page || pageNumber) < Number(pagination.last_page || pageNumber));
         setFullPlanData(res?.data)
       } else {
         setTourPlanData([]);
@@ -65,6 +75,7 @@ const UserTourList = ({ navigation, route }: any) => {
       Alert.alert('Error', 'Failed to load tour plans');
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
@@ -77,7 +88,9 @@ const UserTourList = ({ navigation, route }: any) => {
 
   // Load initially (without date filter) + whenever dates change
   useEffect(() => {
-    loadTourPlans();
+    setPage(1);
+    setHasMore(true);
+    loadTourPlans(1, false);
   }, [startDate, endDate, userId]);
 
 
@@ -463,12 +476,16 @@ const UserTourList = ({ navigation, route }: any) => {
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flex: 1 }}>
             <FlatList
               data={tourPlanData}
+              onEndReached={() => {
+                if (!loading && !loadingMore && hasMore) loadTourPlans(page + 1, true);
+              }}
+              onEndReachedThreshold={0.5}
               keyExtractor={(item) => item?.id?.toString() ?? Math.random().toString()}
               renderItem={renderItem}
               showsVerticalScrollIndicator={false}
-              ListFooterComponent={() => (
-                <View style={{ height: 40 }} />
-              )}
+              ListFooterComponent={() => loadingMore
+                ? <ActivityIndicator size="small" color={colors.blue} />
+                : <View style={{ height: 40 }} />}
               ListHeaderComponent={() => (
                 <View style={[styles.boxView, styles.row, { marginTop: 12, }]}>
                   <View style={[styles.heading, { width: 112 }]}>

@@ -1,12 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Keyboard, Pressable, ScrollView, TextInput, View } from 'react-native';
-import { ArrowDownIcon, CrossIcon } from '../../assets/svgs/SvgsFile';
+import { ActivityIndicator, FlatList, Keyboard, Pressable, TextInput, View } from 'react-native';
+import { CrossIcon } from '../../assets/svgs/SvgsFile';
 import { rw } from '../../utils/responsive';
 import { NavigationProp, ParamListBase, useFocusEffect, useNavigation } from '@react-navigation/native';
 import { colors } from '../../utils/Colors';
 import { SearchSvgIcon } from '../../assets/svgs/HomePageSvgs';
-import CustomerCard from '../../components/atoms/CustomerCard';
-import { useMutateCustomerListApi, useMutateSecondaryCustListApi } from '../../api/query/CustomerApi';
 import Geolocation from '@react-native-community/geolocation';
 import Toast from 'react-native-toast-message';
 import store from '../../components/redux/Store';
@@ -14,29 +12,22 @@ import axios from 'axios';
 import { styles } from '../CustomerList/styles';
 import AppText from '../../components/AppText/AppText';
 import SecondaryCustomerCard from '../../components/atoms/SecondaryCustomerCard';
+import { BASE_URL } from "../../api/AxiosClient";
 const BeatCustomerDetails = ({ route }: any) => {
     const { beatId, beatName } = route.params || {};
-    const [focusText, setFocusText] = useState(false);
-    const [loader, setLoader] = useState(false);
     const [searchText, setSearchText] = useState('');
     const [customers, setCustomers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
     const navigation = useNavigation<NavigationProp<ParamListBase>>();
     const [currentLat, setCurrentLat] = useState<number | null>(null)
     const [currentLng, setCurrentLng] = useState<number | null>(null)
     const [locationError, setLocationError] = useState<string | null>(null)
     const [isPunchedIn, setIsPunchedIn] = useState<any>(false);
     console.log(beatId, beatName, 'beatId, beatName');
-    useFocusEffect(
-        useCallback(() => {
-            fetchBeatCustomers();
-            getCurrentLocation()
-            fetchPunchInStatus()
-        }, [])
-    )
-
-
-    const fetchBeatCustomers = useCallback(async () => {
+    const fetchBeatCustomers = useCallback(async (pageNumber = 1, append = false) => {
         if (!beatId) {
             setLoading(false);
             return;
@@ -49,8 +40,10 @@ const BeatCustomerDetails = ({ route }: any) => {
         }
 
         try {
-            setLoading(true);
-            const url = `https://app.ksbindia.co.in/FieldKonnect_API/api/getBeatCustomers?beat_id=${beatId}`;
+            append ? setLoadingMore(true) : setLoading(true);
+            const params = new URLSearchParams({ beat_id: String(beatId), page: String(pageNumber), per_page: '10' });
+            if (searchText.trim()) params.append('search', searchText.trim());
+            const url = `${BASE_URL}api/getBeatCustomers?${params.toString()}`;
             console.log(url, 'urlurl')
             // Optional: add search if you want server-side filtering
             // if (searchText?.trim()) url += `&search=${encodeURIComponent(searchText.trim())}`;
@@ -64,14 +57,20 @@ const BeatCustomerDetails = ({ route }: any) => {
 
             const data = response.data;
 
-            if (data.status === 'success' && Array.isArray(data.data)) {
-                // or data.data.data if paginated
-                setCustomers(data.data || []);
-            } else if (data.data?.data) {
-                // in case it's paginated like getBeatList
-                setCustomers(data.data.data || []);
+            const newRows = Array.isArray(data?.data?.data)
+                ? data.data.data
+                : Array.isArray(data?.data) ? data.data : [];
+            if (data.status === 'success') {
+                setCustomers(previous => {
+                    const combined = append ? [...previous, ...newRows] : newRows;
+                    return Array.from(new Map(combined.map((row: any) => [String(row?.beat_customer_id ?? row?.customer?.id), row])).values());
+                });
+                const lastPage = Number(data?.data?.last_page ?? data?.page_count ?? 1);
+                setPage(pageNumber);
+                setHasMore(pageNumber < lastPage);
             } else {
-                setCustomers([]);
+                if (!append) setCustomers([]);
+                setHasMore(false);
             }
         } catch (err: any) {
             console.error('Beat customers fetch failed:', err);
@@ -82,23 +81,33 @@ const BeatCustomerDetails = ({ route }: any) => {
             });
         } finally {
             setLoading(false);
+            setLoadingMore(false);
         }
     }, [beatId, searchText]);
 
+    useFocusEffect(
+        useCallback(() => {
+            getCurrentLocation();
+            fetchPunchInStatus();
+        }, [])
+    );
+
     useEffect(() => {
         const timer = setTimeout(() => {
-            fetchBeatCustomers();
+            setPage(1);
+            setHasMore(true);
+            fetchBeatCustomers(1, false);
         }, 400); // debounce ~400ms
 
         return () => clearTimeout(timer);
-    }, [searchText]);
+    }, [fetchBeatCustomers, searchText]);
 
 
     const fetchPunchInStatus = async () => {
         try {
             const token = store.getState()?.auth?.token;
 
-            const res = await axios.get('https://app.ksbindia.co.in/FieldKonnect_API/api/getPunchin', {
+            const res = await axios.get(`${BASE_URL}api/getPunchin`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     Accept: 'application/json',
@@ -178,8 +187,7 @@ const BeatCustomerDetails = ({ route }: any) => {
 
 
     return (
-        <View style={styles.container}>
-            <ScrollView style={[styles.container, { paddingHorizontal: rw(18) }]} >
+        <View style={[styles.container, { paddingHorizontal: rw(18) }]}>
                 {loading ? (
                     <View style={styles.center}>
                         <ActivityIndicator size="large" color={colors.blue} />
@@ -203,8 +211,6 @@ const BeatCustomerDetails = ({ route }: any) => {
                                     Keyboard.dismiss();
                                 }}
                                 onChangeText={setSearchText}
-                                onFocus={() => setFocusText(true)}
-                                onBlur={() => setFocusText(false)}
                             />
                             {searchText && (
                                 <Pressable style={styles.icon} onPress={() => {
@@ -225,6 +231,11 @@ const BeatCustomerDetails = ({ route }: any) => {
                             }}
                             contentContainerStyle={styles.listContainer}
                             showsVerticalScrollIndicator={false}
+                            onEndReached={() => {
+                                if (!loading && !loadingMore && hasMore) fetchBeatCustomers(page + 1, true);
+                            }}
+                            onEndReachedThreshold={0.5}
+                            ListFooterComponent={loadingMore ? <ActivityIndicator size="small" color={colors.blue} /> : null}
                             ListEmptyComponent={
                                 <AppText size={16} color="#666" style={{ textAlign: 'center', marginTop: rw(120) }}>
                                     No customers in this beat
@@ -233,7 +244,6 @@ const BeatCustomerDetails = ({ route }: any) => {
                         />
                     </>
                 )}
-            </ScrollView>
         </View>
 
     );
