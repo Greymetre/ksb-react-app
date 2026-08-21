@@ -189,6 +189,31 @@ function LeadIcon(props: any) {
 
 
 
+/** Loyalty: a rewards medal, drawn on the same 59x65 canvas and two-tone blue
+ *  palette as the other home tiles so the row stays visually consistent. */
+function LoyaltyIcon(props: any) {
+  return (
+    <Svg
+      width={59}
+      height={65}
+      viewBox="0 0 59 65"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <Path d="M12.5 2h11l9 17h-11l-9-17z" fill="#58CCED" />
+      <Path d="M35.5 2h11l-9 17h-11l9-17z" fill="#3895D3" />
+      <Circle cx={29.5} cy={41} r={22} fill="#58CCED" />
+      <Circle cx={29.5} cy={41} r={15.5} fill="#3895D3" />
+      <Path
+        d="M29.5 30.5l3.34 6.77 7.47 1.09-5.4 5.27 1.27 7.44-6.68-3.51-6.68 3.51 1.27-7.44-5.4-5.27 7.47-1.09L29.5 30.5z"
+        fill="#fff"
+      />
+    </Svg>
+  )
+}
+
+
 function ClockIcon(props: any) {
   return (
     <Svg
@@ -1019,7 +1044,7 @@ function OrderIcon(props:any) {
 
 export {
   LogoIcon, VillageIcon, TourPlanIcon, AddCustomerIcon, CustomerVisitIcon, SearchSvgIcon,
-  AdhocOrderIcon, Expenses, LeadIcon, ClockIcon, LocationIcon, ChatIcon, CallIcon,
+  AdhocOrderIcon, Expenses, LeadIcon, LoyaltyIcon, ClockIcon, LocationIcon, ChatIcon, CallIcon,
   EyeIcon, CheckIcon, AddToCartIcon, ArrowCardDownIcon, CrossIconCard,
   PlaceOrderIcon,
   WhatsappICon, PhoneICon, EmailIcon, PlusIcon, MinusIcon, UploadIcon, AddCartMiunsIcon,

@@ -294,6 +294,38 @@ export const useGetSubmitCheckIN = () => {
     });
 };
 
+/** Every check-in on one customer, with the day's order value and the checkout note. */
+export const useGetCustomerCheckinActivity = () => {
+    return useMutation({
+        mutationFn: (payload: { entity_type: string; entity_id: any; page?: number; page_size?: number }) =>
+            axiosClient.get(API_ENDPOINT.CUSTOMER_CHECKIN_ACTIVITY, { params: payload }),
+    });
+};
+
+/** Visit and order run rates for the Customer Details dashboard block. */
+export const useGetCustomerSnapshot = () => {
+    return useMutation({
+        mutationFn: (payload: { entity_type: string; entity_id: any }) =>
+            axiosClient.get(API_ENDPOINT.CUSTOMER_SNAPSHOT, { params: payload }),
+    });
+};
+
+/** Retailer's schemes with that retailer's own numbers on each. */
+export const useGetRetailerLoyalty = () => {
+    return useMutation({
+        mutationFn: (payload: { retailer_id: any }) =>
+            axiosClient.get(API_ENDPOINT.RETAILER_LOYALTY, { params: payload }),
+    });
+};
+
+/** One scheme, scoped to a single retailer rather than the whole dealer. */
+export const useGetRetailerSchemeDetail = () => {
+    return useMutation({
+        mutationFn: (payload: { retailer_id: any; scheme_id: any }) =>
+            axiosClient.get(API_ENDPOINT.RETAILER_SCHEME_DETAIL, { params: payload }),
+    });
+};
+
 export const useGetUserActivity = () => {
     return useMutation({
         mutationFn: (payload: { user_id: any, date: any }) =>

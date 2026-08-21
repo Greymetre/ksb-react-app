@@ -6,6 +6,7 @@ import AppText from '../../components/AppText/AppText'
 import FastImage from 'react-native-fast-image'
 import { BuyOrderIcon, CalenderAddIcon, CalenderIcon, CrossIcon, OrderBoxIcon, OrderHistoryIcon } from '../../assets/svgs/SvgsFile'
 import { colors } from '../../utils/Colors'
+import CustomerSnapshot from './CustomerSnapshot'
 import { useGetCustomerData, useGetSecondaryCustomerData, useGetSubmitCheckIN } from '../../api/query/CustomerApi'
 import axiosClient, { resolveMediaUrl } from '../../api/AxiosClient'
 import { CheckIcon } from '../../assets/svgs/HomePageSvgs'
@@ -581,10 +582,11 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
             </View>
             {
               customerData && (
+                <View style={[styles.row, styles.actionRow]}>
                 <Pressable
                   style={[
                     styles.button,
-                    { alignSelf: 'flex-start', marginTop: 15, gap: 6 },
+                    styles.actionButton,
                     styles.row,
                     (checkInLoading) ? { opacity: 0.7 } : null,
                   ]}
@@ -609,7 +611,7 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
                   disabled={checkInLoading || loader}
                 >
                   <CheckIcon color="white" />
-                  <AppText size={12} color="#FDFDFD" family="InterSemiBold">
+                  <AppText size={12} color="#FDFDFD" family="InterSemiBold" numLines={1}>
                     {checkInLoading
                       ? 'Processing...'
                       : checkInHanlde
@@ -617,8 +619,38 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
                         : 'Check In'}
                   </AppText>
                 </Pressable>
+
+                <Pressable
+                  style={[styles.button, styles.actionButton, styles.row, { backgroundColor: colors.blue }]}
+                  onPress={() => navigation.navigate('CustomerActivity', {
+                    entityId: routeItem?.id,
+                    entityType: route?.params?.type,
+                    customerName: customerData?.legal_name,
+                  })}
+                >
+                  <AppText size={12} color="#FDFDFD" family="InterSemiBold" numLines={1}>Activity</AppText>
+                </Pressable>
+
+                {/* Loyalty is a retailer-only programme, so distributors never see it. */}
+                {isRetailerCustomer && (
+                  <Pressable
+                    style={[styles.button, styles.actionButton, styles.row, { backgroundColor: '#6C5CE7' }]}
+                    onPress={() => navigation.navigate('RetailerLoyalty', {
+                      retailerId: routeItem?.id,
+                      customerName: customerData?.legal_name,
+                    })}
+                  >
+                    <AppText size={12} color="#FDFDFD" family="InterSemiBold" numLines={1}>Loyalty</AppText>
+                  </Pressable>
+                )}
+                </View>
               )
             }
+
+            {/* Loyalty and this dashboard are retailer-only, so the same check gates both. */}
+            {customerData && isRetailerCustomer ? (
+              <CustomerSnapshot entityId={routeItem?.id} entityType={route?.params?.type} />
+            ) : null}
 
 
             {/* <View style={[styles.row, styles.filter]}>

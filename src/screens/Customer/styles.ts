@@ -103,7 +103,11 @@ export const styles = StyleSheet.create({
     headerRow: {
         justifyContent: 'space-between',
     },
-    button: {
+    // Customer actions share the row evenly: two buttons take half each, three take
+  // a third, so the row is always fully covered whatever the customer type.
+  actionRow: { marginTop: 15, gap: 10, alignSelf: 'stretch' },
+  actionButton: { flex: 1, gap: 6, paddingHorizontal: rw(6) },
+  button: {
         height: 34,
         paddingHorizontal: rw(10),
         justifyContent: 'center',

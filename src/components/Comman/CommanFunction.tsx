@@ -1,4 +1,4 @@
-import { AddCustomerIcon, AdhocOrderIcon, CustomerVisitIcon, Expenses, LeadIcon, TourPlanIcon } from "../../assets/svgs/HomePageSvgs";
+import { AddCustomerIcon, AdhocOrderIcon, CustomerVisitIcon, Expenses, LoyaltyIcon, TourPlanIcon } from "../../assets/svgs/HomePageSvgs";
 import { colors } from "../../utils/Colors";
 
 export const dashboardTiles = [
@@ -39,8 +39,8 @@ export const dashboardTiles = [
   },
   {
     id: "6",
-    title: "Lead",
-    icon: <LeadIcon/>,
+    title: "Loyalty",
+    icon: <LoyaltyIcon/>,
     bgColor: colors.blue,
     navigateTo: "AttendanceReport",
   },

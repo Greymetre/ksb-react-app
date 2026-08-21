@@ -20,6 +20,9 @@ import AttendanceScreen from '../screens/AttendanceReport/AttendanceScreen';
 import store, { useAppSelector } from '../components/redux/Store';
 import AddSecondaryCustomer from '../screens/AddCustomer/AddSecondaryCustomer';
 import VisitReport from '../screens/AttendanceReport/VisitReport';
+import CustomerActivity from '../screens/Customer/CustomerActivity';
+import RetailerLoyalty from '../screens/Customer/RetailerLoyalty';
+import RetailerSchemeDetail from '../screens/Customer/RetailerSchemeDetail';
 import UserTourList from '../screens/TourPlan/UserTourList';
 import BeatCustomerDetails from '../screens/BeatScreen/BeatCustomerDetails';
 import OrderHistoryDetailsScreen from '../screens/OrderScreen/OrderHistoryDetailsScreen';
@@ -142,6 +145,18 @@ const Routes = () => {
         <Stack.Screen name='VisitReport' component={VisitReport} options={{
           headerShown: true,
           title: 'Visit Report'
+        }} />
+        <Stack.Screen name='CustomerActivity' component={CustomerActivity} options={{
+          headerShown: true,
+          title: 'Activity'
+        }} />
+        <Stack.Screen name='RetailerLoyalty' component={RetailerLoyalty} options={{
+          headerShown: true,
+          title: 'Loyalty'
+        }} />
+        <Stack.Screen name='RetailerSchemeDetail' component={RetailerSchemeDetail} options={{
+          headerShown: true,
+          title: 'Scheme Details'
         }} />
 
         <Stack.Screen name='CustomerList' component={CustomerList} options={{

@@ -40,6 +40,11 @@ export const API_ENDPOINT = {
   //Check in api
   CUSTOMER_CHECKIN: "api/submitCheckin",
   CUSTOMER_CHECKOUT: "api/submitCheckout",
+  CUSTOMER_CHECKIN_ACTIVITY: "api/getCustomerCheckinActivity",
+  CUSTOMER_SNAPSHOT: "api/getCustomerSnapshot",
+  //Loyalty (retailer scoped)
+  RETAILER_LOYALTY: "api/getRetailerLoyalty",
+  RETAILER_SCHEME_DETAIL: "api/getRetailerSchemeDetail",
   CHANGE_ATTENDANCE_STATUS: "api/attendance/changeStatus",
   //user activity 
   USER_ACTIVITY: "api/user/activity",
