@@ -70,6 +70,11 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
   type,
   customerType
 }) => {
+  // The API can return the approval as APPROVED, Approved or a legacy value from
+  // customer_details.visit_status. Read it one way here so the badge and the
+  // Check In / Add Order gates never disagree.
+  const approvalStatus = String((item as any)?.status || 'PENDING').trim().toUpperCase();
+
   const customerTypeText = [
     customerType,
     item?.customer_type,
@@ -404,7 +409,7 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
               reducedTransparencyFallbackColor="rgba(255, 255, 255, 0.8)"
             />
             <View style={[styles.playIconContainer, { backgroundColor: 'rgba(255, 255, 255, 0.9)' }]}>
-              <Text style={styles.tagText}>{String(item?.status || 'PENDING').trim().toUpperCase()}</Text>
+              <Text style={styles.tagText}>{approvalStatus}</Text>
             </View>
           </TouchableOpacity>
         )
@@ -462,7 +467,7 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
           !type ? (
             <TouchableOpacity style={[styles.viewButton, { width: '33%', }]}
               onPress={() => {
-                if (item?.status == "REJECTED") {
+                if (approvalStatus === "REJECTED") {
                   Toast.show({
                     type: 'error',
                     text1: "Your customer is Rejected, you cannot check in this Customer"
@@ -480,7 +485,7 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
           ) : (
             <TouchableOpacity style={[styles.viewButton, { width: '33%', }]}
               onPress={() => {
-                if (item?.status == "REJECTED") {
+                if (approvalStatus === "REJECTED") {
                   Toast.show({
                     type: 'error',
                     text1: "Your customer is Rejected, you cannot check in this Customer"
@@ -503,7 +508,7 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
             {!isDealerOrDistributor && (
             <TouchableOpacity style={[styles.addOrderButton, { width: '36%' }]}
               onPress={() => {
-                if (item?.status != "APPROVED") {
+                if (approvalStatus !== "APPROVED") {
                   Toast.show({
                     type: 'error',
                     text1: "Your customer is not approved"
