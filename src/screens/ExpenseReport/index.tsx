@@ -134,7 +134,7 @@ const ExpenseReport = ({ navigation }: any) => {
     [authUser],
   );
   const can = useCallback((name: string) => permissions.includes(name), [permissions]);
-  const canCheck = can('expense_checked') || can('expenses_authority');
+  const canCheck = can('expense.check') || can('expense.approve');
 
   const [rows, setRows] = useState<any[]>([]);
   const [summary, setSummary] = useState<any>(null);
@@ -632,7 +632,7 @@ const ExpenseReport = ({ navigation }: any) => {
         }
       />
 
-      {can('expenses_create') ? (
+      {can('expense.create') ? (
         <Pressable style={styles.fab} onPress={() => navigation.navigate('AddNewExpense')}>
           <PlusAddIcon color={'white'} />
         </Pressable>
@@ -969,7 +969,7 @@ const ExpenseReport = ({ navigation }: any) => {
 
               {detailIsPending && detailIsMine ? (
                 <View style={[styles.row, { gap: 10, marginTop: 4 }]}>
-                  {can('expenses_edit') ? (
+                  {can('expense.edit') ? (
                     <Pressable
                       style={[styles.buttonView, { flex: 1, marginTop: 0, marginBottom: 0 }]}
                       onPress={() => {
@@ -983,7 +983,7 @@ const ExpenseReport = ({ navigation }: any) => {
                       </AppText>
                     </Pressable>
                   ) : null}
-                  {can('expenses_delete') ? (
+                  {can('expense.delete') ? (
                     <Pressable
                       style={[
                         styles.buttonView,

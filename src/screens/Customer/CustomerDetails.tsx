@@ -44,7 +44,7 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
     (state) => state.auth
   );
   const canManageRetailerApproval = Array.isArray(user?.permissions)
-    && user.permissions.some((permission: string) => permission.toLowerCase() === 'retailer_approve');
+    && user.permissions.some((permission: string) => permission.toLowerCase() === 'customer.approve');
   const [punchInStatus, setPunchInStatus] = useState("Random");
   // ── New states for location ────────────────────────────────
 
