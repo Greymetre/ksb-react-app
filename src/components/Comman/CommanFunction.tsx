@@ -42,7 +42,7 @@ export const dashboardTiles = [
     title: "Loyalty",
     icon: <LoyaltyIcon/>,
     bgColor: colors.blue,
-    navigateTo: "AttendanceReport",
+    navigateTo: "LoyaltyMenu",
   },
 ];
 export const DATA = [
