@@ -45,6 +45,7 @@ export type RootStackParamList = {
   RetailersPerformanceViewAllScreen:undefined
   ActivityForm: {id?: number; type: 'nukkad'|'retailer'|'farmer'|'influencer'; readOnly?: boolean};
   ActivitySummary: undefined;
+  MyProfile: undefined;
 };
 
 export type AppTextProps = {

@@ -18,7 +18,7 @@ export const LOCAL_BASE_URL = Platform.select({
 // !! Ship with LIVE_BASE_URL. A build made against the local one cannot reach
 // !! the server from any device. Point this at LOCAL_BASE_URL while developing
 // !! against the docker backend, and switch it back before any build.
-export const BASE_URL = LOCAL_BASE_URL;
+export const BASE_URL = LIVE_BASE_URL;
 export const API_BASE_URL = `${BASE_URL}api`;
 export const IMAGE_BASE_URL = BASE_URL;
 export const resolveMediaUrl = (value?: string | null): string => {

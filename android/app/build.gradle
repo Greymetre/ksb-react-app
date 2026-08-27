@@ -90,8 +90,8 @@ android {
         applicationId "com.fieldkonnectksb"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 24
-        versionName "24.0"
+        versionCode 26
+        versionName "26.0"
     }
     packagingOptions {
         pickFirst '**/libworklets.so'

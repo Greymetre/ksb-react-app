@@ -154,6 +154,10 @@ const ProfileTab = ({ handleDrawerClose }: any) => {
                 } 
                 return (
                   <Pressable key={item.id} style={[styles.itemVIew, styles.row]} onPress={async () => {
+                    if (item?.name == "My Profile") {
+                      navigation.navigate('MyProfile')
+                      handleDrawerClose()
+                    }
                     if (item?.name == "Report") {
                       navigation.navigate('Reports')
                       // navigation.navigate('UserActivityPage')

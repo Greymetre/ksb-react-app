@@ -48,5 +48,8 @@ export const API_ENDPOINT = {
   CHANGE_ATTENDANCE_STATUS: "api/attendance/changeStatus",
   //user activity 
   USER_ACTIVITY: "api/user/activity",
+  //my profile
+  PROFILE_DETAILS: "api/profile/details",
+  PROFILE_PHOTO: "api/profile/photo",
 
 };
