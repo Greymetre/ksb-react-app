@@ -4,6 +4,7 @@ import Toast from 'react-native-toast-message';
 import AppText from '../../components/AppText/AppText';
 import { colors } from '../../utils/Colors';
 import { SCHEME_TONE, SchemeCard, SchemeDetail, schemeApi } from '../../api/schemeApi';
+import { apiErrorMessage } from '../../utils/misc';
 import { schemeStyles as styles } from './styles';
 
 const money = (value: number) => `₹${Number(value || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
@@ -38,12 +39,8 @@ const SchemeList = () => {
   const load = useCallback(async () => {
     try {
       setSchemes(await schemeApi.list());
-    } catch (error: any) {
-      Toast.show({
-        type: 'error',
-        position: 'top',
-        text1: error?.response?.data?.message || 'Unable to load schemes',
-      });
+    } catch (error) {
+      Toast.show({ type: 'error', position: 'top', text1: apiErrorMessage(error, 'Unable to load schemes') });
       setSchemes([]);
     } finally {
       setLoading(false);
@@ -59,12 +56,8 @@ const SchemeList = () => {
     setDetailLoading(true);
     try {
       setDetail(await schemeApi.detail(scheme.id));
-    } catch (error: any) {
-      Toast.show({
-        type: 'error',
-        position: 'top',
-        text1: error?.response?.data?.message || 'Unable to open this scheme',
-      });
+    } catch (error) {
+      Toast.show({ type: 'error', position: 'top', text1: apiErrorMessage(error, 'Unable to open this scheme') });
     } finally {
       setDetailLoading(false);
     }

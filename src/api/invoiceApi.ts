@@ -75,10 +75,20 @@ export type InvoiceDealer = {
 
 export type InvoiceScheme = { id: number; name: string; code: string | null };
 
+export type InvoiceAttachment = {
+  id: number;
+  url: string;
+  fileName: string | null;
+  mimeType: string | null;
+  fileSize: number | null;
+};
+
 export type InvoiceDetail = InvoiceListItem & {
   approvalRemark: string | null;
   city: string | null;
+  /** First file, kept for older screens; the full set is in `attachments`. */
   attachment: string | null;
+  attachments: InvoiceAttachment[];
   /** True while nobody has acted on the invoice - pending or on hold. */
   canEdit: boolean;
   canDelete: boolean;
@@ -95,6 +105,25 @@ const nullableText = (value: any): string | null => {
 const number = (value: any): number => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
+};
+
+/** A server that predates the multi-attachment release only sends `attachment`; fall
+ *  back to it so the screen still shows the one file it has. */
+const toAttachments = (row: any): InvoiceAttachment[] => {
+  const rows = Array.isArray(row?.attachments) ? row.attachments : [];
+  if (rows.length > 0) {
+    return rows
+      .map((item: any) => ({
+        id: number(item?.id),
+        url: text(item?.url || item?.file_path),
+        fileName: nullableText(item?.file_name),
+        mimeType: nullableText(item?.mime_type),
+        fileSize: number(item?.file_size) || null,
+      }))
+      .filter((item: InvoiceAttachment) => !!item.url);
+  }
+  const legacy = nullableText(row?.attachment);
+  return legacy ? [{ id: 0, url: legacy, fileName: null, mimeType: null, fileSize: null }] : [];
 };
 
 const toListItem = (row: any): InvoiceListItem => ({
@@ -139,6 +168,10 @@ export const invoiceApi = {
         totalAmount: number(summary.total_amount),
       } as InvoiceSummary,
       total: number(data.pagination?.total),
+      // Raising an invoice belongs to the ASR who owns the retailer (and to a
+      // superadmin). The server decides; the screen only obeys. Missing on an older
+      // server build means no add button, which is the safe way round.
+      canCreate: data.can_create === true,
     };
   },
 
@@ -150,6 +183,7 @@ export const invoiceApi = {
       approvalRemark: nullableText(row.approval_remark),
       city: nullableText(row.city),
       attachment: nullableText(row.attachment),
+      attachments: toAttachments(row),
       canEdit: row.can_edit === true,
       canDelete: row.can_delete === true,
       schemeId: number(row.scheme_id) || null,
@@ -216,7 +250,7 @@ export const invoiceApi = {
     invoiceNumber: string;
     invoiceDate: string;
     amount: number;
-    attachment: { uri: string; name: string; type: string };
+    attachments: { uri: string; name: string; type: string }[];
   }) {
     const form = new FormData();
     form.append('retailer_id', String(payload.retailerId));
@@ -225,7 +259,7 @@ export const invoiceApi = {
     form.append('invoice_number', payload.invoiceNumber);
     form.append('invoice_date', payload.invoiceDate);
     form.append('amount', String(payload.amount));
-    form.append('attachment', payload.attachment as any);
+    payload.attachments.forEach(file => form.append('attachments', file as any));
 
     const response = await axiosClient.post('api/field/invoices', form, {
       headers: { 'Content-Type': 'multipart/form-data' },
@@ -233,7 +267,8 @@ export const invoiceApi = {
     return response.data;
   },
 
-  /** Correcting an invoice nobody has acted on. A new photo is optional. */
+  /** Correcting an invoice nobody has acted on. New files are optional; ids listed in
+   *  `removedAttachmentIds` are dropped from the invoice. */
   async update(
     id: number,
     payload: {
@@ -243,7 +278,8 @@ export const invoiceApi = {
       invoiceNumber: string;
       invoiceDate: string;
       amount: number;
-      attachment?: { uri: string; name: string; type: string } | null;
+      attachments?: { uri: string; name: string; type: string }[];
+      removedAttachmentIds?: number[];
     },
   ) {
     const form = new FormData();
@@ -253,7 +289,8 @@ export const invoiceApi = {
     form.append('invoice_number', payload.invoiceNumber);
     form.append('invoice_date', payload.invoiceDate);
     form.append('amount', String(payload.amount));
-    if (payload.attachment) form.append('attachment', payload.attachment as any);
+    (payload.attachments || []).forEach(file => form.append('attachments', file as any));
+    (payload.removedAttachmentIds || []).forEach(id => form.append('removed_attachment_ids', String(id)));
 
     const response = await axiosClient.post(`api/field/invoices/${id}`, form, {
       headers: { 'Content-Type': 'multipart/form-data' },

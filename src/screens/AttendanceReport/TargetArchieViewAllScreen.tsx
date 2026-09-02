@@ -12,7 +12,12 @@ import {  View,
   Text,
   TextInput,
   Linking,
+  Platform,
+  ActivityIndicator,
 } from 'react-native';
+import ReactNativeBlobUtil from 'react-native-blob-util';
+import * as XLSX from 'xlsx-js-style';
+import ICDownload from '../../assets/svgs/download';
 
 import AppText from '../../components/AppText/AppText';
 import { colors } from '../../utils/Colors';
@@ -172,6 +177,9 @@ const getShort = (zone: string) =>
 
 const TargetArchieViewAllScreen = ({ navigation }: any) => {
   const [tab, setTab] = useState<'ASR' | 'DSR'>('ASR');
+  const [period, setPeriod] = useState<'MTD' | 'YTD'>('MTD');
+  const [rawZones, setRawZones] = useState<any[]>([]);
+  const [exporting, setExporting] = useState(false);
   const [activeFilter, setActiveFilter] = useState('User');
   const [sections, setSections] = useState([]);
   const [summary, setSummary] = useState<any>(null);
@@ -187,41 +195,55 @@ const TargetArchieViewAllScreen = ({ navigation }: any) => {
   });
 
 
-  const formatSalesData = (zones: any[]) => {
+  // MTD = running month, YTD = calendar year (Jan to date). The API sends both,
+  // so switching the period only re-maps the same response, no refetch.
+  const formatSalesData = (zones: any[] = [], mode: 'MTD' | 'YTD' = 'MTD') => {
+    const ytd = mode === 'YTD';
     return zones.map((z) => ({
       title: z.zone,
-      data: z.users.map((u: any) => ({
-        name: u.name,
-        branch: u.branch,
-        reporting: u.reporting,
-        registered_retailers: u.registered_retailers,
+      data: z.users.map((u: any) => {
+        // The API serialises in snake_case: target_qty / year_target_qty.
+        const tgtQty = ytd ? u.year_target_qty : u.target_qty;
+        const tgtLacs = ytd ? u.year_target : u.target;
+        const periodQty = ytd ? u.year_order_qty : u.month_order_qty;
+        const periodValue = ytd ? u.year_order_value : u.month_order_value;
+        const actQty = ytd ? u.year_achievement_percent_qty : u.achievement_percent_qty;
+        const actValue = ytd ? u.year_achievement_percent : u.achievement_percent;
+        const visits = ytd ? u.year_visits : u.month_visits;
+        const orders = ytd ? u.year_order_count : u.month_order_count;
+        const uniqueVisits = ytd ? u.year_unique_retailer_visits : u.month_unique_retailer_visits;
+        const uniqueOrders = ytd ? u.unique_retailers_year : u.unique_retailers_month;
 
-        monthTgt: { qty: u.targetQty, lacs: u.target },
-        today: { qty: u.today_order_qty, lacs: (u.today_order_value / 100000)?.toFixed(2) },
-        mtd: { qty: u.month_order_qty, lacs: (u.month_order_value / 100000)?.toFixed(2) },
-        achievement: { qty: u.achievement_percent_qty, lacs: (u.achievement_percent / 100000)?.toFixed(0) },
+        return {
+          name: u.name,
+          branch: u.branch,
+          reporting: u.reporting,
+          registered_retailers: u.registered_retailers,
 
-        todayRetailers: {
-          vis: u.today_visits,
-          ord: u.today_order_count,
-          percent: u.today_visits > 0 ? (u.today_order_count / u.today_visits) * 100 : 0,
-        },
+          monthTgt: { qty: tgtQty || 0, lacs: tgtLacs || 0 },
+          today: { qty: u.today_order_qty, lacs: (u.today_order_value / 100000)?.toFixed(2) },
+          mtd: { qty: periodQty || 0, lacs: ((periodValue || 0) / 100000)?.toFixed(2) },
+          achievement: { qty: actQty || 0, lacs: ((actValue || 0) / 100000)?.toFixed(0) },
 
-        mtdRetailers: {
-          vis: u.month_visits,
-          ord: u.month_order_count,
-          percent: u.month_visits > 0 ? (u.month_order_count / u.month_visits) * 100 : 0,
-        },
+          todayRetailers: {
+            vis: u.today_visits,
+            ord: u.today_order_count,
+            percent: u.today_visits > 0 ? (u.today_order_count / u.today_visits) * 100 : 0,
+          },
 
-        mtdUnique: {
-          vis: u.month_unique_retailer_visits,
-          ord: u.unique_retailers_month,
-          percent:
-            u.month_unique_retailer_visits > 0
-              ? (u.unique_retailers_month / u.month_unique_retailer_visits) * 100
-              : 0,
-        },
-      })),
+          mtdRetailers: {
+            vis: visits || 0,
+            ord: orders || 0,
+            percent: visits > 0 ? (orders / visits) * 100 : 0,
+          },
+
+          mtdUnique: {
+            vis: uniqueVisits || 0,
+            ord: uniqueOrders || 0,
+            percent: uniqueVisits > 0 ? (uniqueOrders / uniqueVisits) * 100 : 0,
+          },
+        };
+      }),
     }));
   };
 
@@ -304,6 +326,22 @@ const TargetArchieViewAllScreen = ({ navigation }: any) => {
     fetchAttendanceWithFilters(filters, tab);
   }, [filters]);
 
+  // Older API builds do not send the year_* fields. Until that backend is live
+  // the YTD tab stays hidden, so the screen behaves exactly as before instead of
+  // showing a table full of zeroes.
+  const hasYtdData = rawZones.some((z: any) =>
+    (z?.users || []).some((u: any) => u && 'year_order_value' in u),
+  );
+
+  useEffect(() => {
+    if (!hasYtdData && period !== 'MTD') setPeriod('MTD');
+  }, [hasYtdData, period]);
+
+  useEffect(() => {
+    const mode = hasYtdData ? period : 'MTD';
+    setSections(formatSalesData(rawZones, mode) as any);
+  }, [rawZones, period, hasYtdData]);
+
   const handleSelect = (value: any) => {
     let updatedFilters = { ...filters };
 
@@ -359,7 +397,7 @@ const TargetArchieViewAllScreen = ({ navigation }: any) => {
 
       console.log(json.data.zones, 'json.data.zonesjson.data.zones')
       if (json.success) {
-        setSections(formatSalesData(json.data.zones));
+        setRawZones(json.data.zones || []);
         setSummary(json.data.summary);
       }
     } catch (err) {
@@ -430,6 +468,181 @@ const TargetArchieViewAllScreen = ({ navigation }: any) => {
 
   const dayText = `Day ${currentDay}/${totalDays}`;
 
+  // ────────────────────────────────────────────────
+  // Excel export - exports exactly what the table is
+  // showing right now (ASR/DSR, MTD/YTD and the applied
+  // Zone / Branch / User filters), built from the same
+  // `sections` the SectionList renders.
+  // ────────────────────────────────────────────────
+  const num = (value: any) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+
+  const round2 = (value: any) => Math.round(num(value) * 100) / 100;
+
+  const exportToExcel = async () => {
+    if (exporting) return;
+
+    const rowCount = sections.reduce((sum: number, sec: any) => sum + (sec?.data?.length || 0), 0);
+    if (!rowCount) {
+      Toast.show({ type: 'error', text1: 'Nothing to export', text2: 'No records for the selected filters' });
+      return;
+    }
+
+    setExporting(true);
+    try {
+      const tgtLabel = period === 'YTD' ? 'Year Tgt' : 'Mnth Tgt';
+
+      const sheet: any[][] = [
+        [
+          'Zone', 'Name', 'Reporting Head', 'Branch', 'Retailers (Reg & App.)',
+          `${tgtLabel} Qty`, `${tgtLabel} Lacs`,
+          'Today Qty', 'Today Lacs',
+          `${period} Qty`, `${period} Lacs`,
+          '%Act Qty', '%Act Lacs',
+          'Today Retailers Vis', 'Today Retailers Ord', 'Today Retailers %',
+          `${period} Retailers Vis`, `${period} Retailers Ord`, `${period} Retailers %`,
+          `${period} Unique Vis`, `${period} Unique Ord`, `${period} Unique %`,
+        ],
+      ];
+
+      const bodyRow = (zone: string, label: string, head: string, branch: string, item: any) => ([
+        zone, label, head, branch, num(item?.registered_retailers),
+        num(item?.monthTgt?.qty), round2(item?.monthTgt?.lacs),
+        num(item?.today?.qty), round2(item?.today?.lacs),
+        num(item?.mtd?.qty), round2(item?.mtd?.lacs),
+        round2(item?.achievement?.qty), round2(item?.achievement?.lacs),
+        num(item?.todayRetailers?.vis), num(item?.todayRetailers?.ord), round2(item?.todayRetailers?.percent),
+        num(item?.mtdRetailers?.vis), num(item?.mtdRetailers?.ord), round2(item?.mtdRetailers?.percent),
+        num(item?.mtdUnique?.vis), num(item?.mtdUnique?.ord), round2(item?.mtdUnique?.percent),
+      ]);
+
+      const totalRow = (label: string, totals: any) => ([
+        '', label, '', '', num(totals?.retailers),
+        num(totals?.monthTgt?.qty), round2(totals?.monthTgt?.lacs),
+        num(totals?.today?.qty), round2(totals?.today?.lacs),
+        num(totals?.mtd?.qty), round2(totals?.mtd?.lacs),
+        '', '',
+        num(totals?.todayRetailers?.vis), num(totals?.todayRetailers?.ord),
+        totals?.todayRetailers?.vis > 0 ? round2((totals.todayRetailers.ord / totals.todayRetailers.vis) * 100) : 0,
+        num(totals?.mtdRetailers?.vis), num(totals?.mtdRetailers?.ord),
+        totals?.mtdRetailers?.vis > 0 ? round2((totals.mtdRetailers.ord / totals.mtdRetailers.vis) * 100) : 0,
+        num(totals?.mtdUnique?.vis), num(totals?.mtdUnique?.ord),
+        totals?.mtdUnique?.vis > 0 ? round2((totals.mtdUnique.ord / totals.mtdUnique.vis) * 100) : 0,
+      ]);
+
+      const totalRowIndexes = new Set<number>();
+      sections.forEach((section: any) => {
+        (section?.data || []).forEach((item: any) => {
+          sheet.push(bodyRow(
+            section?.title || '',
+            item?.name || '-',
+            item?.reporting?.name || '-',
+            item?.branch || '-',
+            item,
+          ));
+        });
+        sheet.push(totalRow(`${section?.title || ''} Total`, calculateSectionTotals(section?.data || [])));
+        totalRowIndexes.add(sheet.length - 1);
+      });
+
+      sheet.push(totalRow('Grand Total', grandTotals));
+      totalRowIndexes.add(sheet.length - 1);
+
+      const worksheet = XLSX.utils.aoa_to_sheet(sheet);
+      worksheet['!cols'] = [
+        { wch: 14 }, { wch: 26 }, { wch: 24 }, { wch: 18 }, { wch: 20 },
+        ...Array(17).fill({ wch: 13 }),
+      ];
+      worksheet['!rows'] = [{ hpx: 26 }];
+
+      // Same look as the CRM's ASR performance export: blue header, red zone
+      // totals, green grand total, Calibri 9 throughout.
+      const base = { name: 'Calibri', sz: 9 };
+      const bordered = {
+        top: { style: 'thin', color: { rgb: 'D0D5DD' } },
+        bottom: { style: 'thin', color: { rgb: 'D0D5DD' } },
+        left: { style: 'thin', color: { rgb: 'D0D5DD' } },
+        right: { style: 'thin', color: { rgb: 'D0D5DD' } },
+      };
+      const styleFor = (rowIndex: number) => {
+        if (rowIndex === 0) {
+          return {
+            font: { ...base, bold: true, color: { rgb: 'FFFFFF' } },
+            fill: { fgColor: { rgb: '1E88E5' } },
+            alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+            border: bordered,
+          };
+        }
+        if (totalRowIndexes.has(rowIndex)) {
+          return {
+            font: { ...base, bold: true, color: { rgb: 'FFFFFF' } },
+            fill: { fgColor: { rgb: rowIndex === sheet.length - 1 ? '43A047' : 'E53935' } },
+            alignment: { vertical: 'center' },
+            border: bordered,
+          };
+        }
+        return { font: base, alignment: { vertical: 'center' }, border: bordered };
+      };
+
+      const range = XLSX.utils.decode_range(worksheet['!ref'] as string);
+      for (let row = range.s.r; row <= range.e.r; row += 1) {
+        const style = styleFor(row);
+        for (let col = range.s.c; col <= range.e.c; col += 1) {
+          const cell = worksheet[XLSX.utils.encode_cell({ r: row, c: col })];
+          if (cell) cell.s = style;
+        }
+      }
+
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Sales Performance');
+      const base64 = XLSX.write(workbook, { type: 'base64', bookType: 'xlsx' });
+
+      const stamp = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}_${String(today.getHours()).padStart(2, '0')}${String(today.getMinutes()).padStart(2, '0')}`;
+      const fileName = `Sales_Performance_${tab}_${period}_${stamp}.xlsx`;
+
+      const mime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      const { fs } = ReactNativeBlobUtil;
+
+      // The app's own folder is always writable, so the file is created there first.
+      const privatePath = `${fs.dirs.DocumentDir}/${fileName}`;
+      if (await fs.exists(privatePath)) await fs.unlink(privatePath);
+      await fs.writeFile(privatePath, base64, 'base64');
+
+      if (Platform.OS === 'ios') {
+        ReactNativeBlobUtil.ios.previewDocument(privatePath);
+        Toast.show({ type: 'success', text1: 'Report ready', text2: fileName });
+        return;
+      }
+
+      // On Android put a copy in the public Downloads folder so the report is easy
+      // to find. Scoped storage can refuse that on newer devices, in which case the
+      // file is opened straight from the app folder instead.
+      try {
+        const publicPath = `${fs.dirs.DownloadDir}/${fileName}`;
+        if (await fs.exists(publicPath)) await fs.unlink(publicPath);
+        await fs.cp(privatePath, publicPath);
+        await ReactNativeBlobUtil.android.addCompleteDownload({
+          title: fileName,
+          description: 'Sales performance report',
+          mime,
+          path: publicPath,
+          showNotification: true,
+        });
+        Toast.show({ type: 'success', text1: 'Saved to Downloads', text2: fileName });
+      } catch {
+        Toast.show({ type: 'success', text1: 'Report ready', text2: fileName });
+        await ReactNativeBlobUtil.android.actionViewIntent(privatePath, mime);
+      }
+    } catch (err) {
+      console.log('Export error:', err);
+      Toast.show({ type: 'error', text1: 'Export failed', text2: 'Could not create the Excel file' });
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const filteredModalData: any = getModalData().filter((item: any) => {
     const label = getLabel(item)?.toString().toLowerCase();
     return label.includes(search.toLowerCase());
@@ -449,6 +662,18 @@ const TargetArchieViewAllScreen = ({ navigation }: any) => {
             style={styles.image}
             resizeMode="contain"
           />
+        </Pressable>
+
+        <Pressable
+          style={[styles.exportBtn, exporting && styles.exportBtnBusy]}
+          onPress={exportToExcel}
+          disabled={exporting}
+        >
+          {exporting ? (
+            <ActivityIndicator size="small" color={colors.blue} />
+          ) : (
+            <ICDownload width={20} height={20} stroke={colors.blue} />
+          )}
         </Pressable>
         <AppText size={14} color="#cdd1ed" family={'InterMedium'}>
           Target VS Achievement
@@ -489,6 +714,37 @@ const TargetArchieViewAllScreen = ({ navigation }: any) => {
             </Pressable>
           ))}
         </View>
+
+        {/* PERIOD TABS */}
+        {hasYtdData ? (
+        <View style={styles.periodTabs}>
+          {(['MTD', 'YTD'] as const).map(p => (
+            <Pressable
+              key={p}
+              onPress={() => setPeriod(p)}
+              style={[
+                styles.periodTab,
+                period === p ? styles.activePeriodTab : styles.inactivePeriodTab,
+              ]}
+            >
+              <AppText
+                size={13}
+                family={'InterBold'}
+                color={period === p ? colors.blue : '#cdd1ed'}
+              >
+                {p}
+              </AppText>
+              <AppText
+                size={10}
+                family={'InterMedium'}
+                color={period === p ? colors.blue : '#9ba1c9'}
+              >
+                {p === 'MTD' ? 'This month' : 'Jan - Dec'}
+              </AppText>
+            </Pressable>
+          ))}
+        </View>
+        ) : null}
       </View>
 
       {/* TABS */}
@@ -575,13 +831,13 @@ const TargetArchieViewAllScreen = ({ navigation }: any) => {
             <AppText style={[styles.th, { textAlign: 'left', width: 170, }]}>Reporting Head</AppText>
             <AppText style={styles.th}>Branch</AppText>
             <AppText style={[styles.th, { width: 140 }]}>Retailers{'\n'}(Reg & App.)</AppText>
-            <AppText style={[styles.thGroup, { width: 120 }]}>Mnth Tgt</AppText>
+            <AppText style={[styles.thGroup, { width: 120 }]}>{period === 'YTD' ? 'Year Tgt' : 'Mnth Tgt'}</AppText>
             <AppText style={[styles.thGroup, { width: 120 }]}>Today</AppText>
-            <AppText style={[styles.thGroup, { width: 120 }]}>MTD</AppText>
+            <AppText style={[styles.thGroup, { width: 120 }]}>{period}</AppText>
             <AppText style={[styles.thGroup, { width: 120 }]}>%Act</AppText>
             <AppText style={[styles.thGroup, { width: 180 }]}>Today Retailers</AppText>
-            <AppText style={[styles.thGroup, { width: 180 }]}>MTD Retailers</AppText>
-            <AppText style={[styles.thGroup, { width: 180 }]}>MTD Unique</AppText>
+            <AppText style={[styles.thGroup, { width: 180 }]}>{period} Retailers</AppText>
+            <AppText style={[styles.thGroup, { width: 180 }]}>{period} Unique</AppText>
           </View>
 
           {/* SUB HEADER */}
@@ -999,6 +1255,37 @@ const styles = StyleSheet.create({
   },
 
   inactiveTab: {},
+  periodTabs: {
+    flexDirection: 'row',
+    marginTop: 10,
+    backgroundColor: 'rgba(255,255,255,0.14)',
+    borderRadius: 24,
+    padding: 4,
+  },
+  periodTab: {
+    flex: 1,
+    paddingVertical: 6,
+    borderRadius: 24,
+    alignItems: 'center',
+  },
+  activePeriodTab: {
+    backgroundColor: colors.white,
+  },
+  inactivePeriodTab: {},
+  exportBtn: {
+    position: 'absolute',
+    top: 40,
+    right: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  exportBtnBusy: {
+    opacity: 0.7,
+  },
 
   filters: {
     flexDirection: 'row',

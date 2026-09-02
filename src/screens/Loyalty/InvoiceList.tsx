@@ -4,6 +4,7 @@ import {
   Alert,
   FlatList,
   Image,
+  Linking,
   Modal,
   Pressable,
   RefreshControl,
@@ -22,6 +23,8 @@ import {
   InvoiceSummary,
   invoiceApi,
 } from '../../api/invoiceApi';
+import { apiErrorMessage } from '../../utils/misc';
+import { isPdfAsset } from '../../utils/invoiceAttachments';
 import { invoiceStyles as styles } from './styles';
 
 const STATUS_FILTERS: { label: string; value: number | null }[] = [
@@ -63,6 +66,7 @@ const InvoiceList = ({ navigation }: any) => {
   const [selected, setSelected] = useState<InvoiceDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [canCreate, setCanCreate] = useState(false);
 
   const load = useCallback(
     async (nextPage: number, mode: 'replace' | 'append') => {
@@ -72,12 +76,9 @@ const InvoiceList = ({ navigation }: any) => {
         setSummary(result.summary);
         setTotal(result.total);
         setPage(nextPage);
-      } catch (error: any) {
-        Toast.show({
-          type: 'error',
-          position: 'top',
-          text1: error?.response?.data?.message || 'Unable to load invoices',
-        });
+        setCanCreate(result.canCreate);
+      } catch (error) {
+        Toast.show({ type: 'error', position: 'top', text1: apiErrorMessage(error, 'Unable to load invoices') });
         if (mode === 'replace') setItems([]);
       } finally {
         setLoading(false);
@@ -106,12 +107,8 @@ const InvoiceList = ({ navigation }: any) => {
     setDetailLoading(true);
     try {
       setSelected(await invoiceApi.detail(invoice.id));
-    } catch (error: any) {
-      Toast.show({
-        type: 'error',
-        position: 'top',
-        text1: error?.response?.data?.message || 'Unable to open this invoice',
-      });
+    } catch (error) {
+      Toast.show({ type: 'error', position: 'top', text1: apiErrorMessage(error, 'Unable to open this invoice') });
     } finally {
       setDetailLoading(false);
     }
@@ -142,13 +139,8 @@ const InvoiceList = ({ navigation }: any) => {
               setSelected(null);
               Toast.show({ type: 'success', position: 'top', text1: 'Invoice deleted' });
               load(1, 'replace');
-            } catch (error: any) {
-              const message = error?.response?.data?.message;
-              Toast.show({
-                type: 'error',
-                position: 'top',
-                text1: typeof message === 'string' ? message : 'Could not delete the invoice',
-              });
+            } catch (error) {
+              Toast.show({ type: 'error', position: 'top', text1: apiErrorMessage(error, 'Could not delete the invoice') });
             } finally {
               setDeleting(false);
             }
@@ -285,9 +277,11 @@ const InvoiceList = ({ navigation }: any) => {
         />
       )}
 
-      <Pressable style={styles.fab} onPress={() => navigation.navigate('LoyaltyNewInvoice')}>
-        <AppText size={30} color="white" family="InterLight">+</AppText>
-      </Pressable>
+      {canCreate ? (
+        <Pressable style={styles.fab} onPress={() => navigation.navigate('LoyaltyNewInvoice')}>
+          <AppText size={30} color="white" family="InterLight">+</AppText>
+        </Pressable>
+      ) : null}
 
       <Modal visible={!!selected || detailLoading} transparent animationType="slide" onRequestClose={() => setSelected(null)}>
         <View style={styles.overlay}>
@@ -350,11 +344,25 @@ const InvoiceList = ({ navigation }: any) => {
                     </View>
                   ) : null}
 
-                  {selected.attachment ? (
-                    <View style={styles.attachmentBox}>
-                      <Image source={{ uri: selected.attachment }} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
-                    </View>
-                  ) : null}
+                  {/* An invoice can carry several files - images inline, PDFs as a row
+                      that opens in the phone's own viewer. */}
+                  {selected.attachments.map(file =>
+                    isPdfAsset({ type: file.mimeType, name: file.fileName || file.url }) ? (
+                      <Pressable
+                        key={`att-${file.id}-${file.url}`}
+                        style={styles.attachmentPdf}
+                        onPress={() => Linking.openURL(file.url)}>
+                        <AppText size={18}>📄</AppText>
+                        <AppText size={12.5} family="InterMedium" customColor={colors.blue} style={{ flex: 1 }}>
+                          {file.fileName || 'Invoice PDF'}
+                        </AppText>
+                      </Pressable>
+                    ) : (
+                      <View key={`att-${file.id}-${file.url}`} style={styles.attachmentBox}>
+                        <Image source={{ uri: file.url }} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
+                      </View>
+                    ),
+                  )}
 
                   {selected.canEdit || selected.canDelete ? (
                     <View style={styles.detailActions}>

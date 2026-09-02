@@ -169,6 +169,15 @@ export const invoiceStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  attachmentPdf: {
+    marginTop: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: '#F1F5F9',
+  },
   timelineDot: { width: 8, height: 8, borderRadius: 8, backgroundColor: colors.blue, marginTop: 5 },
 
   emptyWrap: { alignItems: 'center', paddingTop: 70, paddingHorizontal: 40 },
@@ -240,6 +249,40 @@ export const invoiceFormStyles = StyleSheet.create({
     padding: 14,
   },
   preview: { height: 150, borderRadius: 12, overflow: 'hidden', backgroundColor: '#EEF3F8' },
+  // An invoice can carry up to ten files, so they sit in a wrapping grid of thumbnails
+  // with a remove badge on each and an "add" tile at the end.
+  attachmentGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 4 },
+  attachmentTile: {
+    width: 78,
+    height: 78,
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: '#EEF3F8',
+  },
+  attachmentImage: { width: '100%', height: '100%' },
+  attachmentDoc: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 2 },
+  attachmentRemove: {
+    position: 'absolute',
+    top: 3,
+    right: 3,
+    width: 19,
+    height: 19,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(17,24,39,0.72)',
+  },
+  attachmentAdd: {
+    width: 78,
+    height: 78,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: '#B7C7DA',
+    backgroundColor: '#F7FAFD',
+  },
 
   submitBar: {
     position: 'absolute',
@@ -263,6 +306,9 @@ export const invoiceFormStyles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(8,20,40,0.55)', justifyContent: 'flex-end' },
   backdrop: { ...StyleSheet.absoluteFillObject },
   sheet: { backgroundColor: 'white', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '78%', padding: 20 },
+  /* With the keyboard up there is less room, so the sheet gives some back rather than
+     being squeezed against the top of the screen. */
+  sheetWithKeyboard: { maxHeight: '55%' },
   sheetScroll: { flexGrow: 0, flexShrink: 1 },
   option: { paddingVertical: 13, borderBottomWidth: 1, borderColor: '#F1F5F9' },
   search: {

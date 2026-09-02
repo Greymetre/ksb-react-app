@@ -2,8 +2,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Dimensions,
   FlatList,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -12,18 +14,25 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import Toast from 'react-native-toast-message';
 import AppText from '../../components/AppText/AppText';
 import { colors } from '../../utils/Colors';
-import { InvoiceDealer, InvoiceDetail, InvoiceRetailer, InvoiceScheme, invoiceApi } from '../../api/invoiceApi';
+import { InvoiceAttachment, InvoiceDealer, InvoiceDetail, InvoiceRetailer, InvoiceScheme, invoiceApi } from '../../api/invoiceApi';
+import {
+  AttachmentTooLargeError,
+  InvoiceAsset,
+  MAX_INVOICE_ATTACHMENTS,
+  chooseAttachmentSource,
+  compressInvoiceAsset,
+  isPdfAsset,
+  isPickerCancel,
+  pickInvoiceAssets,
+} from '../../utils/invoiceAttachments';
+import { apiErrorMessage } from '../../utils/misc';
 import { invoiceFormStyles as styles } from './styles';
 import DatePickerModal from './DatePickerModal';
 
 type Picker = 'retailer' | 'dealer' | 'scheme' | null;
-type Asset = { uri: string; name: string; type: string };
-
-const MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024;
 
 const toApiDate = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -75,11 +84,40 @@ const NewInvoice = ({ navigation, route }: any) => {
   });
   const [showDate, setShowDate] = useState(false);
   const [amount, setAmount] = useState(editing ? String(editing.amount) : '');
-  const [asset, setAsset] = useState<Asset | null>(null);
+  // Files staged on this screen, plus the ones already saved on an invoice being edited.
+  const [assets, setAssets] = useState<InvoiceAsset[]>([]);
+  const [saved, setSaved] = useState<InvoiceAttachment[]>(editing?.attachments ?? []);
+  const [removedIds, setRemovedIds] = useState<number[]>([]);
+  const [processing, setProcessing] = useState(false);
 
   const [picker, setPicker] = useState<Picker>(null);
   const [search, setSearch] = useState('');
   const [saving, setSaving] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [overlayHeight, setOverlayHeight] = useState(0);
+
+  /* A sheet pinned to the bottom of a Modal ends up behind the keyboard - you type a name
+     and cannot see what came back. The keyboard's height is tracked here so the sheet can
+     sit on top of it. */
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const onShow = Keyboard.addListener(showEvent, event => setKeyboardHeight(event.endCoordinates?.height || 0));
+    const onHide = Keyboard.addListener(hideEvent, () => setKeyboardHeight(0));
+    return () => {
+      onShow.remove();
+      onHide.remove();
+    };
+  }, []);
+
+  /* iOS never resizes a modal for the keyboard, so the sheet has to be lifted by its full
+     height. Android may or may not, depending on whether the modal's window honours the
+     activity's adjustResize - so rather than guessing per platform, the overlay measures
+     itself: if it has already shrunk, the keyboard has been accounted for and lifting the
+     sheet again would push it into the middle of the screen. */
+  const windowHeight = Dimensions.get('window').height;
+  const overlayAlreadyShrunk = overlayHeight > 0 && overlayHeight < windowHeight - 80;
+  const sheetLift = keyboardHeight > 0 && !overlayAlreadyShrunk ? keyboardHeight : 0;
 
   /** Retailers come a page at a time and the typing is answered by the server, so the
    *  picker opens instantly however many retailers this user can reach. */
@@ -91,8 +129,8 @@ const NewInvoice = ({ navigation, route }: any) => {
       setRetailers(old => (page === 1 ? result.items : [...old, ...result.items]));
       setRetailersHasMore(result.hasMore);
       setRetailersPage(page);
-    } catch {
-      Toast.show({ type: 'error', position: 'top', text1: 'Unable to load your retailers' });
+    } catch (error) {
+      Toast.show({ type: 'error', position: 'top', text1: apiErrorMessage(error, 'Unable to load your retailers') });
       if (page === 1) setRetailers([]);
     } finally {
       setRetailersLoading(false);
@@ -122,7 +160,7 @@ const NewInvoice = ({ navigation, route }: any) => {
         if (existing) setDealer(existing);
         else if (rows.length === 1) setDealer(rows[0]);
       })
-      .catch(() => Toast.show({ type: 'error', position: 'top', text1: 'Unable to load dealers' }))
+      .catch(error => Toast.show({ type: 'error', position: 'top', text1: apiErrorMessage(error, 'Unable to load dealers') }))
       .finally(() => setDealersLoading(false));
   }, [retailer]);
 
@@ -136,40 +174,56 @@ const NewInvoice = ({ navigation, route }: any) => {
         setSchemes(rows);
         if (editing?.schemeId) setScheme(rows.find(row => row.id === editing.schemeId) || null);
       })
-      .catch(() => Toast.show({ type: 'error', position: 'top', text1: 'Unable to load schemes' }));
+      .catch(error => Toast.show({ type: 'error', position: 'top', text1: apiErrorMessage(error, 'Unable to load schemes') }));
   }, [retailer, invoiceDate]);
 
-  const pickAttachment = useCallback((source: 'camera' | 'gallery') => {
-    const options: any = { mediaType: 'photo', quality: 0.8, includeBase64: false };
-    const handler = (response: any) => {
-      if (response?.didCancel) return;
-      if (response?.errorCode) {
-        Toast.show({ type: 'error', position: 'top', text1: response.errorMessage || 'Could not open the camera' });
+  const attachmentCount = saved.length + assets.length;
+
+  const addAttachments = useCallback(
+    async (source: 'camera' | 'gallery' | 'file') => {
+      const room = MAX_INVOICE_ATTACHMENTS - (saved.length + assets.length);
+      if (room <= 0) {
+        Toast.show({ type: 'error', position: 'top', text1: `At most ${MAX_INVOICE_ATTACHMENTS} attachments` });
         return;
       }
-      const file = (response?.assets || [])[0];
-      if (!file) return;
-      if ((file.fileSize || 0) > MAX_ATTACHMENT_BYTES) {
-        Toast.show({ type: 'error', position: 'top', text1: 'The photo must be under 5 MB' });
-        return;
+
+      setProcessing(true);
+      try {
+        const picked = await pickInvoiceAssets(source, room);
+        for (const file of picked) {
+          try {
+            // Anything over the limit is shrunk here, so a big photo never leaves the
+            // phone; only a file that stays too big afterwards is refused.
+            const ready = await compressInvoiceAsset(file);
+            setAssets(old => [...old, ready]);
+          } catch (error: any) {
+            Toast.show({
+              type: 'error',
+              position: 'top',
+              text1: error instanceof AttachmentTooLargeError ? error.message : 'Could not process that file',
+            });
+          }
+        }
+      } catch (error: any) {
+        if (!isPickerCancel(error)) {
+          Toast.show({ type: 'error', position: 'top', text1: error?.message || 'Could not open the picker' });
+        }
+      } finally {
+        setProcessing(false);
       }
-      setAsset({
-        uri: file.uri,
-        name: file.fileName || `invoice-${Date.now()}.jpg`,
-        type: file.type || 'image/jpeg',
-      });
-    };
+    },
+    [assets.length, saved.length],
+  );
 
-    if (source === 'camera') launchCamera({ ...options, saveToPhotos: false }, handler);
-    else launchImageLibrary({ ...options, selectionLimit: 1 }, handler);
-  }, []);
+  const chooseAttachment = () => chooseAttachmentSource(addAttachments);
 
-  const chooseAttachment = () =>
-    Alert.alert('Invoice attachment', 'Choose a source', [
-      { text: 'Camera', onPress: () => pickAttachment('camera') },
-      { text: 'Gallery', onPress: () => pickAttachment('gallery') },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
+  const removeStaged = (index: number) => setAssets(old => old.filter((_, position) => position !== index));
+
+  const removeSaved = (file: InvoiceAttachment) => {
+    setSaved(old => old.filter(item => item !== file));
+    // Id 0 is the legacy single-attachment column - there is no row for the API to drop.
+    if (file.id > 0) setRemovedIds(old => [...old, file.id]);
+  };
 
   const submit = async () => {
     if (!retailer) return Toast.show({ type: 'error', position: 'top', text1: 'Please select a retailer' });
@@ -178,8 +232,8 @@ const NewInvoice = ({ navigation, route }: any) => {
     if (!invoiceNumber.trim()) return Toast.show({ type: 'error', position: 'top', text1: 'Invoice number is required' });
     if (!scheme) return Toast.show({ type: 'error', position: 'top', text1: 'Please select a scheme' });
     if (!(Number(amount) > 0)) return Toast.show({ type: 'error', position: 'top', text1: 'Amount must be greater than 0' });
-    // On an edit the invoice already has a photo; a new one is only needed if it is being replaced.
-    if (!asset && !editing) return Toast.show({ type: 'error', position: 'top', text1: 'Invoice attachment is required' });
+    if (processing) return Toast.show({ type: 'error', position: 'top', text1: 'Attachments are still being processed' });
+    if (attachmentCount === 0) return Toast.show({ type: 'error', position: 'top', text1: 'Invoice attachment is required' });
 
     setSaving(true);
     try {
@@ -193,19 +247,20 @@ const NewInvoice = ({ navigation, route }: any) => {
       };
 
       if (editing) {
-        await invoiceApi.update(editing.id, { ...payload, attachment: asset });
+        await invoiceApi.update(editing.id, { ...payload, attachments: assets, removedAttachmentIds: removedIds });
         Toast.show({ type: 'success', position: 'top', text1: 'Invoice updated - it goes back for review' });
       } else {
-        await invoiceApi.create({ ...payload, attachment: asset! });
+        await invoiceApi.create({ ...payload, attachments: assets });
         Toast.show({ type: 'success', position: 'top', text1: 'Invoice created successfully' });
       }
       navigation.goBack();
-    } catch (error: any) {
-      const message = error?.response?.data?.message;
+    } catch (error) {
+      // Whatever the API objected to - a duplicate number for that dealer, an ineligible
+      // scheme - is what the person filling the form needs to read, not a generic line.
       Toast.show({
         type: 'error',
         position: 'top',
-        text1: typeof message === 'string' ? message : editing ? 'Could not update the invoice' : 'Could not create the invoice',
+        text1: apiErrorMessage(error, editing ? 'Could not update the invoice' : 'Could not create the invoice'),
       });
     } finally {
       setSaving(false);
@@ -287,13 +342,13 @@ const NewInvoice = ({ navigation, route }: any) => {
               </Pressable>
             </View>
             <View style={styles.half}>
-              <AppText size={12} family="InterSemiBold" color="black" opacity={0.5} style={styles.label}>AMOUNT (₹) *</AppText>
+              <AppText size={12} family="InterSemiBold" color="black" opacity={0.5} style={styles.label}>PRE-GST AMOUNT *</AppText>
               <View style={styles.field}>
                 <TextInput
                   value={amount}
                   onChangeText={setAmount}
                   keyboardType="decimal-pad"
-                  placeholder="0"
+                  placeholder="₹ 0"
                   placeholderTextColor="#9AA5B1"
                   style={styles.input}
                 />
@@ -301,7 +356,7 @@ const NewInvoice = ({ navigation, route }: any) => {
             </View>
           </View>
           <AppText size={10.5} color="black" opacity={0.45} style={{ marginTop: 6 }}>
-            Enter the pre-GST invoice amount only.
+            Enter the pre-GST invoice amount only. Do not include GST.
           </AppText>
 
           <AppText size={12} family="InterSemiBold" color="black" opacity={0.5} style={[styles.label, { marginTop: 16 }]}>SCHEME *</AppText>
@@ -315,33 +370,63 @@ const NewInvoice = ({ navigation, route }: any) => {
 
         <View style={styles.card}>
           <AppText size={12} family="InterSemiBold" color="black" opacity={0.5} style={styles.label}>
-            {editing ? 'INVOICE PHOTO' : 'INVOICE PHOTO *'}
+            {editing ? 'INVOICE ATTACHMENTS' : 'INVOICE ATTACHMENTS *'}
           </AppText>
-          {asset ? (
-            <View>
-              <View style={styles.preview}>
-                <Image source={{ uri: asset.uri }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
-              </View>
-              <Pressable onPress={chooseAttachment} style={{ marginTop: 10, alignSelf: 'flex-start' }}>
-                <AppText size={12} family="InterSemiBold" customColor={colors.blue}>Change photo</AppText>
-              </Pressable>
-            </View>
-          ) : editing?.attachment ? (
-            <View>
-              <View style={styles.preview}>
-                <Image source={{ uri: editing.attachment }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
-              </View>
-              <Pressable onPress={chooseAttachment} style={{ marginTop: 10, alignSelf: 'flex-start' }}>
-                <AppText size={12} family="InterSemiBold" customColor={colors.blue}>Replace photo</AppText>
-              </Pressable>
+
+          {attachmentCount > 0 ? (
+            <View style={styles.attachmentGrid}>
+              {saved.map(file => (
+                <View key={`saved-${file.id}-${file.url}`} style={styles.attachmentTile}>
+                  {isPdfAsset({ type: file.mimeType, name: file.fileName || file.url }) ? (
+                    <View style={styles.attachmentDoc}>
+                      <AppText size={22}>📄</AppText>
+                      <AppText size={10} color="black" opacity={0.55}>PDF</AppText>
+                    </View>
+                  ) : (
+                    <Image source={{ uri: file.url }} style={styles.attachmentImage} resizeMode="cover" />
+                  )}
+                  <Pressable style={styles.attachmentRemove} onPress={() => removeSaved(file)} hitSlop={8}>
+                    <AppText size={12} color="white" family="InterSemiBold">×</AppText>
+                  </Pressable>
+                </View>
+              ))}
+
+              {assets.map((file, index) => (
+                <View key={`new-${file.uri}-${index}`} style={styles.attachmentTile}>
+                  {isPdfAsset(file) ? (
+                    <View style={styles.attachmentDoc}>
+                      <AppText size={22}>📄</AppText>
+                      <AppText size={10} color="black" opacity={0.55}>PDF</AppText>
+                    </View>
+                  ) : (
+                    <Image source={{ uri: file.uri }} style={styles.attachmentImage} resizeMode="cover" />
+                  )}
+                  <Pressable style={styles.attachmentRemove} onPress={() => removeStaged(index)} hitSlop={8}>
+                    <AppText size={12} color="white" family="InterSemiBold">×</AppText>
+                  </Pressable>
+                </View>
+              ))}
+
+              {attachmentCount < MAX_INVOICE_ATTACHMENTS ? (
+                <Pressable style={styles.attachmentAdd} onPress={chooseAttachment} disabled={processing}>
+                  <AppText size={22} customColor={colors.blue}>+</AppText>
+                  <AppText size={10} family="InterSemiBold" customColor={colors.blue}>Add</AppText>
+                </Pressable>
+              ) : null}
             </View>
           ) : (
-            <Pressable style={styles.upload} onPress={chooseAttachment}>
-              <AppText size={26}>📷</AppText>
-              <AppText size={13} family="InterSemiBold" customColor={colors.blue}>Add invoice photo</AppText>
-              <AppText size={11} color="black" opacity={0.45}>Camera or gallery, under 5 MB</AppText>
+            <Pressable style={styles.upload} onPress={chooseAttachment} disabled={processing}>
+              <AppText size={26}>📎</AppText>
+              <AppText size={13} family="InterSemiBold" customColor={colors.blue}>Add invoice attachment</AppText>
+              <AppText size={11} color="black" opacity={0.45}>Camera, gallery or a PDF from Files</AppText>
             </Pressable>
           )}
+
+          <AppText size={11} color="black" opacity={0.45} style={{ marginTop: 8 }}>
+            {processing
+              ? 'Processing attachment...'
+              : `${attachmentCount} of ${MAX_INVOICE_ATTACHMENTS} added. Images are compressed to 5 MB, PDFs must be 10 MB or less.`}
+          </AppText>
         </View>
       </ScrollView>
 
@@ -361,9 +446,15 @@ const NewInvoice = ({ navigation, route }: any) => {
       />
 
       <Modal visible={picker !== null} transparent animationType="slide" onRequestClose={() => setPicker(null)}>
-        <View style={styles.overlay}>
-          <Pressable style={styles.backdrop} onPress={() => setPicker(null)} />
-          <View style={styles.sheet}>
+        <View style={styles.overlay} onLayout={event => setOverlayHeight(event.nativeEvent.layout.height)}>
+          <Pressable
+            style={styles.backdrop}
+            onPress={() => {
+              Keyboard.dismiss();
+              setPicker(null);
+            }}
+          />
+          <View style={[styles.sheet, sheetLift > 0 && [{ marginBottom: sheetLift }, styles.sheetWithKeyboard]]}>
             <AppText size={16} family="InterSemiBold" color="black" style={{ marginBottom: 12 }}>
               {picker === 'retailer' ? 'Select retailer' : picker === 'dealer' ? 'Select dealer' : 'Select scheme'}
             </AppText>
@@ -411,6 +502,7 @@ const NewInvoice = ({ navigation, route }: any) => {
                   <Pressable
                     style={styles.option}
                     onPress={() => {
+                      Keyboard.dismiss();
                       if (picker === 'retailer') setRetailer(option);
                       else if (picker === 'dealer') setDealer(option);
                       else setScheme(option);

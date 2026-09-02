@@ -55,3 +55,26 @@ export const formatShortNumber = (
 
     return formatNumberValueIndian(parsed);
 };
+/**
+ * What the API actually said, ready to show.
+ *
+ * Validation failures come back Laravel-style - `message` is an object keyed by field,
+ * each holding its own list of sentences - so reading it as a string quietly loses the
+ * one thing the user needs to know ("This invoice number is already used for this
+ * dealer") and leaves a generic line in its place. Axios's own message is never shown:
+ * "Request failed with status code 402" tells nobody anything.
+ */
+export function apiErrorMessage(error: any, fallback: string): string {
+  const payload = error?.response?.data;
+  const flattened = flattenApiMessage(payload?.message ?? payload?.error ?? payload?.errors);
+  return flattened || fallback;
+}
+
+function flattenApiMessage(value: any): string {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'string') return value.trim();
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  if (Array.isArray(value)) return value.map(flattenApiMessage).filter(Boolean).join(' ');
+  if (typeof value === 'object') return Object.values(value).map(flattenApiMessage).filter(Boolean).join(' ');
+  return '';
+}
