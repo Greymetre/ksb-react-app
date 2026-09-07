@@ -15,6 +15,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import AppText from '../../components/AppText/AppText';
+import AttachmentViewer from '../../components/AttachmentViewer';
 import { colors } from '../../utils/Colors';
 import {
   INVOICE_STATUS_TONE,
@@ -66,6 +67,12 @@ const InvoiceList = ({ navigation }: any) => {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<number | null>(null);
   const [selected, setSelected] = useState<InvoiceDetail | null>(null);
+  // Which attachment of the open invoice is being read, if any. It is cleared as
+  // the invoice changes, or the next invoice would open straight into a document.
+  const [attachmentIndex, setAttachmentIndex] = useState<number | null>(null);
+  useEffect(() => {
+    setAttachmentIndex(null);
+  }, [selected?.id]);
   const [detailLoading, setDetailLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [canCreate, setCanCreate] = useState(false);
@@ -383,23 +390,26 @@ const InvoiceList = ({ navigation }: any) => {
                     </View>
                   ) : null}
 
-                  {/* An invoice can carry several files - images inline, PDFs as a row
-                      that opens in the phone's own viewer. */}
-                  {selected.attachments.map(file =>
+                  {/* An invoice can carry several files. Either kind opens in the
+                      app's own viewer, which moves between them without closing. */}
+                  {selected.attachments.map((file, position) =>
                     isPdfAsset({ type: file.mimeType, name: file.fileName || file.url }) ? (
                       <Pressable
                         key={`att-${file.id}-${file.url}`}
                         style={styles.attachmentPdf}
-                        onPress={() => Linking.openURL(file.url)}>
+                        onPress={() => setAttachmentIndex(position)}>
                         <AppText size={18}>📄</AppText>
                         <AppText size={12.5} family="InterMedium" customColor={colors.blue} style={{ flex: 1 }}>
                           {file.fileName || 'Invoice PDF'}
                         </AppText>
                       </Pressable>
                     ) : (
-                      <View key={`att-${file.id}-${file.url}`} style={styles.attachmentBox}>
+                      <Pressable
+                        key={`att-${file.id}-${file.url}`}
+                        style={styles.attachmentBox}
+                        onPress={() => setAttachmentIndex(position)}>
                         <Image source={{ uri: file.url }} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
-                      </View>
+                      </Pressable>
                     ),
                   )}
 
@@ -447,6 +457,18 @@ const InvoiceList = ({ navigation }: any) => {
           </View>
         </View>
       </Modal>
+
+      {/* Layered above the details sheet, so closing a document returns to the
+          invoice rather than out of it. */}
+      <AttachmentViewer
+        files={(selected?.attachments ?? []).map(file => ({
+          url: file.url,
+          fileName: file.fileName || undefined,
+          mimeType: file.mimeType || undefined,
+        }))}
+        index={attachmentIndex}
+        onClose={() => setAttachmentIndex(null)}
+      />
     </View>
   );
 };
