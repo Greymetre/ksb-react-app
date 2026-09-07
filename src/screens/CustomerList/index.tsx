@@ -54,6 +54,10 @@ const CustomerList = ({ route }: any) => {
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState('All'); // ✅ default
 
+  // KYC. Pre-set when the Loyalty invoice tab opened this screen from its KYC tile, so
+  // the list arrives already showing exactly the retailers that count referred to.
+  const [kycFilter, setKycFilter] = useState<string | null>(route?.params?.kyc ?? null);
+
   // Add these near your other states
   const [showUserModal, setShowUserModal] = useState(false);
   const [userList, setUserList] = useState<any[]>([]);
@@ -85,7 +89,7 @@ const CustomerList = ({ route }: any) => {
       // setSelectedStatus('All')
       // setSearchText('')
       // setSelectedUser(null)
-    }, [selectedStatus, selectedCity, selectedUser])
+    }, [selectedStatus, selectedCity, selectedUser, kycFilter])
   )
 
   // Option A: Fixed title (recommended for most cases)
@@ -274,6 +278,7 @@ const CustomerList = ({ route }: any) => {
               : overrideStatus ?? selectedStatus,
           city_name: clearCity ? null : overrideCity?.city_name ?? selectedCity?.city_name,
           for_user_id: clearUser ? null : overrideUser?.id ?? selectedUser?.id,
+          kyc: kycFilter,
         });
         console.log('Secondary customer list response:', {
           type: route.params.type,
@@ -322,7 +327,7 @@ const CustomerList = ({ route }: any) => {
       setLoader(false);
       setLoader1(false)
     }
-  }, [searchText, isSecondary, selectedStatus, selectedCity, selectedUser, navigation, route]);
+  }, [searchText, isSecondary, selectedStatus, selectedCity, selectedUser, kycFilter, navigation, route]);
 
 
   const clearFilters = () => {
@@ -427,6 +432,29 @@ const CustomerList = ({ route }: any) => {
                 <ArrowDownIcon />
               </Pressable>
             </View>
+          )
+        }
+
+        {
+          route?.params?.type && (
+            <Pressable
+              style={[styles.kycChip, kycFilter === 'pending' && styles.kycChipActive]}
+              onPress={() => {
+                const next = kycFilter === 'pending' ? null : 'pending';
+                setKycFilter(next);
+                setLoader1(true);
+                setPage(1);
+              }}
+            >
+              <AppText
+                size={12}
+                family="InterMedium"
+                color={kycFilter === 'pending' ? 'white' : 'black'}
+                opacity={kycFilter === 'pending' ? 1 : 0.6}
+              >
+                KYC Pending
+              </AppText>
+            </Pressable>
           )
         }
 

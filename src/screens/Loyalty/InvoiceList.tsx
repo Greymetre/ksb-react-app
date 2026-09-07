@@ -24,6 +24,8 @@ import {
   invoiceApi,
 } from '../../api/invoiceApi';
 import { apiErrorMessage } from '../../utils/misc';
+import axiosClient from '../../api/AxiosClient';
+import { API_ENDPOINT } from '../../api/ApiUrls';
 import { isPdfAsset } from '../../utils/invoiceAttachments';
 import { invoiceStyles as styles } from './styles';
 
@@ -67,6 +69,9 @@ const InvoiceList = ({ navigation }: any) => {
   const [detailLoading, setDetailLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [canCreate, setCanCreate] = useState(false);
+  // Counted through the retailer listing itself rather than the invoice summary, so this
+  // number is by definition the list the card opens - no second scope to drift from.
+  const [kycPending, setKycPending] = useState(0);
 
   const load = useCallback(
     async (nextPage: number, mode: 'replace' | 'append') => {
@@ -89,6 +94,21 @@ const InvoiceList = ({ navigation }: any) => {
     [search, status],
   );
 
+  // One row is enough: only the total is read. Asked for separately from the invoice
+  // list because it counts retailers, not invoices, and must not move with the status
+  // chips above it.
+  const loadKycPending = useCallback(async () => {
+    try {
+      const response = await axiosClient.get(`${API_ENDPOINT.SECONDARY_CUSTOMER_GET}RETAILER`, {
+        params: { page: 1, per_page: 1, kyc: 'pending' },
+      });
+      setKycPending(Number(response?.data?.data?.total) || 0);
+    } catch {
+      // A count that cannot be fetched is not worth an error toast over the list.
+      setKycPending(0);
+    }
+  }, []);
+
   // Typing should not fire a request per keystroke.
   useEffect(() => {
     setLoading(true);
@@ -96,11 +116,13 @@ const InvoiceList = ({ navigation }: any) => {
     return () => clearTimeout(timer);
   }, [search, status, load]);
 
-  // Coming back from the create screen must show what was just raised.
+  // Coming back from the create screen must show what was just raised - and coming back
+  // from the KYC list must show a count that reflects anything approved while there.
   useFocusEffect(
     useCallback(() => {
       load(1, 'replace');
-    }, [load]),
+      loadKycPending();
+    }, [load, loadKycPending]),
   );
 
   const openDetail = useCallback(async (invoice: InvoiceListItem) => {
@@ -150,13 +172,26 @@ const InvoiceList = ({ navigation }: any) => {
     );
   }, [load, selected]);
 
+  // The first three count invoices; the last counts retailers, and is the only card
+  // that leads anywhere - it opens the same retailers it counted.
   const summaryCards = useMemo(
     () => [
-      { label: 'Invoices', value: String(summary?.total ?? 0), tone: colors.blue },
-      { label: 'Pending', value: String((summary?.pending ?? 0) + (summary?.hold ?? 0)), tone: '#D97706' },
-      { label: 'Approved', value: String(summary?.approved ?? 0), tone: '#16A34A' },
+      { label: 'Invoices', value: String(summary?.total ?? 0), tone: colors.blue, onPress: undefined },
+      { label: 'Pending', value: String((summary?.pending ?? 0) + (summary?.hold ?? 0)), tone: '#D97706', onPress: undefined },
+      { label: 'Approved', value: String(summary?.approved ?? 0), tone: '#16A34A', onPress: undefined },
+      {
+        label: 'KYC Pending',
+        value: String(kycPending),
+        tone: '#DC2626',
+        onPress: () =>
+          navigation?.navigate('CustomerList', {
+            type: 'RETAILER',
+            customerTypeName: 'Retailer',
+            kyc: 'pending',
+          }),
+      },
     ],
-    [summary],
+    [summary, kycPending, navigation],
   );
 
   const canLoadMore = items.length < total && !loadingMore && !loading;
@@ -199,11 +234,15 @@ const InvoiceList = ({ navigation }: any) => {
 
       <View style={styles.summaryRow}>
         {summaryCards.map(card => (
-          <View key={card.label} style={styles.summaryCard}>
+          <Pressable
+            key={card.label}
+            disabled={!card.onPress}
+            onPress={card.onPress}
+            style={({ pressed }) => [styles.summaryCard, pressed && card.onPress ? { opacity: 0.6 } : null]}>
             <View style={[styles.summaryAccent, { backgroundColor: card.tone }]} />
             <AppText size={19} family="InterSemiBold" color="black">{card.value}</AppText>
             <AppText size={11} color="black" opacity={0.5}>{card.label}</AppText>
-          </View>
+          </Pressable>
         ))}
       </View>
 

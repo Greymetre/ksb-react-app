@@ -48,7 +48,8 @@ export const useMutateSecondaryCustListApi = () => {
             page,
             status,
             city_name,
-            for_user_id
+            for_user_id,
+            kyc
         }: any) => {
 
             const params: any = {
@@ -69,6 +70,9 @@ export const useMutateSecondaryCustListApi = () => {
             }
             if (for_user_id) {
                 params.for_user_id = for_user_id;
+            }
+            if (kyc) {
+                params.kyc = kyc;
             }
 
             console.log(`${API_ENDPOINT.SECONDARY_CUSTOMER_GET}${type}`,

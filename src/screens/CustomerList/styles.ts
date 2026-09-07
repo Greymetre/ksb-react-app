@@ -18,6 +18,20 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
         padding: rw(100)
     },
+    kycChip: {
+        alignSelf: 'flex-start',
+        marginBottom: 12,
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+        borderRadius: 18,
+        borderWidth: 1,
+        borderColor: "rgba(203, 213, 224, 1)",
+        backgroundColor: "rgba(57, 82, 153, 0.07)",
+    },
+    kycChipActive: {
+        backgroundColor: colors.blue,
+        borderColor: colors.blue,
+    },
     UserBox: {
         flex: 0.5,
         height: 48,

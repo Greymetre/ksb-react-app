@@ -103,8 +103,10 @@ export const invoiceStyles = StyleSheet.create({
   chipActive: { backgroundColor: colors.blue, borderColor: colors.blue },
 
   /* A strip of totals, so the first thing on screen is the shape of the workload. */
-  summaryRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 16, marginTop: 14 },
-  summaryCard: { ...card, flex: 1, paddingVertical: 12, paddingHorizontal: 12 },
+  // Four cards now, so the gap and the side padding come down to keep the label on
+  // one line on a narrow phone.
+  summaryRow: { flexDirection: 'row', gap: 7, paddingHorizontal: 12, marginTop: 14 },
+  summaryCard: { ...card, flex: 1, paddingVertical: 12, paddingHorizontal: 8 },
   summaryAccent: { height: 3, width: 26, borderRadius: 3, marginBottom: 8 },
 
   listContent: { padding: 16, paddingBottom: 120 },

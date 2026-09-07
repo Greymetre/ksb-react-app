@@ -152,6 +152,12 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
             .filter(Boolean)
             .join(', ') || null;
           setCustomerData({
+            // Start from the record as the API sent it. The hand-picked list below only
+            // reshapes what the detail view needs; anything it does not mention used to
+            // be dropped here, and since this same object is what the edit form is opened
+            // with, the form re-posted those fields blank and erased them - which is how
+            // an email typed in the CRM disappeared on the first edit from the app.
+            ...data,
             shop_image: data?.shop_photo,
             legal_name: data?.shop_name,
             billing_address: data?.address_line,
