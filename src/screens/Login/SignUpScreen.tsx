@@ -14,6 +14,7 @@ import ICEyeOff from '../../assets/svgs/eye-off';
 import ICEye from '../../assets/svgs/eye';
 import Toast from 'react-native-toast-message';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { toMobileDigits } from '../../utils/mobile';
 
 type SignUpFormValues = {
   name: string;
@@ -147,6 +148,7 @@ const SignUpScreen = ({ navigation }: { navigation: any }) => {
               handleChange,
               handleBlur,
               handleSubmit,
+              setFieldValue,
               values,
               errors,
               touched,
@@ -193,11 +195,11 @@ const SignUpScreen = ({ navigation }: { navigation: any }) => {
                 <TextInput
                   style={styles.input}
                   value={values.mobile}
-                  onChangeText={handleChange('mobile')}
+                  onChangeText={(text) => setFieldValue('mobile', toMobileDigits(text))}
                   onBlur={handleBlur('mobile')}
                   placeholder="Mobile Number"
                   placeholderTextColor="rgba(0,0,0,0.4)"
-                  keyboardType="phone-pad"
+                  keyboardType="number-pad"
                   maxLength={10}
                 />
                 {touched.mobile && errors.mobile && (

@@ -39,6 +39,7 @@ import ActionSheet, { ActionSheetRef } from 'react-native-actions-sheet';
 import Geolocation from '@react-native-community/geolocation';
 import useLocationHook from '../../api/hooks/uselocationhook';
 import { useFocusEffect } from '@react-navigation/native';
+import { toMobileDigits } from '../../utils/mobile';
 
 const { width } = Dimensions.get('window');
 
@@ -162,7 +163,7 @@ const CustomTextInput = ({
   maxLength?: any;
   editable?: any;
   onChangeText: (text: string) => void;
-  keyboardType?: 'default' | 'phone-pad' | 'email-address' | 'numeric';
+  keyboardType?: 'default' | 'phone-pad' | 'number-pad' | 'email-address' | 'numeric';
   autoCapitalize?: 'characters' | 'none' | 'sentences' | 'words'
 }) => (
   <View style={[styles.selectUser, styles.row]}>
@@ -1428,8 +1429,8 @@ const [locationLoading, setLocationLoading] = useState(false);
           <CustomTextInput
             placeholder="Primary Mobile *"
             value={formData.primaryMobile}
-            onChangeText={(text) => handleChange('primaryMobile', text)}
-            keyboardType="phone-pad"
+            onChangeText={(text) => handleChange('primaryMobile', toMobileDigits(text))}
+            keyboardType="number-pad"
             maxLength={10}
             editable={isEditMode}
           />
@@ -1437,8 +1438,8 @@ const [locationLoading, setLocationLoading] = useState(false);
           <CustomTextInput
             placeholder="Alternate Mobile (optional)"
             value={formData.alternateMobile}
-            onChangeText={(text) => handleChange('alternateMobile', text)}
-            keyboardType="phone-pad"
+            onChangeText={(text) => handleChange('alternateMobile', toMobileDigits(text))}
+            keyboardType="number-pad"
             maxLength={10}
           />
 
