@@ -1089,6 +1089,18 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
                   ));
                 })()}
               </View>
+
+              {/* Email is held for every customer type and is editable in the form,
+                  so it belongs here beside the other contact details. */}
+              <View style={styles.detailsView}>
+                <AppText color="black" size={14} family="InterMedium" opacity={0.8}>
+                  Email
+                </AppText>
+                <View style={{ height: 6 }} />
+                <AppText color="black" size={14} family="InterBold">
+                  {customerData?.email || '-'}
+                </AppText>
+              </View>
             </View>
 
             {/* Address */}
