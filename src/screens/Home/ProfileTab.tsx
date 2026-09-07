@@ -21,6 +21,8 @@ const data = [
   { id: 1, icon: require('../../assets/images/HomeTabs/myprofile.png'), name: 'My Profile' },
   // { id: 2, icon:require('../../assets/images/HomeTabs/orderHistory.png'), name: 'Order History' },
   { id: 3, icon: require('../../assets/images/HomeTabs/report.png'), name: 'Report' },
+  // Moved out of the bottom bar. Same screen, reached from here instead.
+  { id: 8, icon: require('../../assets/images/HomeTabs/mspactivity.png'), name: 'Beats' },
   // { id: 4, icon: require('../../assets/images/HomeTabs/documents.png'), name: 'Documents' },
   // { id: 5, icon: require('../../assets/images/HomeTabs/mspactivity.png'), name: 'MSP Activity' },
   { id: 6, icon: require('../../assets/images/HomeTabs/logout.png'), name: 'Logout' },
@@ -156,6 +158,10 @@ const ProfileTab = ({ handleDrawerClose }: any) => {
                   <Pressable key={item.id} style={[styles.itemVIew, styles.row]} onPress={async () => {
                     if (item?.name == "My Profile") {
                       navigation.navigate('MyProfile')
+                      handleDrawerClose()
+                    }
+                    if (item?.name == "Beats") {
+                      navigation.navigate('Beats')
                       handleDrawerClose()
                     }
                     if (item?.name == "Report") {

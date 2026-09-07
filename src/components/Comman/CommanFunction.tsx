@@ -1,4 +1,5 @@
-import { AddCustomerIcon, AdhocOrderIcon, CustomerVisitIcon, Expenses, LoyaltyIcon, TourPlanIcon } from "../../assets/svgs/HomePageSvgs";
+import { Image } from "react-native";
+import { AddCustomerIcon, AdhocOrderIcon, CustomerVisitIcon, Expenses, TourPlanIcon } from "../../assets/svgs/HomePageSvgs";
 import { colors } from "../../utils/Colors";
 
 export const dashboardTiles = [
@@ -39,8 +40,19 @@ export const dashboardTiles = [
   },
   {
     id: "6",
-    title: "Loyalty",
-    icon: <LoyaltyIcon/>,
+    // The programme is called Vriddhi - the same name the customer-facing app carries.
+    // Its own mark rather than a generic loyalty glyph, so the two read as one thing.
+    title: "VRiDDHi",
+    icon: (
+      <Image
+        source={require("../../assets/images/HomeTabs/vriddhi-mark.png")}
+        // 65 tall, the same as every other tile icon. The mark is wider than it is
+        // tall and fills its canvas edge to edge, so matching on width left it looking
+        // smaller than the rest.
+        style={{ width: 74, height: 65 }}
+        resizeMode="contain"
+      />
+    ),
     bgColor: colors.blue,
     navigateTo: "LoyaltyMenu",
   },
