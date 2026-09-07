@@ -31,7 +31,6 @@ const FORM_SECTIONS = [
   { id: 5, label: 'Photos' },
   { id: 6, label: 'Feedback' },
 ];
-const PARTICIPANT_TYPES = ['Retailer', 'Plumber', 'Mechanic', 'Other'];
 const SOCIAL_TYPES = ['Instagram', 'Facebook', 'LinkedIn', 'YouTube'];
 
 const emptyParticipant = () => ({
@@ -695,17 +694,11 @@ export default function ActivityFormScreen() {
                   />
                 </>
               )}
-              <SmallSelect
-                label="Participant Type"
-                value={p.participantType}
-                options={PARTICIPANT_TYPES}
-                disabled={readOnly}
-                onChange={(v: string) => participant(i, 'participantType', v)}
-              />
               <SmallInput
                 label="Mobile"
                 value={p.mobile}
                 disabled={readOnly}
+                phone
                 onChange={(v: string) => participant(i, 'mobile', v)}
               />
               <View style={s.field}>
@@ -806,7 +799,7 @@ export default function ActivityFormScreen() {
             <View key={x.expenseType} style={s.expense}>
               <Text style={s.bold}>
                 {x.expenseType === 'gift'
-                  ? 'Gift Amount Total'
+                  ? 'Expense Amt'
                   : x.expenseType.toUpperCase()}
               </Text>
               <View style={s.two}>
@@ -1147,15 +1140,20 @@ function SmallSelect({ label, value, options, onChange, disabled }: any) {
     </View>
   );
 }
-function SmallInput({ label, value, onChange, disabled, numeric }: any) {
+function SmallInput({ label, value, onChange, disabled, numeric, phone }: any) {
+  // A phone field takes digits only and stops at 10, so the value can never reach
+  // validation in a shape the form would reject.
+  const handleChange = (text: string) =>
+    onChange(phone ? text.replace(/\D/g, '').slice(0, 10) : text);
   return (
     <View style={s.field}>
       <Text style={s.label}>{label}</Text>
       <TextInput
         editable={!disabled}
-        keyboardType={numeric ? 'decimal-pad' : 'default'}
+        keyboardType={phone ? 'number-pad' : numeric ? 'decimal-pad' : 'default'}
+        maxLength={phone ? 10 : undefined}
         value={String(value ?? '')}
-        onChangeText={onChange}
+        onChangeText={handleChange}
         style={[s.input, disabled && s.disabled]}
       />
     </View>
