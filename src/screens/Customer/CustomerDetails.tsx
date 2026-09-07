@@ -1038,6 +1038,18 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
                 </AppText>
               </View>
 
+              {/* The same column under two names: a dealer knows it as its dealer
+                  code, a retailer as its customer code. */}
+              <View style={styles.detailsView}>
+                <AppText color="black" size={14} family="InterMedium" opacity={0.8}>
+                  {isRetailerCustomer ? 'Customer Code' : 'Dealer Code'}
+                </AppText>
+                <View style={{ height: 6 }} />
+                <AppText color="black" size={14} family="InterBold">
+                  {customerData?.distributor_code || customerData?.customer_code || '-'}
+                </AppText>
+              </View>
+
               <View style={styles.detailsView}>
                 <AppText color="black" size={14} family="InterMedium" opacity={0.8}>
                   Owner Name
