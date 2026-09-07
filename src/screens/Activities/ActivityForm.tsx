@@ -269,6 +269,29 @@ export default function ActivityFormScreen() {
   }, [form.distributorId]);
   const set = (key: string, value: any) =>
     !readOnly && setForm((x: any) => ({ ...x, [key]: value }));
+
+  // How many participants actually have a gift picked. The total gift count follows
+  // this, and moves again every time a gift is chosen or cleared - a manual + or -
+  // still stands until then, so the number can be nudged for spares.
+  const chosenGiftCount = useMemo(
+    () =>
+      form.participants.filter((p: any) => String(p.giftName ?? '').trim()).length,
+    [form.participants],
+  );
+  const syncedGiftCount = useRef<number | null>(null);
+  useEffect(() => {
+    if (loading || readOnly) return;
+    // The first pass only records where things stand. An edit's participants arrive
+    // after the first render, and syncing then would overwrite the count the
+    // activity was actually saved with.
+    if (syncedGiftCount.current === null) {
+      syncedGiftCount.current = chosenGiftCount;
+      return;
+    }
+    if (syncedGiftCount.current === chosenGiftCount) return;
+    syncedGiftCount.current = chosenGiftCount;
+    setForm((x: any) => ({ ...x, giftCount: chosenGiftCount }));
+  }, [chosenGiftCount, loading, readOnly]);
   const participant = (i: number, key: string, value: any) =>
     setForm((x: any) => ({
       ...x,
