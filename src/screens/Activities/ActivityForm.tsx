@@ -22,7 +22,17 @@ import { resolveMediaUrl } from '../../api/AxiosClient';
 
 const offline = createMMKV({ id: 'promotional-activity-drafts' });
 const today = () => new Date().toISOString().slice(0, 10);
-const GIFT_OPTIONS = ['T-Shirt', 'Cap', 'Tool Kit', 'Bag'];
+const GIFT_OPTIONS = [
+  'T-Shirt',
+  'Cap',
+  'Tool Kit',
+  'Bag',
+  'Water Bottle',
+  'Mechanic Bag',
+  'Lunch Box',
+  'Thermos Cup Set',
+  'Pipe Wrench',
+];
 const FORM_SECTIONS = [
   { id: 1, label: 'Details' },
   { id: 2, label: 'People' },
