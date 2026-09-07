@@ -37,7 +37,8 @@ import {
   useGetPincodeListAPi,
   useGetStateListApi,
 } from '../../api/query/CustomerApi';
-import { Asset, ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-native-image-picker';
+// react-native-image-picker is no longer used here: ImageCropPicker opens the
+// gallery and the camera itself, in one step, and crops in the same pass.
 import FastImage from 'react-native-fast-image';
 import Toast from 'react-native-toast-message';
 import store from '../../components/redux/Store';
@@ -48,6 +49,7 @@ import { fonts } from '../../utils/typography';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ImageCropPicker from 'react-native-image-crop-picker';
 import { useFocusEffect } from '@react-navigation/native';
+import { toMobileDigits } from '../../utils/mobile';
 
 const requestPermissions = async () => {
   if (Platform.OS !== 'android') return true;
@@ -431,67 +433,56 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
     actionSheetRef.current?.show();
   };
 
+  // Picking and cropping used to be two steps: react-native-image-picker returned a
+  // uri which was then handed to ImageCropPicker.openCropper. That chain is dead on
+  // iOS under the new architecture - openCropper is the one method in the native
+  // module that still reaches for the legacy bridge
+  // (`self.bridge moduleForName:@"ImageLoader"`), which is nil in bridgeless mode.
+  // Its callback then never fires, so the promise neither resolves nor rejects: the
+  // picture is chosen and nothing happens at all. openPicker and openCamera do the
+  // same job in one step and never touch the bridge.
+  // No permission gate of our own. ImageCropPicker asks for exactly what each route
+  // needs - camera permission for openCamera, nothing at all for openPicker on
+  // Android 11 and up, where the system photo picker needs no grant. The old gate
+  // demanded CAMERA before either route and returned false when it was refused, so
+  // on Android a person who had declined the camera could never open the gallery.
   const pickImage = async (fromCamera = false) => {
-    const hasPermission = await requestPermissions();
-    if (!hasPermission) return;
-
-    const options = {
+    const cropOptions = {
+      width: 1200,
+      height: 1200,
+      cropping: true,
+      cropperCircleOverlay: false,
+      freeStyleCropEnabled: true,
+      compressImageQuality: 0.85,
+      compressImageMaxWidth: 1200,
+      compressImageMaxHeight: 1200,
+      forceJpg: true,
       mediaType: 'photo' as const,
-      quality: 0.9,           // start with good quality
-      maxWidth: 1600,         // resize before cropping (helps performance)
-      maxHeight: 1600,
-      includeBase64: false,
     };
 
-    const picker = fromCamera ? launchCamera : launchImageLibrary;
-    picker({ mediaType: 'photo', quality: 1 }, async (response: ImagePickerResponse) => {
-      // if (response.didCancel || response.errorCode) return;
-      // if (response.assets && response.assets[0] && currentUploadField) {
-      //   handleChange(currentUploadField, response.assets[0]);
-      // }
-      // actionSheetRef.current?.hide();
-      if (response.didCancel || response.errorCode || !response.assets?.[0]) {
-        actionSheetRef.current?.hide();
-        return;
-      }
+    try {
+      const image = fromCamera
+        ? await ImageCropPicker.openCamera(cropOptions)
+        : await ImageCropPicker.openPicker(cropOptions);
 
-      const asset = response.assets[0];
-
-      try {
-        // Now open cropper with the picked image
-        const croppedImage = await ImageCropPicker.openCropper({
-          path: asset.uri!, // important: use uri from image-picker
-          width: 1200, // desired output width
-          height: 1200, // desired output height (change as needed)
-          cropping: true,
-          cropperCircleOverlay: false, // set true for profile picture (circular crop)
-          freeStyleCropEnabled: true, // allow user to freely adjust crop
-          compressImageQuality: 0.85, // final compression
-          compressImageMaxWidth: 1200,
-          compressImageMaxHeight: 1200,
-          forceJpg: true,
-          mediaType: 'photo'
+      if (currentUploadField) {
+        handleChange(currentUploadField, {
+          uri: image.path,
+          type: image.mime || 'image/jpeg',
+          fileName: image.filename || `photo_${Date.now()}.jpg`,
+          width: image.width,
+          height: image.height,
+          size: image.size,
         });
-        // croppedImage now has much smaller size
-        if (currentUploadField) {
-          handleChange(currentUploadField, {
-            uri: croppedImage.path,
-            type: croppedImage.mime || 'image/jpeg',
-            fileName: croppedImage.filename || `photo_${Date.now()}.jpg`,
-            width: croppedImage.width,
-            height: croppedImage.height,
-            size: croppedImage.size,   // you can check this before upload
-          });
-        }
-      } catch (cropError: any) {
-        if (cropError.code !== 'E_PICKER_CANCELLED') {
-          console.error('Cropping error:', cropError);
-          // Optionally show alert to user
-        }
       }
+    } catch (error: any) {
+      // Backing out of the picker or the crop screen is not a failure.
+      if (error?.code !== 'E_PICKER_CANCELLED') {
+        console.error('Image pick/crop error:', error);
+      }
+    }
 
-      actionSheetRef.current?.hide();
-    });
+    actionSheetRef.current?.hide();
   };
 
   const ImageUploadBox = ({ label, value, field, required = false, existingUri }: any) => {
@@ -869,8 +860,8 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
                     style={[styles.textInput, { flex: 1 }]}
                     placeholder="Enter 10-digit number"
                     value={mobileInput}
-                    onChangeText={setMobileInput}
-                    keyboardType="phone-pad"
+                    onChangeText={(text) => setMobileInput(toMobileDigits(text))}
+                    keyboardType="number-pad"
                     maxLength={10}
                   />
                   <TouchableOpacity
