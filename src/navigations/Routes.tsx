@@ -9,6 +9,7 @@ import TourPlanPage from '../screens/TourPlan';
 import CreatePlan from '../screens/TourPlan/CreatePlan';
 import BottomTab from './BottomTab';
 import CustomerList from '../screens/CustomerList';
+import BeatsScreen from '../screens/BeatScreen';
 import AddCustomer from '../screens/AddCustomer';
 import ExpenseReport from '../screens/ExpenseReport';
 import AttendanceReport from '../screens/AttendanceReport';
@@ -178,6 +179,11 @@ const Routes = () => {
         <Stack.Screen name='CustomerList' component={CustomerList} options={{
           headerShown: true,
           title: 'Customers'
+        }} />
+
+        <Stack.Screen name='Beats' component={BeatsScreen} options={{
+          headerShown: true,
+          title: 'Beats'
         }} />
 
         <Stack.Screen name='BeatCustomerList' component={BeatCustomerDetails} options={{

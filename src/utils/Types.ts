@@ -12,6 +12,7 @@ export type TopTabNameProps = {
 };
 
 export type RootStackParamList = {
+  Beats: undefined;
   LoginScreen: undefined;
   SignUpScreen: undefined;
   AccountPendingScreen: undefined;

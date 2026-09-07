@@ -13,7 +13,7 @@ import AppText from '../components/AppText/AppText';
 import Home from '../screens/Home';
 import OrderList from '../screens/OrderScreen';
 import ActivitiesScreen from '../screens/Activities';
-import BeatsScreen from '../screens/BeatScreen';
+import Rating from '../screens/Rating';
 import Toast from 'react-native-toast-message';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppSelector } from '../components/redux/Store';
@@ -67,7 +67,7 @@ const BottomTab = () => {
               borderRadius: 33,
             },{
               height: 66,
-              width: (SCREEN_WIDTH * 0.9) / 4 - 8,
+              width: (SCREEN_WIDTH * 0.9) / 3 - 8,
               borderRadius: 33,
                // Active circle
               justifyContent: 'center',
@@ -89,7 +89,7 @@ const BottomTab = () => {
           <View
             style={{
               height: 66,
-              width: (SCREEN_WIDTH * 0.9) / 4 - 8,
+              width: (SCREEN_WIDTH * 0.9) / 3 - 8,
               borderRadius: 33,
               backgroundColor: focused ? 'rgba(0,0,0,0.10)' : 'transparent', // Active circle
               justifyContent: 'center',
@@ -135,16 +135,16 @@ const BottomTab = () => {
           ),
         }}
       />
-      <Tab.Screen name='Beats' component={BeatsScreen} options={{
+      <Tab.Screen name='Rating' component={Rating} options={{
         headerShown: true,
-        title: 'Beats',
+        title: 'Rating',
         tabBarIcon: ({ focused }) => (
           <View
             style={{
               height: 66,
-              width: (SCREEN_WIDTH * 0.9) / 4 - 8,
+              width: (SCREEN_WIDTH * 0.9) / 3 - 8,
               borderRadius: 33,
-              backgroundColor: focused ? 'rgba(0,0,0,0.10)' : 'transparent', // Active circle
+              backgroundColor: focused ? 'rgba(0,0,0,0.10)' : 'transparent',
               justifyContent: 'center',
               alignItems: 'center',
               marginTop: 28,
@@ -152,7 +152,7 @@ const BottomTab = () => {
             }}
           >
             {focused ? <ActiveTaskIcon /> : <TaskIcon />}
-            <AppText color={colors.blue} family={focused ? "InterRegular" : 'InterMedium'} size={13}>Beats</AppText>
+            <AppText color={colors.blue} family={focused ? "InterRegular" : 'InterMedium'} size={13}>Rating</AppText>
           </View>
         ),
       }} />
@@ -164,7 +164,7 @@ const BottomTab = () => {
           <View
             style={{
               height: 66,
-              width: (SCREEN_WIDTH * 0.9) / 4 - 8,
+              width: (SCREEN_WIDTH * 0.9) / 3 - 8,
               borderRadius: 33,
               backgroundColor: focused ? 'rgba(0,0,0,0.10)' : 'transparent', // Active circle
               justifyContent: 'center',
