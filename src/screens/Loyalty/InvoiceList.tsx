@@ -456,19 +456,20 @@ const InvoiceList = ({ navigation }: any) => {
             )}
           </View>
         </View>
-      </Modal>
 
-      {/* Layered above the details sheet, so closing a document returns to the
-          invoice rather than out of it. */}
-      <AttachmentViewer
-        files={(selected?.attachments ?? []).map(file => ({
-          url: file.url,
-          fileName: file.fileName || undefined,
-          mimeType: file.mimeType || undefined,
-        }))}
-        index={attachmentIndex}
-        onClose={() => setAttachmentIndex(null)}
-      />
+        {/* Inside the details modal on purpose. iOS will not present a second modal
+            that sits outside the one already on screen - the state changed and
+            nothing appeared. */}
+          <AttachmentViewer
+            files={(selected?.attachments ?? []).map(file => ({
+              url: file.url,
+              fileName: file.fileName || undefined,
+              mimeType: file.mimeType || undefined,
+            }))}
+            index={attachmentIndex}
+            onClose={() => setAttachmentIndex(null)}
+          />
+      </Modal>
     </View>
   );
 };
