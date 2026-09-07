@@ -881,6 +881,14 @@ console.log(billingPincode,'sksk');
     return count;
   };
 
+  // The shop image is marked required in the form and is now required to submit, on
+  // a new record and on an edit alike. An edit keeps the stored photo on the record
+  // rather than in formData, so a customer that already has one is not made to
+  // photograph the shop again.
+  const hasShopImage = Boolean(
+    formData.shopImage?.uri || (isEditMode && route?.params?.customer?.shop_image),
+  );
+
   const isFormValid =
     getBasicInfoCount() === 5 &&
     getContactCount() === 3 &&
@@ -891,7 +899,8 @@ console.log(billingPincode,'sksk');
     getBankingFinancialCount() === 7 &&
     getSalesPerformanceCount() === 5 &&
     getAdditionalInfoCount() === 7 &&
-    getOperationalCapacityCount() === 6;
+    getOperationalCapacityCount() === 6 &&
+    hasShopImage;
 
   const validateEmail = (email: string): string => {
     if (!email.trim()) return '';

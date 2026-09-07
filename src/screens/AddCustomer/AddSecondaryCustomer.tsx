@@ -563,10 +563,16 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
 
   const requiredAdditionalCount = isDealer ? 1 : 2;
 
+  // On an edit the stored photo is loaded back into formData as a uri, so this holds
+  // for a new customer and an existing one without asking for the shop to be
+  // photographed again.
+  const hasShopPhoto = Boolean(formData.shop_photo?.uri);
+
   const isFormValid =
     getBasicCount() === 3 &&
     getAddressCount() === 5 &&
     getAdditionalCount() === requiredAdditionalCount &&
+    hasShopPhoto &&
     isBankInfoValid();
 
   const handleChange = (field: string, value: any) => {
@@ -785,6 +791,10 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
     // Additional
     if (!isDealer && !formData.distributor_name) return "Distributor is required";
     if (!formData.beat_id) return "Beat is required";
+
+    // Attachments. On an edit the stored photo comes back as a uri, so a record that
+    // already has one does not have to be photographed again.
+    if (!formData.shop_photo?.uri) return "Shop Photo is required";
 
     // Bank validation
     if (!isBankInfoValid()) return "Bank account numbers do not match";
@@ -1130,10 +1140,10 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
             <AccordionSection title="Attachments">
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
                 <ImageUploadBox
-                  label={`Shop Photo ${"\n"}(optional)`}
+                  label="Shop Photo"
                   field="shop_photo"
                   value={formData.shop_photo}
-                  // required
+                  required
                   existingUri={isEdit ? formData.shop_photo?.uri : null}
                 />
                 <ImageUploadBox
