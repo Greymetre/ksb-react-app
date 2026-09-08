@@ -136,6 +136,11 @@ const SchemeList = () => {
                     <AppText size={11.5} family="InterMedium" color="black" opacity={0.7}>
                       {`${shortDate(item.startDate)} – ${shortDate(item.endDate)}`}
                     </AppText>
+                    {item.note ? (
+                      <AppText size={11} family="InterMedium" color="black" opacity={0.5} numLines={3} lineHeight={15}>
+                        {item.note}
+                      </AppText>
+                    ) : null}
                   </View>
                   {item.isLive ? (
                     <View style={styles.daysPill}>
@@ -169,6 +174,11 @@ const SchemeList = () => {
                       <AppText size={11.5} color="black" opacity={0.5}>
                         {`${shortDate(detail.scheme.startDate)} – ${shortDate(detail.scheme.endDate)} · ${areaLine(detail.scheme)}`}
                       </AppText>
+                      {detail.scheme.note ? (
+                        <AppText size={11.5} family="InterMedium" color="black" opacity={0.55} lineHeight={16}>
+                          {detail.scheme.note}
+                        </AppText>
+                      ) : null}
                     </View>
                     <View style={[styles.statusPill, { backgroundColor: SCHEME_TONE[detail.scheme.status].background }]}>
                       <AppText size={11} family="InterSemiBold" customColor={SCHEME_TONE[detail.scheme.status].text}>

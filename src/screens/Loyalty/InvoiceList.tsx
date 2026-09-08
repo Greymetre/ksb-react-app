@@ -383,6 +383,14 @@ const InvoiceList = ({ navigation }: any) => {
                     </View>
                   ))}
 
+                  {selected.schemeNote ? (
+                    <View style={{ marginTop: -4, marginBottom: 10 }}>
+                      <AppText size={11.5} family="InterMedium" color="black" opacity={0.5} align="right" lineHeight={16}>
+                        {selected.schemeNote}
+                      </AppText>
+                    </View>
+                  ) : null}
+
                   {selected.approvalRemark ? (
                     <View style={{ marginTop: 14 }}>
                       <AppText size={12} color="black" opacity={0.45}>Remark</AppText>

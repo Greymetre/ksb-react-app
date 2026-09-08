@@ -20,6 +20,8 @@ export type SchemeCard = {
   id: number;
   name: string;
   code: string | null;
+  /** A couple of lines from the scheme creator, shown under the dates. */
+  note: string | null;
   walletType: string;
   basedOn: string | null;
   startDate: string;
@@ -65,6 +67,7 @@ const toCard = (row: any): SchemeCard => {
     id: number(row?.id),
     name: text(row?.name),
     code: nullableText(row?.code),
+    note: nullableText(row?.scheme_note),
     walletType: text(row?.wallet_type) || 'Regular',
     basedOn: nullableText(row?.based_on),
     startDate: text(row?.start_date),

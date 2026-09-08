@@ -13,6 +13,7 @@ type SchemeRow = {
   id: number;
   name: string;
   code?: string | null;
+  scheme_note?: string | null;
   tag?: string | null;
   based_on?: string | null;
   start_date?: string | null;
@@ -116,6 +117,14 @@ const RetailerLoyalty = ({ navigation, route }: any) => {
             </View>
           ) : null}
         </View>
+
+        {item.scheme_note ? (
+          <View style={{ marginTop: 8 }}>
+            <AppText size={11.5} color="#64748B" family="InterMedium" numLines={3} lineHeight={16}>
+              {item.scheme_note}
+            </AppText>
+          </View>
+        ) : null}
 
         <View style={s.statGrid}>
           <View style={s.statCell}>

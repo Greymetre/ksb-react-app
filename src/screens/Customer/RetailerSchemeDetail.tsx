@@ -9,7 +9,7 @@ import { rw } from '../../utils/responsive';
 import { shadowStyle } from '../../utils/typography';
 import { loyaltyStyles as s, money, points, shortDate, themeFor } from './loyaltyStyles';
 
-type Slab = { tier_name?: string | null; value_from: number; value_to: number; reward_value: number; is_achieved: boolean };
+type Slab = { tier_name?: string | null; value_from: number; value_to: number; reward_value: number; reward_label?: string | null; is_achieved: boolean };
 type SchemeInvoice = {
   id: number; invoice_number: string; invoice_date: string; amount: number;
   approval_status: number; status_label: string; points_earned: number; points_expected: number;
@@ -101,7 +101,7 @@ const RetailerSchemeDetail = ({ route }: any) => {
           {scheme.code ? (
             <View style={{ marginTop: 3 }}>
               <AppText size={12.5} color="rgba(255,255,255,0.85)" family="InterMedium" lineHeight={18}>
-                {scheme.code} · {scheme.tag} · {scheme.based_on === 'Percentage' ? '% based' : 'Value based'}
+                {scheme.code} · {scheme.tag} · {scheme.based_on === 'Value + Percentage' ? 'Value & % based' : scheme.based_on === 'Percentage' ? '% based' : 'Value based'}
               </AppText>
             </View>
           ) : null}
@@ -110,6 +110,13 @@ const RetailerSchemeDetail = ({ route }: any) => {
               {shortDate(scheme.start_date)} – {shortDate(scheme.end_date)}
             </AppText>
           </View>
+          {scheme.scheme_note ? (
+            <View style={{ marginTop: 6 }}>
+              <AppText size={12} color="rgba(255,255,255,0.9)" family="InterMedium" lineHeight={17}>
+                {scheme.scheme_note}
+              </AppText>
+            </View>
+          ) : null}
 
           <View style={s.heroStats}>
             <View style={s.heroStat}>
@@ -218,7 +225,9 @@ const RetailerSchemeDetail = ({ route }: any) => {
               </View>
               <View style={[s.tagPill, { backgroundColor: slab.is_achieved ? '#E7F7EF' : '#F1F5F9' }]}>
                 <AppText size={12} color={slab.is_achieved ? '#0B6B43' : '#475569'} family="InterBold" lineHeight={17}>
-                  {scheme.based_on === 'Percentage' ? `${slab.reward_value}%` : money(slab.reward_value)}
+                  {/* The server labels each slab: a mixed scheme pays some in rupees and
+                      some as a percentage, so the scheme alone cannot say which. */}
+                  {slab.reward_label || (scheme.based_on === 'Percentage' ? `${slab.reward_value}%` : money(slab.reward_value))}
                 </AppText>
               </View>
             </View>

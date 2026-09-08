@@ -43,6 +43,7 @@ export type InvoiceListItem = {
   mobile: string;
   dealerName: string | null;
   schemeName: string | null;
+  schemeNote: string | null;
   createdByName: string | null;
   createdAt: string | null;
 };
@@ -140,6 +141,7 @@ const toListItem = (row: any): InvoiceListItem => ({
   mobile: text(row?.mobile),
   dealerName: nullableText(row?.dealer_name),
   schemeName: nullableText(row?.scheme_name),
+  schemeNote: nullableText(row?.scheme_note),
   createdByName: nullableText(row?.created_by_name),
   createdAt: nullableText(row?.created_at),
 });
