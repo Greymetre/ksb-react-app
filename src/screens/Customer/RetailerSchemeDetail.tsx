@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Toast from 'react-native-toast-message';
 import AppText from '../../components/AppText/AppText';
@@ -8,11 +8,25 @@ import { colors } from '../../utils/Colors';
 import { rw } from '../../utils/responsive';
 import { shadowStyle } from '../../utils/typography';
 import { loyaltyStyles as s, money, points, shortDate, themeFor } from './loyaltyStyles';
+import AttachmentViewer from '../../components/AttachmentViewer';
 
-type Slab = { tier_name?: string | null; value_from: number; value_to: number; reward_value: number; reward_label?: string | null; is_achieved: boolean };
+type Slab = { tier_name?: string | null; value_from: number; value_to: number; reward_value: number; reward_type?: string | null; reward_label?: string | null; is_achieved: boolean };
 type SchemeInvoice = {
   id: number; invoice_number: string; invoice_date: string; amount: number;
   approval_status: number; status_label: string; points_earned: number; points_expected: number;
+};
+
+/**
+ * Only used against a server that does not yet write the reward out itself. The type
+ * has to match exactly: a mixed scheme's own Based On reads "Value + Percentage",
+ * which contains the word and would put a % on every slab. When that is all we have,
+ * the figure is shown bare rather than given the wrong unit.
+ */
+const slabFallback = (type: string | null | undefined, value: number) => {
+  const kind = (type || '').trim().toLowerCase();
+  if (kind === 'percentage') return `${value}%`;
+  if (kind === 'value + percentage') return String(value);
+  return money(value);
 };
 
 const statusTint = (status: number) => {
@@ -29,6 +43,8 @@ const RetailerSchemeDetail = ({ route }: any) => {
 
   const [retailer, setRetailer] = useState<any>(null);
   const [scheme, setScheme] = useState<any>(null);
+  // The brochure opens in the viewer an invoice attachment already uses.
+  const [brochureIndex, setBrochureIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -116,6 +132,11 @@ const RetailerSchemeDetail = ({ route }: any) => {
                 {scheme.scheme_note}
               </AppText>
             </View>
+          ) : null}
+          {scheme.brochure_url ? (
+            <Pressable style={local.brochure} onPress={() => setBrochureIndex(0)}>
+              <AppText size={12} family="InterSemiBold" color={colors.white}>View Scheme PDF</AppText>
+            </Pressable>
           ) : null}
 
           <View style={s.heroStats}>
@@ -227,7 +248,7 @@ const RetailerSchemeDetail = ({ route }: any) => {
                 <AppText size={12} color={slab.is_achieved ? '#0B6B43' : '#475569'} family="InterBold" lineHeight={17}>
                   {/* The server labels each slab: a mixed scheme pays some in rupees and
                       some as a percentage, so the scheme alone cannot say which. */}
-                  {slab.reward_label || (scheme.based_on === 'Percentage' ? `${slab.reward_value}%` : money(slab.reward_value))}
+                  {slab.reward_label || slabFallback(slab.reward_type ?? scheme.based_on, slab.reward_value)}
                 </AppText>
               </View>
             </View>
@@ -279,6 +300,14 @@ const RetailerSchemeDetail = ({ route }: any) => {
           );
         })}
       </View>
+
+      <AttachmentViewer
+        files={scheme.brochure_url
+          ? [{ url: scheme.brochure_url, fileName: 'Scheme brochure', mimeType: 'application/pdf' }]
+          : []}
+        index={brochureIndex}
+        onClose={() => setBrochureIndex(null)}
+      />
     </ScrollView>
   );
 };
@@ -291,6 +320,13 @@ const Stat = ({ label, value, tone }: { label: string; value: string; tone?: str
 );
 
 const local = StyleSheet.create({
+  // The scheme brochure button, on the dark hero, so it borrows the same translucent
+  // white the code and dates above it use rather than introducing a new colour.
+  brochure: {
+    marginTop: 10, alignSelf: 'flex-start', borderRadius: 10,
+    paddingHorizontal: 14, paddingVertical: 9,
+    backgroundColor: 'rgba(255,255,255,0.18)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.35)',
+  },
   section: { paddingHorizontal: rw(18), marginTop: 12 },
   block: {
     backgroundColor: colors.white, borderRadius: rw(16), marginHorizontal: rw(14), marginTop: 12,

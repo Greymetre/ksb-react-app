@@ -68,6 +68,14 @@ export const schemeStyles = StyleSheet.create({
   statRow: { flexDirection: 'row', gap: 10, marginTop: 14 },
   statCard: { flex: 1, backgroundColor: '#F8FAFC', borderRadius: 12, paddingVertical: 12, paddingHorizontal: 12 },
   amountRow: { flexDirection: 'row', gap: 10, marginTop: 12, backgroundColor: '#F8FAFC', borderRadius: 12, padding: 14 },
+  // The scheme brochure button, at the foot of the detail sheet.
+  brochure: {
+    marginTop: 20,
+    borderRadius: 12,
+    paddingVertical: 13,
+    alignItems: 'center',
+    backgroundColor: colors.blue,
+  },
   slabRow: {
     flexDirection: 'row',
     alignItems: 'center',

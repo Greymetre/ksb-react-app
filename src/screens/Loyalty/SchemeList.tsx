@@ -3,9 +3,10 @@ import { ActivityIndicator, FlatList, Modal, Pressable, RefreshControl, ScrollVi
 import Toast from 'react-native-toast-message';
 import AppText from '../../components/AppText/AppText';
 import { colors } from '../../utils/Colors';
-import { SCHEME_TONE, SchemeCard, SchemeDetail, schemeApi } from '../../api/schemeApi';
+import { SCHEME_TONE, SchemeCard, SchemeDetail, schemeApi, slabRewardText } from '../../api/schemeApi';
 import { apiErrorMessage } from '../../utils/misc';
 import { schemeStyles as styles } from './styles';
+import AttachmentViewer from '../../components/AttachmentViewer';
 
 const money = (value: number) => `₹${Number(value || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
 
@@ -34,6 +35,9 @@ const SchemeList = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [detail, setDetail] = useState<SchemeDetail | null>(null);
+  // The brochure opens in the same viewer an invoice attachment uses. null keeps it
+  // closed; 0 opens it on the one file there is.
+  const [brochureIndex, setBrochureIndex] = useState<number | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
   const load = useCallback(async () => {
@@ -230,12 +234,30 @@ const SchemeList = () => {
                               ? `${money(slab.fromAmount)} – ${money(slab.toAmount)}`
                               : `${money(slab.fromAmount)} and above`}
                           </AppText>
-                          <AppText size={13} family="InterSemiBold" customColor={colors.blue}>{slab.value}</AppText>
+                          <AppText size={13} family="InterSemiBold" customColor={colors.blue}>{slabRewardText(slab)}</AppText>
                         </View>
                       ))}
                     </View>
                   ) : null}
+
+                  {detail.scheme.brochureUrl ? (
+                    <Pressable style={styles.brochure} onPress={() => setBrochureIndex(0)}>
+                      <AppText size={12.5} family="InterSemiBold" customColor="#FFFFFF">
+                        View Scheme PDF
+                      </AppText>
+                    </Pressable>
+                  ) : null}
                 </ScrollView>
+
+                {/* Inside the sheet's own modal: iOS will not present a second modal
+                    that sits outside the one already on screen. */}
+                <AttachmentViewer
+                  files={detail.scheme.brochureUrl
+                    ? [{ url: detail.scheme.brochureUrl, fileName: 'Scheme brochure', mimeType: 'application/pdf' }]
+                    : []}
+                  index={brochureIndex}
+                  onClose={() => setBrochureIndex(null)}
+                />
               </>
             )}
           </View>
