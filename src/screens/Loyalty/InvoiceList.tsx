@@ -76,9 +76,9 @@ const InvoiceList = ({ navigation }: any) => {
   const [detailLoading, setDetailLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [canCreate, setCanCreate] = useState(false);
-  // Counted through the retailer listing itself rather than the invoice summary, so this
-  // number is by definition the list the card opens - no second scope to drift from.
-  const [kycPending, setKycPending] = useState(0);
+  // The four KYC stages of the retailers this user can see, counted by the server from
+  // the same index the CRM's KYC screen reads.
+  const [kycSummary, setKycSummary] = useState<Record<string, number>>({});
 
   const load = useCallback(
     async (nextPage: number, mode: 'replace' | 'append') => {
@@ -101,18 +101,17 @@ const InvoiceList = ({ navigation }: any) => {
     [search, status],
   );
 
-  // One row is enough: only the total is read. Asked for separately from the invoice
-  // list because it counts retailers, not invoices, and must not move with the status
-  // chips above it.
-  const loadKycPending = useCallback(async () => {
+  // Asked for separately from the invoice list because it counts retailers, not invoices,
+  // and must not move with the status chips above it.
+  const loadKycSummary = useCallback(async () => {
     try {
-      const response = await axiosClient.get(`${API_ENDPOINT.SECONDARY_CUSTOMER_GET}RETAILER`, {
-        params: { page: 1, per_page: 1, kyc: 'pending' },
+      const response = await axiosClient.get(`${API_ENDPOINT.SECONDARY_CUSTOMER}/kyc-summary`, {
+        params: { type: 'RETAILER' },
       });
-      setKycPending(Number(response?.data?.data?.total) || 0);
+      setKycSummary(response?.data?.data ?? {});
     } catch {
       // A count that cannot be fetched is not worth an error toast over the list.
-      setKycPending(0);
+      setKycSummary({});
     }
   }, []);
 
@@ -128,8 +127,8 @@ const InvoiceList = ({ navigation }: any) => {
   useFocusEffect(
     useCallback(() => {
       load(1, 'replace');
-      loadKycPending();
-    }, [load, loadKycPending]),
+      loadKycSummary();
+    }, [load, loadKycSummary]),
   );
 
   const openDetail = useCallback(async (invoice: InvoiceListItem) => {
@@ -179,26 +178,34 @@ const InvoiceList = ({ navigation }: any) => {
     );
   }, [load, selected]);
 
-  // The first three count invoices; the last counts retailers, and is the only card
-  // that leads anywhere - it opens the same retailers it counted.
   const summaryCards = useMemo(
     () => [
       { label: 'Invoices', value: String(summary?.total ?? 0), tone: colors.blue, onPress: undefined },
       { label: 'Pending', value: String((summary?.pending ?? 0) + (summary?.hold ?? 0)), tone: '#D97706', onPress: undefined },
       { label: 'Approved', value: String(summary?.approved ?? 0), tone: '#16A34A', onPress: undefined },
-      {
-        label: 'KYC Pending',
-        value: String(kycPending),
-        tone: '#DC2626',
-        onPress: () =>
-          navigation?.navigate('CustomerList', {
-            type: 'RETAILER',
-            customerTypeName: 'Retailer',
-            kyc: 'pending',
-          }),
-      },
     ],
-    [summary, kycPending, navigation],
+    [summary],
+  );
+
+  // The CRM's four KYC stages. Each opens the retailers it counted.
+  const kycCards = useMemo(
+    () => [
+      { stage: 'approved', label: 'Fully Approved', count: kycSummary.approved, tone: '#16A34A' },
+      { stage: 'complete_pending', label: 'Awaiting Review', count: kycSummary.complete_pending, tone: '#D97706' },
+      { stage: 'partial', label: 'Partly Submitted', count: kycSummary.partial, tone: '#2563EB' },
+      { stage: 'none', label: 'Not Started', count: kycSummary.not_started, tone: '#64748B' },
+    ].map(card => ({
+      label: card.label,
+      value: String(card.count ?? 0),
+      tone: card.tone,
+      onPress: () =>
+        navigation?.navigate('CustomerList', {
+          type: 'RETAILER',
+          customerTypeName: 'Retailer',
+          kyc: card.stage,
+        }),
+    })),
+    [kycSummary, navigation],
   );
 
   const canLoadMore = items.length < total && !loadingMore && !loading;
@@ -241,6 +248,23 @@ const InvoiceList = ({ navigation }: any) => {
 
       <View style={styles.summaryRow}>
         {summaryCards.map(card => (
+          <Pressable
+            key={card.label}
+            disabled={!card.onPress}
+            onPress={card.onPress}
+            style={({ pressed }) => [styles.summaryCard, pressed && card.onPress ? { opacity: 0.6 } : null]}>
+            <View style={[styles.summaryAccent, { backgroundColor: card.tone }]} />
+            <AppText size={19} family="InterSemiBold" color="black">{card.value}</AppText>
+            <AppText size={11} color="black" opacity={0.5}>{card.label}</AppText>
+          </Pressable>
+        ))}
+      </View>
+
+      <AppText size={12} family="InterSemiBold" color="black" opacity={0.6} style={{ marginHorizontal: 16, marginTop: 4 }}>
+        Retailer KYC
+      </AppText>
+      <View style={styles.summaryRow}>
+        {kycCards.map(card => (
           <Pressable
             key={card.label}
             disabled={!card.onPress}

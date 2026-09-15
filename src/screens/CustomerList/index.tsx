@@ -17,7 +17,8 @@ import store from '../../components/redux/Store';
 import axios from 'axios';
 import useLocationHook from '../../api/hooks/uselocationhook';
 import { current } from '@reduxjs/toolkit';
-import { BASE_URL } from "../../api/AxiosClient";
+import axiosClient, { BASE_URL } from "../../api/AxiosClient";
+import { API_ENDPOINT } from '../../api/ApiUrls';
 const CustomerList = ({ route }: any) => {
   const [focusText, setFocusText] = useState(false);
   // Start in loading state so the empty-state message never flashes before
@@ -57,6 +58,29 @@ const CustomerList = ({ route }: any) => {
   // KYC. Pre-set when the Loyalty invoice tab opened this screen from its KYC tile, so
   // the list arrives already showing exactly the retailers that count referred to.
   const [kycFilter, setKycFilter] = useState<string | null>(route?.params?.kyc ?? null);
+  // Counts for the four stages, over the same customers and filters as the list.
+  const [kycCounts, setKycCounts] = useState<Record<string, number>>({});
+  const KYC_STAGES = [
+    { key: null, label: 'All', countKey: 'total' },
+    { key: 'approved', label: 'Fully Approved', countKey: 'approved' },
+    { key: 'complete_pending', label: 'Awaiting Review', countKey: 'complete_pending' },
+    { key: 'partial', label: 'Partly Submitted', countKey: 'partial' },
+    { key: 'none', label: 'Not Started', countKey: 'not_started' },
+  ];
+
+  const fetchKycCounts = async () => {
+    if (!route?.params?.type || route?.params?.beatId) return;
+    try {
+      const params: any = { type: route.params.type };
+      if (selectedStatus && selectedStatus !== 'All') params.status = selectedStatus;
+      if (selectedCity?.city_name) params.city_name = selectedCity.city_name;
+      if (selectedUser?.id) params.for_user_id = selectedUser.id;
+      const response = await axiosClient.get(`${API_ENDPOINT.SECONDARY_CUSTOMER}/kyc-summary`, { params });
+      setKycCounts(response?.data?.data ?? {});
+    } catch {
+      setKycCounts({});
+    }
+  };
 
   // Add these near your other states
   const [showUserModal, setShowUserModal] = useState(false);
@@ -85,6 +109,7 @@ const CustomerList = ({ route }: any) => {
         fetchCustomers(1);
       }
       fetchPunchInStatus()
+      fetchKycCounts()
       // setSelectedCity(null)
       // setSelectedStatus('All')
       // setSearchText('')
@@ -436,25 +461,33 @@ const CustomerList = ({ route }: any) => {
         }
 
         {
-          route?.params?.type && (
-            <Pressable
-              style={[styles.kycChip, kycFilter === 'pending' && styles.kycChipActive]}
-              onPress={() => {
-                const next = kycFilter === 'pending' ? null : 'pending';
-                setKycFilter(next);
-                setLoader1(true);
-                setPage(1);
-              }}
-            >
-              <AppText
-                size={12}
-                family="InterMedium"
-                color={kycFilter === 'pending' ? 'white' : 'black'}
-                opacity={kycFilter === 'pending' ? 1 : 0.6}
-              >
-                KYC Pending
-              </AppText>
-            </Pressable>
+          route?.params?.type && !route?.params?.beatId && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0 }} contentContainerStyle={{ gap: 8, paddingRight: 8 }}>
+              {KYC_STAGES.map(stage => {
+                const active = kycFilter === stage.key;
+                return (
+                  <Pressable
+                    key={stage.label}
+                    style={[styles.kycChip, active && styles.kycChipActive]}
+                    onPress={() => {
+                      if (active) return;
+                      setKycFilter(stage.key);
+                      setLoader1(true);
+                      setPage(1);
+                    }}
+                  >
+                    <AppText
+                      size={12}
+                      family="InterMedium"
+                      color={active ? 'white' : 'black'}
+                      opacity={active ? 1 : 0.6}
+                    >
+                      {stage.label} ({kycCounts[stage.countKey] ?? 0})
+                    </AppText>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
           )
         }
 

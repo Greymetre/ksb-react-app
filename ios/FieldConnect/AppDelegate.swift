@@ -24,15 +24,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
     UNUserNotificationCenter.current().delegate = self
 
-    window = UIWindow(frame: UIScreen.main.bounds)
-
-    factory.startReactNative(
-      withModuleName: "FieldConnect",
-      in: window,
-      launchOptions: launchOptions
-    )
-
+    // The window is created by SceneDelegate: apps built with the iOS 27 SDK must use the
+    // UIScene life cycle and are stopped at launch if the app delegate makes the window.
     return true
+  }
+
+  func application(
+    _ application: UIApplication,
+    configurationForConnecting connectingSceneSession: UISceneSession,
+    options: UIScene.ConnectionOptions
+  ) -> UISceneConfiguration {
+    let configuration = UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+    configuration.delegateClass = SceneDelegate.self
+    return configuration
   }
 
   func userNotificationCenter(
@@ -45,6 +49,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     } else {
       completionHandler([.alert, .sound])
     }
+  }
+}
+
+class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+  var window: UIWindow?
+
+  func scene(
+    _ scene: UIScene,
+    willConnectTo session: UISceneSession,
+    options connectionOptions: UIScene.ConnectionOptions
+  ) {
+    guard let windowScene = scene as? UIWindowScene,
+          let appDelegate = UIApplication.shared.delegate as? AppDelegate,
+          let factory = appDelegate.reactNativeFactory else { return }
+
+    let window = UIWindow(windowScene: windowScene)
+    self.window = window
+    // Some libraries still look for the window on the app delegate.
+    appDelegate.window = window
+
+    factory.startReactNative(
+      withModuleName: "FieldConnect",
+      in: window,
+      launchOptions: nil
+    )
   }
 }
 

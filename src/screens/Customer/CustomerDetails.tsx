@@ -818,7 +818,7 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
                   </View>
                   <View style={styles.detailsSecondRow}>
                     <AppText color="black" size={14} family="InterMedium" opacity={0.8}>
-                      Customer Code
+                      Dealer Code
                     </AppText>
                     <View style={{ height: 10 }} />
                     <AppText color="black" size={14} family="InterBold">
@@ -1038,15 +1038,16 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
                 </AppText>
               </View>
 
-              {/* The same column under two names: a dealer knows it as its dealer
-                  code, a retailer as its customer code. */}
+              {/* Always the dealer's code. A retailer has none of its own, and the server
+                  reads this from the dealer's own record rather than a copy kept here, so
+                  it cannot go stale when the retailer is moved to another dealer. */}
               <View style={styles.detailsView}>
                 <AppText color="black" size={14} family="InterMedium" opacity={0.8}>
-                  {isRetailerCustomer ? 'Customer Code' : 'Dealer Code'}
+                  Dealer Code
                 </AppText>
                 <View style={{ height: 6 }} />
                 <AppText color="black" size={14} family="InterBold">
-                  {customerData?.distributor_code || customerData?.customer_code || '-'}
+                  {customerData?.distributor_code || '-'}
                 </AppText>
               </View>
 
