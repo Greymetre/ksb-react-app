@@ -19,7 +19,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { rw } from '../../utils/responsive';
-import { colors } from '../../utils/Colors';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import AppText from '../../components/AppText/AppText';
 import { MinusIcon, PlusIcon, UploadIcon } from '../../assets/svgs/HomePageSvgs';
 import { styles } from './styles'; // ← your styles file
@@ -50,6 +50,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import ImageCropPicker from 'react-native-image-crop-picker';
 import { useFocusEffect } from '@react-navigation/native';
 import { toMobileDigits } from '../../utils/mobile';
+import { BANK_ACCOUNT_TYPES, normalizeBankAccountType } from '../../utils/bankAccountType';
 
 const requestPermissions = async () => {
   if (Platform.OS !== 'android') return true;
@@ -745,7 +746,7 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
         pan_number: existingCustomer.pan_number || '',
         aadhar_no: existingCustomer.aadhar_no || existingCustomer.aadhaar_number || '',
         aadhar_attachment: existingCustomer.aadhar_attachment ? { uri: resolveMediaUrl(existingCustomer.aadhar_attachment) } : null,
-        bank_account_type: existingCustomer.bank_account_type || '',
+        bank_account_type: normalizeBankAccountType(existingCustomer.bank_account_type),
         bank_account_number: existingCustomer.bank_account_number || '',
         bank_account_number_confirm: existingCustomer.bank_account_number || '',
         bank_name: existingCustomer.bank_name || '',
@@ -807,7 +808,7 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
     <SafeAreaView style={[styles.container, { paddingBottom: 10 }]} edges={['bottom']}>
       <View style={{ flex: 1, backgroundColor: '#fff' }}>
         <View style={{ backgroundColor: '#E0F2FE', padding: 16, alignItems: 'center' }}>
-          <AppText size={16} family="InterSemiBold" color={colors.blue}>
+          <AppText size={16} family="InterSemiBold" color={colors.navy}>
             Type: {type}
           </AppText>
         </View>
@@ -877,7 +878,7 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
                   <TouchableOpacity
                     onPress={addMobileNumber}
                     style={{
-                      backgroundColor: colors.blue,
+                      backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
                       paddingHorizontal: 16,
                       paddingVertical: 12,
                       borderRadius: 8,
@@ -1123,10 +1124,7 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
               />
               <Dropdown
                 style={[styles.selectUser, { padding: 14, marginTop: 12 }]}
-                data={[
-                  { label: 'Savings', value: 'SAVINGS' },
-                  { label: 'Current', value: 'CURRENT' },
-                ]}
+                data={BANK_ACCOUNT_TYPES}
                 value={formData.bank_account_type}
                 onChange={(item) => handleChange('bank_account_type', item.value)}
                 labelField="label"
@@ -1186,7 +1184,7 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
 
             <Pressable
               style={{
-                backgroundColor: isFormValid ? colors.blue : '#94a3b8',
+                backgroundColor: isFormValid ? colors.navy : '#94a3b8', experimental_backgroundImage: isFormValid ? BRAND_GRADIENT : undefined,
                 padding: 16,
                 borderRadius: 12,
                 alignItems: 'center',
@@ -1219,7 +1217,7 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
               <TouchableOpacity
                 style={{
                   flex: 1,
-                  backgroundColor: colors.blue,
+                  backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
                   padding: 16,
                   borderRadius: 12,
                   alignItems: 'center',
@@ -1241,7 +1239,7 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
                 }}
                 onPress={() => pickImage(false)}
               >
-                <AppText color={colors.blue}>Choose from Gallery</AppText>
+                <AppText color={colors.navy}>Choose from Gallery</AppText>
               </TouchableOpacity>
             </View>
           </View>

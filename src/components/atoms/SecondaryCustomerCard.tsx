@@ -18,7 +18,7 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
-import { colors } from '../../utils/Colors';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { fonts, shadowStyle } from '../../utils/typography';
 import { AddToCartIcon, ArrowCardDownIcon, CheckIcon, CrossIconCard, EmailIcon, EyeIcon, LocationIcon, PhoneICon, WhatsappICon } from '../../assets/svgs/HomePageSvgs';
 import AppText from '../AppText/AppText';
@@ -385,7 +385,7 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
 
       {
         type && (
-          <AppText size={18} color="#395299" underline='underline' family="InterBold">
+          <AppText size={18} color="#8A5A08" underline='underline' family="InterBold">
             Currently Checkin at
           </AppText>
         )
@@ -459,7 +459,7 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
       <View style={styles.buttonRow}>
         <TouchableOpacity style={[styles.viewButton, { width: '25%' }]} onPress={() => navigation?.navigate("CustomerDetails", { item: item, type: "secondary", isPunchedIn: isPunchedIn })}>
           <EyeIcon />
-          <AppText size={14} color="#395299" family="InterMedium">
+          <AppText size={14} color="#8A5A08" family="InterMedium">
             View
           </AppText>
         </TouchableOpacity>
@@ -478,7 +478,7 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
                 // onCheckInPress(item?.last_checkin_date ? "Check Out" : "Check In", item?.id)
               }}>
               <CheckIcon />
-              <AppText size={14} color="#395299" family="InterMedium">
+              <AppText size={14} color="#8A5A08" family="InterMedium">
                 {checkIn ? "Check Out" : "Check In"}
               </AppText>
             </TouchableOpacity>
@@ -496,7 +496,7 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
                 // onCheckInPress(item?.last_checkin_date ? "Check Out" : "Check In", item?.id)
               }}>
               <CheckIcon />
-              <AppText size={14} color="#395299" family="InterMedium">
+              <AppText size={14} color="#8A5A08" family="InterMedium">
                 Check Out
               </AppText>
             </TouchableOpacity>
@@ -679,7 +679,7 @@ const styles = StyleSheet.create({
   },
   addOrderButton: {
     height: rw(36),
-    backgroundColor: colors.blue,
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
     borderRadius: rw(100),
     justifyContent: 'center',
     alignItems: 'center',

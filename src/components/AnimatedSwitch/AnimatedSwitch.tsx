@@ -23,6 +23,7 @@ interface AnimatedSwitchProps {
   text2?: string;
   initialValue?: boolean;  // ← NEW optional prop for initial state (from parent)
   height?: number
+  width?: number | `${number}%`
 }
 
 export default function AnimatedSwitch({
@@ -30,7 +31,8 @@ export default function AnimatedSwitch({
   text1,
   text2,
   initialValue = true,
-  height
+  height,
+  width
 }: AnimatedSwitchProps) {
   // position of slider
   const x = useSharedValue(0);
@@ -102,7 +104,7 @@ export default function AnimatedSwitch({
   }));
 
   return (
-    <View style={styles.outer}>
+    <View style={[styles.outer, width !== undefined && { width }]}>
       <Animated.View
         style={[styles.rowContainer, { height: height ? height : 50 }]}
         onLayout={(e) => {
@@ -170,7 +172,7 @@ const styles = StyleSheet.create({
   },
   rowContainer: {
     borderRadius: 50,
-    backgroundColor: 'rgba(57, 82, 153, 0.09)',
+    backgroundColor: 'rgba(138, 90, 8, 0.09)',
     overflow: 'hidden',
     height: 50,
     justifyContent: 'center',
@@ -190,7 +192,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   txt: {
-    paddingHorizontal: 15,
+    paddingHorizontal: 8,
     fontSize: 12,
     fontFamily: fonts.InterRegular,
     color: '#797C86',

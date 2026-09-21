@@ -41,6 +41,7 @@ export type RootStackParamList = {
   BeatCustomerList:undefined;
   OrderHistoryDetailsScreen:undefined
   Reports:undefined
+  AppDocuments: undefined
   OrderListDetails:undefined
   IndividualPage:undefined
   AttendanceViewAllScreen:undefined

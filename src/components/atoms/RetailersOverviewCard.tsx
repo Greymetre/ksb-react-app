@@ -17,7 +17,7 @@ const RetailersOverviewCard = ({data}: any) => {
 
                 {/* Main Number */}
                 <View style={styles.mainRow}>
-                    <AppText size={30} family='InterMedium' color="#3a4da0">
+                    <AppText size={30} family='InterMedium' color="#8A5A08">
                         {data?.secondary_customers_registered_approved_current_year}
                     </AppText>
                     <View style={styles.todayBadge}>
@@ -44,7 +44,7 @@ const RetailersOverviewCard = ({data}: any) => {
                         />
                     </View>
                     <View style={{ flex: 1 }}>
-                        <AppText size={12} family='InterMedium' color="#3a4da0">
+                        <AppText size={12} family='InterMedium' color="#8A5A08">
                             Unique Retailers Ordered
                         </AppText>
                         <AppText size={11} color="#6b7280" family="InterMedium">
@@ -52,7 +52,7 @@ const RetailersOverviewCard = ({data}: any) => {
                         </AppText>
                     </View>
                     <View style={{ alignItems: 'flex-end' }}>
-                        <AppText size={22} family='InterSemiBold' color="#3a4da0">
+                        <AppText size={22} family='InterSemiBold' color="#8A5A08">
                             {data?.secondary_customers_with_order_current_year}
                         </AppText>
                         <AppText size={11} color="#267a66" family='InterMedium'>
@@ -68,7 +68,7 @@ const RetailersOverviewCard = ({data}: any) => {
                             YEAR TO DATE ORDERS
                         </AppText>
                         <View style={styles.ytdBadge}>
-                            <AppText size={12} color="#3a4da0" family="InterMedium">YTD</AppText>
+                            <AppText size={12} color="#8A5A08" family="InterMedium">YTD</AppText>
                         </View>
                     </View>
 
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginLeft: 'auto',
-        backgroundColor: '#e8eaf2'
+        backgroundColor: '#FAF0DD'
     },
     activityImage: {
         width: rw(20),
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     },
     uniqueContainer: {
         flexDirection: 'row',
-        backgroundColor: '#e8eaf2',
+        backgroundColor: '#FAF0DD',
         borderRadius: 12,
         paddingHorizontal: rw(12),
         paddingVertical: 6,

@@ -6,7 +6,7 @@ import * as Yup from 'yup';
 
 import { styles } from './styles'; // Reuse same styles
 import AppText from '../../components/AppText/AppText';
-import { colors } from '../../utils/Colors';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { useDispatch } from 'react-redux';
 import { useMutateLogin, useMutateSignup } from '../../api/query/AuthAPI'; // ← Change if your hook name is different
 import { setToken, setUser } from '../../components/redux/slice/AuthSlice';
@@ -15,6 +15,7 @@ import ICEye from '../../assets/svgs/eye';
 import Toast from 'react-native-toast-message';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { toMobileDigits } from '../../utils/mobile';
+import { KsbAarohBrand } from '../../components/AarohLogo';
 
 type SignUpFormValues = {
   name: string;
@@ -121,11 +122,7 @@ const SignUpScreen = ({ navigation }: { navigation: any }) => {
       >
         {/* Logo */}
         <View style={[styles.logoView, styles.center]}>
-          <FastImage
-            style={styles.logo}
-            resizeMode="contain"
-            source={require('../../assets/images/FieldKonnectLogo.png')}
-          />
+          <KsbAarohBrand />
         </View>
 
         <View style={[styles.container, styles.subContainer]}>
@@ -294,7 +291,7 @@ const SignUpScreen = ({ navigation }: { navigation: any }) => {
                   style={[
                     styles.buttonView,
                     {
-                      backgroundColor: isValid ? colors.blue : '#A0A0A0',
+                      backgroundColor: isValid ? colors.navy : '#A0A0A0', experimental_backgroundImage: isValid ? BRAND_GRADIENT : undefined,
                       marginTop: 24,
                     },
                   ]}
@@ -314,7 +311,7 @@ const SignUpScreen = ({ navigation }: { navigation: any }) => {
                 <AppText color="gray" family="InterSemiBold" size={14} align="center">
                   Already have an account?{' '}
                   <AppText
-                    color={colors.blue}
+                    color={colors.navy}
                     family="InterSemiBold"
                     size={14}
                     onPress={() => navigation.navigate('LoginScreen')}

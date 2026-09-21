@@ -239,7 +239,7 @@ const MyProfile = () => {
 
         {loading && !profile ? (
           <View style={styles.loading}>
-            <ActivityIndicator size="large" color={colors.blue} />
+            <ActivityIndicator size="large" color={colors.navy} />
           </View>
         ) : (
           sections.map(section => (

@@ -4,7 +4,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import Toast from 'react-native-toast-message';
 import AppText from '../../components/AppText/AppText';
 import { useGetCustomerCheckinActivity } from '../../api/query/CustomerApi';
-import { colors } from '../../utils/Colors';
+import { colors, gradients, BRAND_GRADIENT } from '../../utils/Colors';
 import { rw } from '../../utils/responsive';
 import { shadowStyle } from '../../utils/typography';
 
@@ -27,7 +27,7 @@ const PAGE_SIZE = 20;
 
 // One colour per employee, picked from the name so the same person keeps the
 // same avatar as you scroll.
-const AVATAR_COLORS = ['#395299', '#0F7B4F', '#B4530A', '#7A3EA1', '#0E6F86', '#A63A55'];
+const AVATAR_COLORS = ['#8A5A08', '#0F7B4F', '#B4530A', '#7A3EA1', '#0E6F86', '#A63A55'];
 
 const money = (value: number) =>
   `₹${new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(value || 0)}`;
@@ -229,7 +229,7 @@ const CustomerActivity = ({ route }: any) => {
     <View style={styles.container}>
       <View style={[styles.hero, shadowStyle]}>
         <LinearGradient
-          colors={['#395299', '#2F6FB8']}
+          colors={gradients.brand} locations={gradients.stops}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.heroGradient}
@@ -279,7 +279,7 @@ const CustomerActivity = ({ route }: any) => {
       </View>
 
       {loading ? (
-        <View style={styles.state}><ActivityIndicator color={colors.blue} /></View>
+        <View style={styles.state}><ActivityIndicator color={colors.navy} /></View>
       ) : (
         <FlatList
           data={entries}
@@ -300,7 +300,7 @@ const CustomerActivity = ({ route }: any) => {
           }
           ListFooterComponent={
             loadingMore ? (
-              <View style={styles.footer}><ActivityIndicator color={colors.blue} size="small" /></View>
+              <View style={styles.footer}><ActivityIndicator color={colors.navy} size="small" /></View>
             ) : entries.length > 0 && !hasMore ? (
               <View style={styles.footer}>
                 <AppText size={12.5} color="#64748B" family="InterMedium" lineHeight={17}>
@@ -316,7 +316,7 @@ const CustomerActivity = ({ route }: any) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.offWHite },
+  container: { flex: 1, backgroundColor: 'transparent' },
 
   // Heights are pinned rather than left to auto-measure: the gradient wrapper was
   // settling on a height that clipped the numbers off the bottom of the card.
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
   // settled on a height that clipped the numbers off the bottom of the card.
   hero: {
     marginHorizontal: rw(14), marginTop: 12, borderRadius: 18,
-    backgroundColor: '#395299',
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
   },
   heroGradient: { ...StyleSheet.absoluteFillObject, borderRadius: 18 },
   heroContent: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 18 },

@@ -5,7 +5,7 @@ import { shadowStyle } from "../../utils/typography";
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.bgColor
+        backgroundColor: 'transparent'
     },
     activityView: {
         backgroundColor: 'white',

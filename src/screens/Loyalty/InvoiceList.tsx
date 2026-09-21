@@ -106,7 +106,8 @@ const InvoiceList = ({ navigation }: any) => {
   const loadKycSummary = useCallback(async () => {
     try {
       const response = await axiosClient.get(`${API_ENDPOINT.SECONDARY_CUSTOMER}/kyc-summary`, {
-        params: { type: 'RETAILER' },
+        // Active retailers only - those who have submitted at least one loyalty invoice.
+        params: { type: 'RETAILER', invoice_active: 1 },
       });
       setKycSummary(response?.data?.data ?? {});
     } catch {
@@ -187,7 +188,8 @@ const InvoiceList = ({ navigation }: any) => {
     [summary],
   );
 
-  // The CRM's four KYC stages. Each opens the retailers it counted.
+  // The CRM's four KYC stages, over active retailers only (at least one loyalty invoice).
+  // Each opens the same active retailers it counted.
   const kycCards = useMemo(
     () => [
       { stage: 'approved', label: 'Fully Approved', count: kycSummary.approved, tone: '#16A34A' },
@@ -203,6 +205,7 @@ const InvoiceList = ({ navigation }: any) => {
           type: 'RETAILER',
           customerTypeName: 'Retailer',
           kyc: card.stage,
+          invoiceActive: true,
         }),
     })),
     [kycSummary, navigation],
@@ -261,7 +264,7 @@ const InvoiceList = ({ navigation }: any) => {
       </View>
 
       <AppText size={12} family="InterSemiBold" color="black" opacity={0.6} style={{ marginHorizontal: 16, marginTop: 4 }}>
-        Retailer KYC
+        Active Retailer KYC ({kycSummary.total ?? 0})
       </AppText>
       <View style={styles.summaryRow}>
         {kycCards.map(card => (
@@ -279,7 +282,7 @@ const InvoiceList = ({ navigation }: any) => {
 
       {loading ? (
         <View style={{ paddingTop: 60 }}>
-          <ActivityIndicator color={colors.blue} />
+          <ActivityIndicator color={colors.navy} />
         </View>
       ) : (
         <FlatList
@@ -303,7 +306,7 @@ const InvoiceList = ({ navigation }: any) => {
             setLoadingMore(true);
             load(page + 1, 'append');
           }}
-          ListFooterComponent={loadingMore ? <ActivityIndicator color={colors.blue} /> : null}
+          ListFooterComponent={loadingMore ? <ActivityIndicator color={colors.navy} /> : null}
           ListEmptyComponent={
             <View style={styles.emptyWrap}>
               <AppText size={15} family="InterSemiBold" color="black" opacity={0.7} align="center">
@@ -332,7 +335,7 @@ const InvoiceList = ({ navigation }: any) => {
                     <AppText size={13.5} family="InterMedium" color="black" numLines={1}>{item.retailerName || '-'}</AppText>
                     <AppText size={11} color="black" opacity={0.5} numLines={1}>{item.shopName}</AppText>
                   </View>
-                  <AppText size={15} family="InterSemiBold" customColor={colors.blue}>{money(item.amount)}</AppText>
+                  <AppText size={15} family="InterSemiBold" customColor={colors.navy}>{money(item.amount)}</AppText>
                 </View>
 
                 <View style={styles.cardRow}>
@@ -360,7 +363,7 @@ const InvoiceList = ({ navigation }: any) => {
             <View style={styles.sheetHandle} />
             {detailLoading || !selected ? (
               <View style={{ padding: 40 }}>
-                <ActivityIndicator color={colors.blue} />
+                <ActivityIndicator color={colors.navy} />
               </View>
             ) : (
               <>
@@ -431,7 +434,7 @@ const InvoiceList = ({ navigation }: any) => {
                         style={styles.attachmentPdf}
                         onPress={() => setAttachmentIndex(position)}>
                         <AppText size={18}>📄</AppText>
-                        <AppText size={12.5} family="InterMedium" customColor={colors.blue} style={{ flex: 1 }}>
+                        <AppText size={12.5} family="InterMedium" customColor={colors.navy} style={{ flex: 1 }}>
                           {file.fileName || 'Invoice PDF'}
                         </AppText>
                       </Pressable>
@@ -449,7 +452,7 @@ const InvoiceList = ({ navigation }: any) => {
                     <View style={styles.detailActions}>
                       {selected.canEdit ? (
                         <Pressable style={[styles.detailAction, styles.editAction]} onPress={editInvoice} disabled={deleting}>
-                          <AppText size={13} family="InterSemiBold" customColor={colors.blue}>Edit</AppText>
+                          <AppText size={13} family="InterSemiBold" customColor={colors.navy}>Edit</AppText>
                         </Pressable>
                       ) : null}
                       {selected.canDelete ? (

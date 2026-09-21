@@ -260,7 +260,7 @@ const AddNewExpense = () => {
   if (loading) {
     return (
       <View style={[styles.container, { justifyContent: 'center' }]}>
-        <ActivityIndicator color={colors.blue} />
+        <ActivityIndicator color={colors.navy} />
       </View>
     );
   }
@@ -397,7 +397,7 @@ const AddNewExpense = () => {
           </AppText>
           {isTravelling || (selectedType?.rate ?? 0) > 0 ? (
             <View style={[styles.UserBox, styles.row, styles.readOnlyBox]}>
-              <AppText size={14} color={colors.blue} family="InterSemiBold">
+              <AppText size={14} color={colors.navy} family="InterSemiBold">
                 ₹ {amount || '0.0'}
               </AppText>
             </View>
@@ -462,7 +462,7 @@ const AddNewExpense = () => {
                     <Image source={{ uri: file.url }} style={styles.existingThumb} />
                   ) : (
                     <View style={[styles.existingThumb, styles.existingDoc]}>
-                      <AppText size={13} color={colors.blue} family="InterBold">
+                      <AppText size={13} color={colors.navy} family="InterBold">
                         PDF
                       </AppText>
                     </View>

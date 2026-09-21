@@ -16,7 +16,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { rw } from '../../utils/responsive';
-import { colors } from '../../utils/Colors';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import AppText from '../../components/AppText/AppText';
 import { MinusIcon, PlusIcon } from '../../assets/svgs/HomePageSvgs';
 import { styles } from './styles'; // same styles file
@@ -313,7 +313,7 @@ const AddTourPlan = ({ navigation }) => {
                 style={{
                   marginTop: 12,
                   padding: 12,
-                  backgroundColor: colors.primary,
+                  backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
                   borderRadius: 8,
                   alignItems: 'center',
                 }}

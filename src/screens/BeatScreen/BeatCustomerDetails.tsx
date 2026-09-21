@@ -190,7 +190,7 @@ const BeatCustomerDetails = ({ route }: any) => {
         <View style={[styles.container, { paddingHorizontal: rw(18) }]}>
                 {loading ? (
                     <View style={styles.center}>
-                        <ActivityIndicator size="large" color={colors.blue} />
+                        <ActivityIndicator size="large" color={colors.navy} />
                     </View>
                 ) : (
                     <>
@@ -235,7 +235,7 @@ const BeatCustomerDetails = ({ route }: any) => {
                                 if (!loading && !loadingMore && hasMore) fetchBeatCustomers(page + 1, true);
                             }}
                             onEndReachedThreshold={0.5}
-                            ListFooterComponent={loadingMore ? <ActivityIndicator size="small" color={colors.blue} /> : null}
+                            ListFooterComponent={loadingMore ? <ActivityIndicator size="small" color={colors.navy} /> : null}
                             ListEmptyComponent={
                                 <AppText size={16} color="#666" style={{ textAlign: 'center', marginTop: rw(120) }}>
                                     No customers in this beat

@@ -20,7 +20,7 @@ import * as XLSX from 'xlsx-js-style';
 import ICDownload from '../../assets/svgs/download';
 
 import AppText from '../../components/AppText/AppText';
-import { colors } from '../../utils/Colors';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { fonts } from '../../utils/typography';
 import { rw } from '../../utils/responsive';
 import store from '../../components/redux/Store';
@@ -670,12 +670,12 @@ const TargetArchieViewAllScreen = ({ navigation }: any) => {
           disabled={exporting}
         >
           {exporting ? (
-            <ActivityIndicator size="small" color={colors.blue} />
+            <ActivityIndicator size="small" color={colors.navy} />
           ) : (
             <ICDownload width={20} height={20} stroke={colors.blue} />
           )}
         </Pressable>
-        <AppText size={14} color="#cdd1ed" family={'InterMedium'}>
+        <AppText size={14} color="#EAD9B8" family={'InterMedium'}>
           Target VS Achievement
         </AppText>
 
@@ -683,7 +683,7 @@ const TargetArchieViewAllScreen = ({ navigation }: any) => {
           Sales performance
         </AppText>
 
-        <AppText size={14} color="#cdd1ed" family={'InterMedium'}>
+        <AppText size={14} color="#EAD9B8" family={'InterMedium'}>
           {formattedDate} · {dayText}
         </AppText>
         <View style={styles.tabs}>
@@ -730,7 +730,7 @@ const TargetArchieViewAllScreen = ({ navigation }: any) => {
               <AppText
                 size={13}
                 family={'InterBold'}
-                color={period === p ? colors.blue : '#cdd1ed'}
+                color={period === p ? colors.blue : '#EAD9B8'}
               >
                 {p}
               </AppText>
@@ -1002,19 +1002,19 @@ const TargetArchieViewAllScreen = ({ navigation }: any) => {
               return (
                 <View style={[styles.totalRow, {
                   backgroundColor:
-                    sectionIndex % 2 === 0 ? '#e8eaf7' : '#e6f4ea',
+                    sectionIndex % 2 === 0 ? '#FAF0DD' : '#e6f4ea',
                 }]}>
                   <AppText style={[styles.totalText, {
-                    color: sectionIndex % 2 === 0 ? '#4849ad' : '#196c2a'
+                    color: sectionIndex % 2 === 0 ? '#8A5A08' : '#196c2a'
                   }]}>{getShort(section.title)} total</AppText>
                   <AppText style={[styles.totalText, {
-                    color: sectionIndex % 2 === 0 ? '#4849ad' : '#196c2a'
+                    color: sectionIndex % 2 === 0 ? '#8A5A08' : '#196c2a'
                   }]}></AppText>
                   <AppText style={[styles.totalText, {
-                    color: sectionIndex % 2 === 0 ? '#4849ad' : '#196c2a'
+                    color: sectionIndex % 2 === 0 ? '#8A5A08' : '#196c2a'
                   }]}>{section.total.retailers}</AppText>
                   <AppText style={[styles.totalText, {
-                    color: sectionIndex % 2 === 0 ? '#4849ad' : '#196c2a'
+                    color: sectionIndex % 2 === 0 ? '#8A5A08' : '#196c2a'
                   }]}>{section.total.qty}</AppText>
                 </View>
               )
@@ -1161,7 +1161,7 @@ const TargetArchieViewAllScreen = ({ navigation }: any) => {
                     style={[
                       modalStyles.row,
                       isSelected && modalStyles.activeRow,
-                      { borderBottomColor: isSelected ? '#3b4ab9' : '#eee', }
+                      { borderBottomColor: isSelected ? '#8A5A08' : '#eee', }
                     ]}
                   >
                     <Text>{label}</Text>
@@ -1191,11 +1191,11 @@ export default TargetArchieViewAllScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f3f3f3',
+    backgroundColor: 'transparent',
   },
 
   header: {
-    backgroundColor: colors.blue,
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
     padding: 16,
     paddingTop: 40
   },
@@ -1251,7 +1251,7 @@ const styles = StyleSheet.create({
   },
 
   activeTab: {
-    backgroundColor: colors.blue,
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
   },
 
   inactiveTab: {},
@@ -1308,7 +1308,7 @@ const styles = StyleSheet.create({
 
   },
   filterActive: {
-    backgroundColor: colors.blue,
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
   },
 
 
@@ -1320,13 +1320,13 @@ const styles = StyleSheet.create({
 
   headerRow: {
     flexDirection: 'row',
-    backgroundColor: colors.blue,
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
 
   },
 
   subHeaderRow: {
     flexDirection: 'row',
-    backgroundColor: colors.blue,
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
   },
 
   th: {
@@ -1397,28 +1397,28 @@ const styles = StyleSheet.create({
   zone: {
     backgroundColor: '#e9eaf6',
     padding: 10,
-    color: '#4849ad',
+    color: '#8A5A08',
     fontFamily: fonts.InterBold,
     fontSize: 14,
   },
 
   totalRow: {
     flexDirection: 'row',
-    backgroundColor: '#e8eaf7',
+    backgroundColor: '#FAF0DD',
   },
 
   totalText: {
     width: 120,
     padding: 10,
     textAlign: 'center',
-    color: colors.blue,
+    color: colors.navy,
     fontFamily: fonts.InterBold,
     fontSize: 14,
   },
 
   grandTotal: {
     flexDirection: 'row',
-    backgroundColor: colors.blue,
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
   },
 
   grandText: {
@@ -1465,7 +1465,7 @@ const modalStyles = StyleSheet.create({
     marginRight: 8,
   },
   activeChip: {
-    backgroundColor: '#3b4ab9',
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
   },
   actions: {
     flexDirection: 'row',
@@ -1489,15 +1489,15 @@ const modalStyles = StyleSheet.create({
   },
 
   activeRow: {
-    backgroundColor: '#e8eaf7', // light blue (matches your zone bg)
-    borderColor: '#3b4ab9',
+    backgroundColor: '#FAF0DD', // light blue (matches your zone bg)
+    borderColor: '#8A5A08',
     borderWidth: 1,
 
   },
 
   applyBtn: {
     marginTop: 12,
-    backgroundColor: '#3b4ab9', // same as your primary color
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT, // same as your primary color
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: 'center',

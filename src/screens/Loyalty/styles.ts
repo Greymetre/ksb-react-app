@@ -1,5 +1,5 @@
 import { Platform, StyleSheet } from 'react-native';
-import { colors } from '../../utils/Colors';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 
 const card = {
   backgroundColor: 'white',
@@ -12,7 +12,7 @@ const card = {
 };
 
 export const loyaltyTabStyles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bgColor },
+  container: { flex: 1, backgroundColor: 'transparent' },
   /* One control, two halves - the same shape the CRM uses for its segmented tabs. */
   tabBar: {
     flexDirection: 'row',
@@ -24,7 +24,7 @@ export const loyaltyTabStyles = StyleSheet.create({
   },
   tab: { flex: 1, height: 38, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   tabActive: {
-    backgroundColor: colors.blue,
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
     shadowColor: '#000',
     shadowOpacity: 0.15,
     shadowRadius: 4,
@@ -74,7 +74,7 @@ export const schemeStyles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 13,
     alignItems: 'center',
-    backgroundColor: colors.blue,
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
   },
   slabRow: {
     flexDirection: 'row',
@@ -87,7 +87,7 @@ export const schemeStyles = StyleSheet.create({
 });
 
 export const invoiceStyles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bgColor },
+  container: { flex: 1, backgroundColor: 'transparent' },
 
   /* Search and the status chips sit together, above the list. */
   toolbar: { paddingHorizontal: 16, paddingTop: 14, backgroundColor: colors.bgColor },
@@ -108,7 +108,7 @@ export const invoiceStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E2E8F0',
   },
-  chipActive: { backgroundColor: colors.blue, borderColor: colors.blue },
+  chipActive: { backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT, borderColor: colors.blue },
 
   /* A strip of totals, so the first thing on screen is the shape of the workload. */
   // Four cards now, so the gap and the side padding come down to keep the label on
@@ -134,7 +134,7 @@ export const invoiceStyles = StyleSheet.create({
     height: 58,
     width: 58,
     borderRadius: 29,
-    backgroundColor: colors.blue,
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -188,7 +188,7 @@ export const invoiceStyles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: '#F1F5F9',
   },
-  timelineDot: { width: 8, height: 8, borderRadius: 8, backgroundColor: colors.blue, marginTop: 5 },
+  timelineDot: { width: 8, height: 8, borderRadius: 8, backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT, marginTop: 5 },
 
   emptyWrap: { alignItems: 'center', paddingTop: 70, paddingHorizontal: 40 },
 
@@ -207,7 +207,7 @@ export const invoiceStyles = StyleSheet.create({
 });
 
 export const invoiceFormStyles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bgColor },
+  container: { flex: 1, backgroundColor: 'transparent' },
   content: { padding: 16, paddingBottom: 130 },
   card: { ...card, padding: 16, marginBottom: 14 },
   label: { marginBottom: 7 },
@@ -307,7 +307,7 @@ export const invoiceFormStyles = StyleSheet.create({
   submit: {
     height: 52,
     borderRadius: 12,
-    backgroundColor: colors.blue,
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -357,7 +357,7 @@ export const datePickerStyles = StyleSheet.create({
   /* Seven to a row, whatever the screen width. */
   cell: { width: `${100 / 7}%`, alignItems: 'center', justifyContent: 'center', paddingVertical: 4 },
   day: { height: 36, width: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  daySelected: { backgroundColor: colors.blue },
+  daySelected: { backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT },
   dayToday: { borderWidth: 1, borderColor: colors.blue },
   footer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderColor: '#EEF2F7' },
 });

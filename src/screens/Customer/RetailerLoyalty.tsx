@@ -4,7 +4,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import Toast from 'react-native-toast-message';
 import AppText from '../../components/AppText/AppText';
 import { useGetRetailerLoyalty } from '../../api/query/CustomerApi';
-import { colors } from '../../utils/Colors';
+import { colors, gradients } from '../../utils/Colors';
 import { rw } from '../../utils/responsive';
 import { shadowStyle } from '../../utils/typography';
 import { loyaltyStyles as s, money, points, shortDate, themeFor } from './loyaltyStyles';
@@ -159,7 +159,7 @@ const RetailerLoyalty = ({ navigation, route }: any) => {
     <View style={s.container}>
       <View style={[s.hero, shadowStyle]}>
         <LinearGradient
-          colors={['#5B3FBF', '#8257E5']}
+          colors={gradients.brand} locations={gradients.stops}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={s.heroGradient}
@@ -215,7 +215,7 @@ const RetailerLoyalty = ({ navigation, route }: any) => {
       </View>
 
       {loading ? (
-        <View style={s.state}><ActivityIndicator color={colors.blue} /></View>
+        <View style={s.state}><ActivityIndicator color={colors.navy} /></View>
       ) : (
         <FlatList
           data={schemes}

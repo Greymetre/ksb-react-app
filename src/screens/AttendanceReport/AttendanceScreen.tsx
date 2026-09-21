@@ -19,7 +19,7 @@ import { styles } from '../ExpenseReport/styles'; // adjust path
 import AppText from '../../components/AppText/AppText';
 import { ArrowDownIcon, EyeballIcon, ThreeDotIcon, PlusAddIcon } from '../../assets/svgs/SvgsFile';
 import { rw } from '../../utils/responsive';
-import { colors } from '../../utils/Colors';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import store, { useAppSelector } from '../../components/redux/Store';
 import {
   useGetTodayBeatPlanData,
@@ -596,7 +596,7 @@ const AttendanceScreen: React.FC<{ navigation: any; route: any }> = ({ navigatio
   // Render today's tour plan section
   // ────────────────────────────────────────────────
   const renderTourPlanSection = () => {
-    if (tourLoading) return <ActivityIndicator size="small" color={colors.blue} style={{ marginTop: 12 }} />;
+    if (tourLoading) return <ActivityIndicator size="small" color={colors.navy} style={{ marginTop: 12 }} />;
     if (tourError) return <AppText size={13} color="red" family="InterMedium">{tourError}</AppText>;
 
     if (!tourPlan) {
@@ -621,7 +621,7 @@ const AttendanceScreen: React.FC<{ navigation: any; route: any }> = ({ navigatio
               marginTop: rw(12),
               paddingHorizontal: rw(16),
               paddingVertical: rw(10),
-              backgroundColor: colors.blue,
+              backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
               borderRadius: rw(8),
             }}
           >
@@ -657,7 +657,7 @@ const AttendanceScreen: React.FC<{ navigation: any; route: any }> = ({ navigatio
           {tourPlan.date || '—'}
         </AppText>
         {/* {tourPlan.objectives && (
-          <AppText size={13} color={colors.blue}>
+          <AppText size={13} color={colors.navy}>
             {tourPlan.objectives}
           </AppText>
         )} */}
@@ -774,7 +774,7 @@ const AttendanceScreen: React.FC<{ navigation: any; route: any }> = ({ navigatio
                     borderColor: colors.blue,
                   }}
                 >
-                  <AppText size={13} color={colors.blue} family="InterMedium">
+                  <AppText size={13} color={colors.navy} family="InterMedium">
                     Edit
                   </AppText>
                 </Pressable>
@@ -803,11 +803,11 @@ const AttendanceScreen: React.FC<{ navigation: any; route: any }> = ({ navigatio
                         borderColor: colors.blue,
                       }}
                     >
-                      <AppText size={13} color={colors.blue} family="InterMedium">
+                      <AppText size={13} color={colors.navy} family="InterMedium">
                         {obj.label == "Other" ? customObjective : obj.label}
                       </AppText>
                       <Pressable onPress={() => removeObjective(obj)} hitSlop={10}>
-                        <AppText size={17} color={colors.blue} style={{ marginLeft: rw(6) }}>
+                        <AppText size={17} color={colors.navy} style={{ marginLeft: rw(6) }}>
                           ×
                         </AppText>
                       </Pressable>
@@ -864,11 +864,11 @@ const AttendanceScreen: React.FC<{ navigation: any; route: any }> = ({ navigatio
                         borderColor: colors.blue,
                       }}
                     >
-                      <AppText size={13} color={colors.blue} family="InterMedium">
+                      <AppText size={13} color={colors.navy} family="InterMedium">
                         {city.label}
                       </AppText>
                       <Pressable onPress={() => removeCity(city)} hitSlop={8} style={{ marginLeft: rw(6) }}>
-                        <AppText size={16} color={colors.blue}>
+                        <AppText size={16} color={colors.navy}>
                           ×
                         </AppText>
                       </Pressable>
@@ -928,11 +928,11 @@ const AttendanceScreen: React.FC<{ navigation: any; route: any }> = ({ navigatio
                             borderColor: colors.blue,
                           }}
                         >
-                          <AppText size={13} color={colors.blue} family="InterMedium">
+                          <AppText size={13} color={colors.navy} family="InterMedium">
                             {beat.label}
                           </AppText>
                           <Pressable onPress={() => removeBeat(beat)} hitSlop={8} style={{ marginLeft: rw(6) }}>
-                            <AppText size={16} color={colors.blue}>×</AppText>
+                            <AppText size={16} color={colors.navy}>×</AppText>
                           </Pressable>
                         </View>
                       ))}
@@ -1013,7 +1013,7 @@ const AttendanceScreen: React.FC<{ navigation: any; route: any }> = ({ navigatio
                     borderRadius: rw(8),
                     borderWidth: 2,
                     borderColor: isSelected ? colors.blue : '#ccc',
-                    backgroundColor: isSelected ? colors.blue : 'transparent',
+                    backgroundColor: isSelected ? colors.navy : 'transparent', experimental_backgroundImage: isSelected ? BRAND_GRADIENT : undefined,
                     justifyContent: 'center',
                     alignItems: 'center',
                     marginRight: rw(14),
@@ -1079,7 +1079,7 @@ const AttendanceScreen: React.FC<{ navigation: any; route: any }> = ({ navigatio
             style={{
               flex: 1,
               paddingVertical: rw(14),
-              backgroundColor: colors.blue,
+              backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
               borderRadius: rw(12),
               alignItems: 'center',
             }}
@@ -1116,7 +1116,7 @@ const AttendanceScreen: React.FC<{ navigation: any; route: any }> = ({ navigatio
                     Select Cities {selectedCities.length > 0 ? `(${selectedCities.length})` : ''}
                   </AppText>
                   <Pressable onPress={() => setShowCityModal(false)}>
-                    <AppText size={16} color={colors.blue} family="InterMedium">
+                    <AppText size={16} color={colors.navy} family="InterMedium">
                       Done
                     </AppText>
                   </Pressable>
@@ -1164,7 +1164,7 @@ const AttendanceScreen: React.FC<{ navigation: any; route: any }> = ({ navigatio
                             borderRadius: rw(6),
                             borderWidth: 2,
                             borderColor: isSelected ? colors.blue : '#ccc',
-                            backgroundColor: isSelected ? colors.blue : 'transparent',
+                            backgroundColor: isSelected ? colors.navy : 'transparent', experimental_backgroundImage: isSelected ? BRAND_GRADIENT : undefined,
                             justifyContent: 'center',
                             alignItems: 'center',
                             marginRight: rw(12),
@@ -1230,7 +1230,7 @@ const AttendanceScreen: React.FC<{ navigation: any; route: any }> = ({ navigatio
                     Select Beats {selectedBeats.length > 0 ? `(${selectedBeats.length})` : ''}
                   </AppText>
                   <Pressable onPress={() => setShowBeatModal(false)}>
-                    <AppText size={16} color={colors.blue} family="InterMedium">
+                    <AppText size={16} color={colors.navy} family="InterMedium">
                       Done
                     </AppText>
                   </Pressable>
@@ -1279,7 +1279,7 @@ const AttendanceScreen: React.FC<{ navigation: any; route: any }> = ({ navigatio
                             borderRadius: rw(6),
                             borderWidth: 2,
                             borderColor: isSelected ? colors.blue : '#ccc',
-                            backgroundColor: isSelected ? colors.blue : 'transparent',
+                            backgroundColor: isSelected ? colors.navy : 'transparent', experimental_backgroundImage: isSelected ? BRAND_GRADIENT : undefined,
                             justifyContent: 'center',
                             alignItems: 'center',
                             marginRight: rw(12),

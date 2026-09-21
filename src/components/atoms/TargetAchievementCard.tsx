@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, TouchableOpacity, StyleSheet, Pressable } from 'react-native';
 import AppText from '../AppText/AppText';
 import { rw } from '../../utils/responsive';
-import { colors } from '../../utils/Colors';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { formatShortNumber } from '../../utils/misc';
 
 interface TargetAchievementCardProps {
@@ -67,7 +67,7 @@ const TargetAchievementCard: React.FC<TargetAchievementCardProps> = ({
                     <View style={styles.retailersContainer}>
                         <AppText size={10} color="#64748B" family='InterMedium'>No.of Retailers</AppText>
                         <AppText size={9} color="#64748B" family='InterMedium'>(MTD Order Unique No)</AppText>
-                        <AppText size={18} family='InterBold' color={colors.blue}>
+                        <AppText size={18} family='InterBold' color={colors.navy}>
                             {activeMainTab === 'ASR' ? homeData?.unique_buyers_from_asr : homeData?.unique_buyers_from_dsr}
                             {/* 200 */}
                         </AppText>
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: rw(18),
     },
     asrBadge: {
-        backgroundColor: '#3a4da0',
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
         width: rw(45),
         height: rw(45),
         borderRadius: 12,
@@ -230,13 +230,13 @@ const styles = StyleSheet.create({
     },
     progressBarBg: {
         height: rw(5),
-        backgroundColor: '#e8eaf2',
+        backgroundColor: '#FAF0DD',
         borderRadius: 999,
         overflow: 'hidden',
     },
     progressBarFill: {
         height: '100%',
-        backgroundColor: '#3a4da0',   // Deep blue like screenshot
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,   // Deep blue like screenshot
         borderRadius: 999,
     },
     bottomSummary: {
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
         borderRadius: 26,
     },
     activeTab: {
-        backgroundColor: '#3a4da0',
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
     },
     subTabs: {
         flexDirection: 'row',

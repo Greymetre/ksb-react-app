@@ -1,17 +1,17 @@
 import { Platform, StyleSheet } from "react-native";
-import { colors } from "../../utils/Colors";
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { rw } from "../../utils/responsive";
 
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.bgColor
+        backgroundColor: 'transparent'
     },
     selectUser: {
         borderRadius: 12,
         borderWidth: 1,
         borderColor: "rgba(203, 213, 224, 1)",
-        backgroundColor: 'rgba(57, 82, 153, 0.07)',
+        backgroundColor: 'rgba(138, 90, 8, 0.07)',
         height: 48,
 
         paddingHorizontal: 14
@@ -67,14 +67,14 @@ export const styles = StyleSheet.create({
     heading: {
         flex: 0.34,
         height: 36,
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
         justifyContent: 'center',
         alignItems: 'center',
     },
     heading1: {
         flex: 0.34,
         height: 44,
-        backgroundColor: 'rgba(57, 82, 153, 0.1)',
+        backgroundColor: 'rgba(138, 90, 8, 0.1)',
         justifyContent: 'center',
         alignItems: 'center',
         borderBottomColor: colors.blue,
@@ -103,7 +103,7 @@ export const styles = StyleSheet.create({
         height: 44,
         paddingHorizontal: 44,
         borderRadius: 6,
-        backgroundColor: colors.blue
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT
     },
     dateTimeBox: {
         marginTop: 10,
@@ -111,7 +111,7 @@ export const styles = StyleSheet.create({
         borderRadius: 8,
         borderWidth: 1,
         borderColor: "rgba(203, 213, 224, 1)",
-        backgroundColor: "rgba(57, 82, 153, 0.07)",
+        backgroundColor: "rgba(138, 90, 8, 0.07)",
         paddingHorizontal: 14,
         // flex: 1
 
@@ -166,7 +166,7 @@ export const styles = StyleSheet.create({
     },
     designationCheckboxSelected: {
         borderColor: colors.blue,
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
     },
     emptyDesignationText: {
         textAlign: 'center',
@@ -189,7 +189,7 @@ export const styles = StyleSheet.create({
         flex: 1,
         paddingVertical: 14,
         borderRadius: 8,
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
         alignItems: 'center',
     },
     listContainer: {

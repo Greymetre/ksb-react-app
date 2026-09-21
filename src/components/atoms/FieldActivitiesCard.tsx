@@ -3,6 +3,7 @@ import {ActivityIndicator, Image, Pressable, StyleSheet, View} from 'react-nativ
 import AppText from '../AppText/AppText';
 import {rw} from '../../utils/responsive';
 import {activityApi} from '../../api/activityApi';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 
 type RoleTab = 'asr' | 'dsr';
 type RangeTab = 'today' | 'month' | 'year';
@@ -52,11 +53,11 @@ const FieldActivitiesCard = () => {
         <View style={styles.subTabs}>
           {([['today', 'Today'], ['month', 'This month'], ['year', 'This year']] as [RangeTab, string][]).map(([key, label]) => (
             <Pressable key={key} style={[styles.subTab, range === key && styles.activeSubTab]} onPress={() => setRange(key)}>
-              <AppText size={12} family="InterMedium" color={range === key ? '#1E40AF' : '#64748B'}>{label}</AppText>
+              <AppText size={12} family="InterMedium" color={range === key ? '#8A5A08' : '#64748B'}>{label}</AppText>
             </Pressable>
           ))}
         </View>
-        {loading ? <ActivityIndicator style={styles.loader} color="#3a4da0" /> : DEFINITIONS.map((item, index) => {
+        {loading ? <ActivityIndicator style={styles.loader} color="#8A5A08" /> : DEFINITIONS.map((item, index) => {
           const value = Number(values?.[item.key] || 0);
           const width = total ? `${Math.round((value / total) * 100)}%` : '0%';
           return (
@@ -65,7 +66,7 @@ const FieldActivitiesCard = () => {
               <View style={styles.activityContent}>
                 <View style={styles.labelRow}>
                   <AppText size={16} family="InterMedium" color="#1F2937">{item.label}</AppText>
-                  <AppText size={17} family="InterSemiBold" color="#3a4da0">{value}</AppText>
+                  <AppText size={17} family="InterSemiBold" color="#8A5A08">{value}</AppText>
                 </View>
                 <View style={styles.progressContainer}><View style={[styles.progressBar, {width: width as any}]} /></View>
               </View>
@@ -82,10 +83,10 @@ const styles = StyleSheet.create({
   card: {backgroundColor: '#fff', borderRadius: 16, padding: rw(16), shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.06, shadowRadius: 10, elevation: 4},
   topTabs: {flexDirection: 'row', backgroundColor: '#f3f4f8', borderRadius: 30, padding: 6, marginBottom: rw(12)},
   tab: {flex: 1, paddingVertical: rw(6), alignItems: 'center', borderRadius: 26},
-  activeTab: {backgroundColor: '#3a4da0'},
+  activeTab: {backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT},
   subTabs: {flexDirection: 'row', gap: rw(8), marginBottom: rw(10)},
   subTab: {flex: 1, backgroundColor: '#fff', borderRadius: 30, paddingVertical: rw(6), alignItems: 'center', borderWidth: 1, borderColor: '#e5e7eb'},
-  activeSubTab: {backgroundColor: '#e8eaf2', borderColor: '#3a4da0'},
+  activeSubTab: {backgroundColor: '#FAF0DD', borderColor: '#8A5A08'},
   loader: {height: rw(220)},
   activityRow: {flexDirection: 'row', alignItems: 'center', gap: rw(12), paddingVertical: rw(13), borderBottomWidth: 1, borderBottomColor: '#F1F5F9'},
   lastRow: {borderBottomWidth: 0},
@@ -94,7 +95,7 @@ const styles = StyleSheet.create({
   activityContent: {flex: 1},
   labelRow: {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'},
   progressContainer: {height: rw(4), backgroundColor: '#E2E8F0', borderRadius: 999, overflow: 'hidden', marginTop: rw(8)},
-  progressBar: {height: '100%', backgroundColor: '#3a4da0', borderRadius: 999},
+  progressBar: {height: '100%', backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT, borderRadius: 999},
 });
 
 export default FieldActivitiesCard;

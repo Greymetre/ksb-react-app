@@ -13,7 +13,7 @@ import {  View,
 } from 'react-native';
 import { rw } from '../../utils/responsive';
 import AppText from '../../components/AppText/AppText';
-import { colors } from '../../utils/Colors';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { fonts } from '../../utils/typography';
 import store from '../../components/redux/Store';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -178,7 +178,7 @@ const AttendanceViewAllScreen = ({ navigation }: any) => {
 
         <View style={styles.center}>
           {item.market && (
-            <Image source={require('../../assets/images/Dummy/check.png')} style={[styles.icon, { tintColor: '#3b4ab9' }]}
+            <Image source={require('../../assets/images/Dummy/check.png')} style={[styles.icon, { tintColor: '#8A5A08' }]}
               resizeMode='contain' />
           )}
         </View>
@@ -462,7 +462,7 @@ const AttendanceViewAllScreen = ({ navigation }: any) => {
           />
         </Pressable>
 
-        <AppText size={12} color="#cdd1ed" family={'InterMedium'}>
+        <AppText size={12} color="#EAD9B8" family={'InterMedium'}>
           Attendance Report
         </AppText>
 
@@ -470,13 +470,13 @@ const AttendanceViewAllScreen = ({ navigation }: any) => {
           Today's Overview
         </AppText>
 
-        <AppText size={12} color="#cdd1ed" family={'InterMedium'}>
+        <AppText size={12} color="#EAD9B8" family={'InterMedium'}>
           {formattedDate}
         </AppText>
       </View>
 
       {/* TABS */}
-      <View style={{ backgroundColor: colors.blue }}>
+      <View style={{ backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT }}>
         <View style={styles.tabs}>
           {['ASR', 'DSR'].map(t => (
             <Pressable
@@ -672,7 +672,7 @@ const AttendanceViewAllScreen = ({ navigation }: any) => {
                     style={[
                       modalStyles.row,
                       isSelected && modalStyles.activeRow,
-                      { borderBottomColor: isSelected ? '#3b4ab9' : '#eee', borderBottomWidth: 1 }
+                      { borderBottomColor: isSelected ? '#8A5A08' : '#eee', borderBottomWidth: 1 }
 
                     ]}
                   >
@@ -702,11 +702,11 @@ export default AttendanceViewAllScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f8fb',
+    backgroundColor: 'transparent',
   },
 
   header: {
-    backgroundColor: colors.blue,
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
     padding: 16,
     paddingTop: 40
   },
@@ -734,7 +734,7 @@ const styles = StyleSheet.create({
   },
   // tabs: {
   //     flexDirection: 'row',
-  //     backgroundColor: colors.blue,
+  //     backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
   //     paddingHorizontal: 16,
   //     paddingBottom: 16
   // },
@@ -754,7 +754,7 @@ const styles = StyleSheet.create({
   },
 
   activeTab: {
-    backgroundColor: colors.blue,
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
   },
 
   inactiveTab: {
@@ -798,12 +798,12 @@ const styles = StyleSheet.create({
   },
 
   filterActive: {
-    backgroundColor: colors.blue,
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
   },
 
   tableHead: {
     flexDirection: 'row',
-    backgroundColor: colors.blue,
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
     paddingVertical: 10,
     paddingHorizontal: 14
   },
@@ -817,10 +817,10 @@ const styles = StyleSheet.create({
   },
 
   zone: {
-    backgroundColor: '#e8eaf7',
+    backgroundColor: '#FAF0DD',
     paddingVertical: 6,
     paddingHorizontal: 14,
-    color: colors.blue,
+    color: colors.navy,
     fontSize: 13,
     fontFamily: fonts.InterBold
   },
@@ -861,7 +861,7 @@ const styles = StyleSheet.create({
     width: 90,
     textAlign: 'center',
     fontFamily: fonts.InterBold,
-    color: colors.blue,
+    color: colors.navy,
     fontSize: 14,
   },
 });
@@ -897,7 +897,7 @@ const modalStyles = StyleSheet.create({
     marginRight: 8,
   },
   activeChip: {
-    backgroundColor: '#3b4ab9',
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
   },
   actions: {
     flexDirection: 'row',
@@ -921,14 +921,14 @@ const modalStyles = StyleSheet.create({
   },
 
   activeRow: {
-    backgroundColor: '#e8eaf7', // light blue (matches your zone bg)
-    borderColor: '#3b4ab9',
+    backgroundColor: '#FAF0DD', // light blue (matches your zone bg)
+    borderColor: '#8A5A08',
     borderWidth: 1,
   },
 
   applyBtn: {
     marginTop: 12,
-    backgroundColor: '#3b4ab9', // same as your primary color
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT, // same as your primary color
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: 'center',

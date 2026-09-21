@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import AppText from './AppText/AppText';
-import { colors } from '../utils/Colors';
+import { colors, BRAND_GRADIENT } from '../utils/Colors';
 
 /**
  * react-native-pdf is a native module. A binary built before it was added does not
@@ -247,7 +247,7 @@ const s = StyleSheet.create({
   fill: { flex: 1, width: '100%', backgroundColor: 'transparent' },
   loader: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
   fallback: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  openButton: { marginTop: 16, paddingHorizontal: 26, height: 44, borderRadius: 12, backgroundColor: colors.blue, alignItems: 'center', justifyContent: 'center' },
+  openButton: { marginTop: 16, paddingHorizontal: 26, height: 44, borderRadius: 12, backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT, alignItems: 'center', justifyContent: 'center' },
   nav: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 18, paddingBottom: 34, gap: 12 },
   navButton: { flex: 1, height: 46, borderRadius: 13, backgroundColor: 'rgba(255,255,255,0.14)', alignItems: 'center', justifyContent: 'center' },
 });

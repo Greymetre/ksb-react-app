@@ -10,7 +10,7 @@ import {
   FlatList,
 } from 'react-native';
 import AppText from '../AppText/AppText';
-import { colors } from '../../utils/Colors';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { fonts } from '../../utils/typography';
 import { BackIcon, BlueTickIcon } from '../../assets/svgs/SvgsFile';
 import { rw } from '../../utils/responsive';
@@ -344,13 +344,13 @@ const CustomCalendar: React.FC<Props> = ({
                   borderTopLeftRadius: 24,
                   borderBottomLeftRadius: 24,
                   overflow: 'hidden',
-                  backgroundColor: '#e0f5ff',
+                  backgroundColor: '#FAF0DD',
                 },
                 normalizeDate(localEndDate)?.getTime() ===
                 normalizeDate(date)?.getTime() && {
                   borderTopRightRadius: 24,
                   borderBottomRightRadius: 24,
-                  backgroundColor: '#e0f5ff',
+                  backgroundColor: '#FAF0DD',
                   overflow: 'hidden',
                 },
                 {
@@ -358,7 +358,7 @@ const CustomCalendar: React.FC<Props> = ({
                   backgroundColor:
                     localStartDate && localEndDate
                       ? isDateStartOrEnd || isDateInRange
-                        ? '#e0f5ff'
+                        ? '#FAF0DD'
                         : 'transparent'
                       : 'transparent',
                   paddingLeft: isStartDate ? 4 : 0,
@@ -665,7 +665,7 @@ const CustomCalendar: React.FC<Props> = ({
         <View style={styles.dateView}>
           <View style={[styles.row, styles.yearMonthView]}>
             <Pressable onPress={() => setShowYearPicker(true)}>
-              <AppText size={12} color="#00A1EB" family='InterMedium'>
+              <AppText size={12} color="#8A5A08" family='InterMedium'>
                 {currentMonthDate.getFullYear()}
               </AppText>
             </Pressable>
@@ -680,7 +680,7 @@ const CustomCalendar: React.FC<Props> = ({
                 <BackIcon width={12} height={12} />
               </Pressable>
               <Pressable onPress={() => setShowMonthPicker(true)}>
-                <AppText size={12} color="#00A1EB" family='InterMedium'>
+                <AppText size={12} color="#8A5A08" family='InterMedium'>
                   {MONTH_NAMES[currentMonthDate.getMonth()]}
                 </AppText>
               </Pressable>
@@ -702,14 +702,14 @@ const CustomCalendar: React.FC<Props> = ({
             <View style={styles.fromVIew}>
               <AppText
                 size={8}
-                color={colors.blue}
+                color={colors.navy}
                 family="InterMedium"
               >
                 {'From'}
               </AppText>
               <AppText
                 size={10}
-                color={colors.blue}
+                color={colors.navy}
                 family="InterMedium"
               >
                 {formattedDate(localStartDate)}
@@ -718,14 +718,14 @@ const CustomCalendar: React.FC<Props> = ({
             <View style={styles.fromVIew}>
               <AppText
                 size={8}
-                color={colors.blue}
+                color={colors.navy}
                 family="InterMedium"
               >
                 {'To'}
               </AppText>
               <AppText
                 size={10}
-                color={colors.blue}
+                color={colors.navy}
                 family="InterMedium"
               >
                 {formattedDate(localEndDate)}
@@ -737,7 +737,7 @@ const CustomCalendar: React.FC<Props> = ({
           <Pressable style={styles.selectButton} onPress={handleApply}>
             <AppText
               size={12}
-              color={colors.blue}
+              color={colors.navy}
               family='InterMedium'
             >
               {'Select'}
@@ -750,7 +750,7 @@ const CustomCalendar: React.FC<Props> = ({
             style={[
               styles.duration,
               range === 'today' && {
-                backgroundColor: colors.blue,
+                backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
               },
             ]}
             onPress={() => {
@@ -769,7 +769,7 @@ const CustomCalendar: React.FC<Props> = ({
             style={[
               styles.duration,
               range === 'yesterday' && {
-                backgroundColor: colors.blue,
+                backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
               },
             ]}
             onPress={() => {
@@ -788,7 +788,7 @@ const CustomCalendar: React.FC<Props> = ({
             style={[
               styles.duration,
               range === 'last7days' && {
-                backgroundColor: colors.blue,
+                backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
               },
             ]}
             onPress={() => {
@@ -807,7 +807,7 @@ const CustomCalendar: React.FC<Props> = ({
             style={[
               styles.duration,
               range === 'currentMonth' && {
-                backgroundColor: colors.blue,
+                backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
               },
             ]}
             onPress={() => {
@@ -826,7 +826,7 @@ const CustomCalendar: React.FC<Props> = ({
             style={[
               styles.duration,
               range === 'currentYear' && {
-                backgroundColor: colors.blue,
+                backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
               },
             ]}
             onPress={() => {
@@ -845,7 +845,7 @@ const CustomCalendar: React.FC<Props> = ({
             style={[
               styles.duration,
               range === 'lastMonth' && {
-                backgroundColor: colors.blue,
+                backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
               },
             ]}
             onPress={() => {
@@ -864,7 +864,7 @@ const CustomCalendar: React.FC<Props> = ({
             style={[
               styles.duration,
               range === 'lastYear' && {
-                backgroundColor: colors.blue,
+                backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
               },
             ]}
             onPress={() => {
@@ -885,7 +885,7 @@ const CustomCalendar: React.FC<Props> = ({
                 style={[
                   styles.duration,
                   range === 'allTime' && {
-                    backgroundColor: colors.blue,
+                    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
                   },
                 ]}
                 onPress={() => {
@@ -895,7 +895,7 @@ const CustomCalendar: React.FC<Props> = ({
                 <AppText
                   size={11}
                   family="InterMedium"
-                  color={colors.blue}
+                  color={colors.navy}
                 >
                   All Time
                 </AppText>

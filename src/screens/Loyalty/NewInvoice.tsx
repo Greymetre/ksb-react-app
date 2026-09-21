@@ -289,7 +289,7 @@ const NewInvoice = ({ navigation, route }: any) => {
 
               {dealersLoading ? (
                 <View style={[styles.field, { justifyContent: 'flex-start' }]}>
-                  <ActivityIndicator size="small" color={colors.blue} />
+                  <ActivityIndicator size="small" color={colors.navy} />
                 </View>
               ) : dealers.length > 1 ? (
                 <Pressable style={styles.field} onPress={() => setPicker('dealer')}>
@@ -301,7 +301,7 @@ const NewInvoice = ({ navigation, route }: any) => {
               ) : dealer ? (
                 <View style={styles.dealerFixed}>
                   <View style={styles.dealerBadge}>
-                    <AppText size={14} family="InterSemiBold" customColor={colors.blue}>
+                    <AppText size={14} family="InterSemiBold" customColor={colors.navy}>
                       {(dealer.firmName || 'D').charAt(0).toUpperCase()}
                     </AppText>
                   </View>
@@ -409,15 +409,15 @@ const NewInvoice = ({ navigation, route }: any) => {
 
               {attachmentCount < MAX_INVOICE_ATTACHMENTS ? (
                 <Pressable style={styles.attachmentAdd} onPress={chooseAttachment} disabled={processing}>
-                  <AppText size={22} customColor={colors.blue}>+</AppText>
-                  <AppText size={10} family="InterSemiBold" customColor={colors.blue}>Add</AppText>
+                  <AppText size={22} customColor={colors.navy}>+</AppText>
+                  <AppText size={10} family="InterSemiBold" customColor={colors.navy}>Add</AppText>
                 </Pressable>
               ) : null}
             </View>
           ) : (
             <Pressable style={styles.upload} onPress={chooseAttachment} disabled={processing}>
               <AppText size={26}>📎</AppText>
-              <AppText size={13} family="InterSemiBold" customColor={colors.blue}>Add invoice attachment</AppText>
+              <AppText size={13} family="InterSemiBold" customColor={colors.navy}>Add invoice attachment</AppText>
               <AppText size={11} color="black" opacity={0.45}>Camera, gallery or a PDF from Files</AppText>
             </Pressable>
           )}
@@ -471,7 +471,7 @@ const NewInvoice = ({ navigation, route }: any) => {
 
             {picker === 'retailer' && retailersLoading ? (
               <View style={{ paddingVertical: 30 }}>
-                <ActivityIndicator color={colors.blue} />
+                <ActivityIndicator color={colors.navy} />
               </View>
             ) : (
               <FlatList
@@ -490,7 +490,7 @@ const NewInvoice = ({ navigation, route }: any) => {
                 }}
                 ListFooterComponent={
                   picker === 'retailer' && retailersLoadingMore ? (
-                    <ActivityIndicator color={colors.blue} style={{ marginVertical: 12 }} />
+                    <ActivityIndicator color={colors.navy} style={{ marginVertical: 12 }} />
                   ) : null
                 }
                 ListEmptyComponent={

@@ -9,7 +9,7 @@ const TileCard = ({ item, onpress }: any) => {
     const navigation = useNavigation<any>();
     return (
         <LinearGradient
-            colors={["#3895D3", "#FFFFFF"]}
+            colors={["#11325B", "#8A5A08"]}
             start={{ x: 1, y: 0 }}
             end={{ x: 0, y: 1 }}
             style={styles.border}>
@@ -20,10 +20,11 @@ const TileCard = ({ item, onpress }: any) => {
                 }}
                 style={[
                     styles.inner,
-                    { backgroundColor: item.bgColor,paddingTop:14 }]}>
+                    // White cards on the orange dashboard; the icons keep their own colours.
+                    { backgroundColor: colors.white, paddingTop: 14 }]}>
                 <AppText
                     size={14}
-                    color={colors.white}
+                    color={colors.navy}
                     horizontal={14}
                     family="InterSemiBold">
                     {item.title}
@@ -40,14 +41,19 @@ const TileCard = ({ item, onpress }: any) => {
 const styles = StyleSheet.create({
     border: {
         width: "31%",
-        borderRadius: 6,
-        padding: 1,
+        borderRadius: 10,
+        padding: 1.2,
+        shadowColor: '#7A2E0A',
+        shadowOpacity: 0.12,
+        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 3 },
+        elevation: 3,
         // marginBottom: 12,
     },
 
     inner: {
         flex: 1,
-        borderRadius: 6,
+        borderRadius: 9,
         justifyContent: "flex-start",
     },
     iconView: {

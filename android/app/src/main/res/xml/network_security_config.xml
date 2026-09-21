@@ -9,7 +9,7 @@
     <!--
       Android versions whose system store predates Sectigo Root R46 cannot
       otherwise build the API server's certificate path. Keep this additional
-      trust anchor scoped to the FieldKonnect API host.
+      trust anchor scoped to the KSB-AAROH API host.
     -->
     <domain-config>
         <domain includeSubdomains="false">app.ksbindia.co.in</domain>

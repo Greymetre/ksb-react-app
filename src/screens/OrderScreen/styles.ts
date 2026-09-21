@@ -1,12 +1,12 @@
 import { StyleSheet } from "react-native";
-import { colors } from "../../utils/Colors";
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { rw } from "../../utils/responsive";
 import { fonts } from "../../utils/typography";
 
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F2F2F4'
+        backgroundColor: 'transparent'
 
     },
     row: {
@@ -19,7 +19,7 @@ export const styles = StyleSheet.create({
         borderRadius: 8,
         borderWidth: 1,
         borderColor: "rgba(203, 213, 224, 1)",
-        backgroundColor: "rgba(57, 82, 153, 0.07)",
+        backgroundColor: "rgba(138, 90, 8, 0.07)",
         paddingHorizontal: 14
     },
     dateTimeBox: {
@@ -28,7 +28,7 @@ export const styles = StyleSheet.create({
         borderRadius: 8,
         borderWidth: 1,
         borderColor: "rgba(203, 213, 224, 1)",
-        backgroundColor: "rgba(57, 82, 153, 0.07)",
+        backgroundColor: "rgba(138, 90, 8, 0.07)",
         paddingHorizontal: 14,
         // flex: 1
 
@@ -139,7 +139,7 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 16,
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
         paddingHorizontal: rw(20),
         borderRadius: 6,
         width: '55%',
@@ -213,7 +213,7 @@ export const styles = StyleSheet.create({
         backgroundColor: '#fff',
     },
     buttonView: {
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
         width: '100%',
         height: 44,
         justifyContent: 'center',
@@ -226,7 +226,7 @@ export const styles = StyleSheet.create({
         borderRadius: 12,
         borderWidth: 1,
         borderColor: "rgba(203, 213, 224, 1)",
-        backgroundColor: 'rgba(57, 82, 153, 0.07)',
+        backgroundColor: 'rgba(138, 90, 8, 0.07)',
         height: 48,
 
         paddingHorizontal: 14

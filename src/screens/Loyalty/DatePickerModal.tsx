@@ -124,7 +124,7 @@ const DatePickerModal = ({ visible, value, onSelect, onClose, title = 'Invoice d
                 onSelect(today);
                 onClose();
               }}>
-              <AppText size={13} family="InterSemiBold" customColor={colors.blue}>Today</AppText>
+              <AppText size={13} family="InterSemiBold" customColor={colors.navy}>Today</AppText>
             </Pressable>
           </View>
         </Pressable>

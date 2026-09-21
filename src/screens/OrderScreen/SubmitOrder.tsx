@@ -4,7 +4,7 @@ import { ArrowDownIcon } from '../../assets/svgs/SvgsFile';
 import AppText from '../../components/AppText/AppText';
 import { styles } from './styles';
 import { rw } from '../../utils/responsive';
-import { colors } from '../../utils/Colors';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { NavigationProp, ParamListBase, useNavigation, useRoute } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import store from '../../components/redux/Store';
@@ -80,7 +80,7 @@ const TableRow: React.FC<TableRowProps> = ({ item, onRateChange, onRemove }) => 
     return (
         <View style={styles.tableRows}>
             <TouchableOpacity
-                style={{ height: 22, width: 22, backgroundColor: colors.blue, borderRadius: 50, alignItems: 'center' }}
+                style={{ height: 22, width: 22, backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT, borderRadius: 50, alignItems: 'center' }}
                 onPress={() => onRemove(item.id)}
             >
                 <AppText size={14} color="white">-</AppText>
@@ -522,7 +522,7 @@ const SubmitOrder = () => {
                         <AppText size={14} color={'#333333'} family={'InterRegular'}>
                             Total Quantity
                         </AppText>
-                        <AppText size={16} color={colors.blue} family="InterBold">
+                        <AppText size={16} color={colors.navy} family="InterBold">
                             {totalQuantity}
                         </AppText>
                     </View>
@@ -530,7 +530,7 @@ const SubmitOrder = () => {
                         <AppText size={14} color={'#333333'} family={'InterRegular'}>
                             Total Order Value
                         </AppText>
-                        <AppText size={16} color={colors.blue} family="InterBold" horizontal={20}>
+                        <AppText size={16} color={colors.navy} family="InterBold" horizontal={20}>
                             {totalOrderValue.toFixed(2)}
                         </AppText>
                     </View>

@@ -22,7 +22,7 @@ const CustomHeader = ({ navigation, route, options, back }: any) => {
           <BackIcon />
         </Pressable>
         <View style={styles.titleView}>
-          <AppText size={18} color='black' family='InterMedium' opacity={0.8}>{title}</AppText>
+          <AppText size={18} color={colors.navy} family='InterSemiBold'>{title}</AppText>
         </View>
       </View>
     </SafeAreaView>

@@ -20,7 +20,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { rw } from '../../utils/responsive';
-import { colors } from '../../utils/Colors';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import AppText from '../../components/AppText/AppText';
 import { LocationIcon, MinusIcon, PlusIcon, UploadIcon } from '../../assets/svgs/HomePageSvgs';
 import { styles } from './styles';
@@ -2535,7 +2535,7 @@ const [locationLoading, setLocationLoading] = useState(false);
 
         {locationLoading && (
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, paddingLeft: 4 }}>
-            <ActivityIndicator size="small" color={colors.blue} />
+            <ActivityIndicator size="small" color={colors.navy} />
             <AppText size={13} color="#64748B">
               Fetching current location...
             </AppText>
@@ -2570,7 +2570,7 @@ const [locationLoading, setLocationLoading] = useState(false);
               styles.buttonView,
               {
                 // opacity: isValid && !isSubmitting ? 1 : 0.5,
-                backgroundColor: colors.blue,
+                backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
                 marginTop: 24,
               },
             ]}
@@ -2687,7 +2687,7 @@ const [locationLoading, setLocationLoading] = useState(false);
                 style={{
                   flex: 1,
                   paddingVertical: 14,
-                  backgroundColor: '#3B82F6', // use your theme color
+                  backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT, // use your theme color
                   borderRadius: 10,
                   marginLeft: 10,
                   alignItems: 'center',

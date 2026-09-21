@@ -114,10 +114,10 @@ const EmployeeRatingModal = ({ row, months, onClose }: Props) => {
                 </View>
               ))}
               <View style={[styles.factBox, styles.factBoxWide]}>
-                <AppText size={9} family="InterSemiBold" color={colors.blue} opacity={0.7}>
+                <AppText size={9} family="InterSemiBold" color={colors.navy} opacity={0.7}>
                   LAST {row.averageMonthCount} MONTHS AVERAGE
                 </AppText>
-                <AppText size={17} family="InterBold" color={colors.blue}>
+                <AppText size={17} family="InterBold" color={colors.navy}>
                   {row.averageRating.toFixed(2)}%
                 </AppText>
               </View>
@@ -129,7 +129,7 @@ const EmployeeRatingModal = ({ row, months, onClose }: Props) => {
               </AppText>
               {activeMonth ? (
                 <View style={styles.monthPill}>
-                  <AppText size={11} family="InterSemiBold" color={colors.blue}>
+                  <AppText size={11} family="InterSemiBold" color={colors.navy}>
                     {activeMonth.fullLabel}
                   </AppText>
                 </View>

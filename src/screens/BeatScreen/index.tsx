@@ -169,7 +169,7 @@ const BeatsScreen = () => {
     if (loading && !refreshing) {
         return (
             <View style={styles.center}>
-                <ActivityIndicator size="large" color={colors.blue} />
+                <ActivityIndicator size="large" color={colors.navy} />
             </View>
         );
     }
@@ -198,7 +198,7 @@ const BeatsScreen = () => {
                     </View>
                 }
                 ListFooterComponent={
-                    loadingMore ? <ActivityIndicator size="small" color={colors.blue} /> : errorMsg && !beats.length ? (
+                    loadingMore ? <ActivityIndicator size="small" color={colors.navy} /> : errorMsg && !beats.length ? (
                         <AppText size={14} color="red" style={{ textAlign: 'center', marginTop: rw(20) }}>
                             {errorMsg}
                         </AppText>
@@ -212,7 +212,7 @@ const BeatsScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.bgColor
+        backgroundColor: 'transparent'
     },
     center: {
         flex: 1,

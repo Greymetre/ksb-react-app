@@ -109,7 +109,7 @@ const SummaryCard = ({ item, orderValue, quantity, totalCustomer, totalCheckIn }
                 <AppText
                     size={16}
                     opacity={0.8}
-                    color={colors.blue}
+                    color={colors.navy}
                     family="InterSemiBold">
                     {orderValueText}
                 </AppText>

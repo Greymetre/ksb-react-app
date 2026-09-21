@@ -66,7 +66,7 @@ const RetailerSchemeDetail = ({ route }: any) => {
   useEffect(() => { load(); }, [load]);
 
   if (loading) {
-    return <View style={[s.container, s.state]}><ActivityIndicator color={colors.blue} /></View>;
+    return <View style={[s.container, s.state]}><ActivityIndicator color={colors.navy} /></View>;
   }
 
   if (!scheme) {

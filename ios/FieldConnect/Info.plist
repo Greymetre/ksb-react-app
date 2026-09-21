@@ -11,7 +11,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>Fieldkonnect-KSB</string>
+	<string>KSB-AAROH</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -46,7 +46,7 @@
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>Location tracking starts after punch-in and stops after punch-out. It is used for attendance and field activity tracking.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>FieldKonnect uses your location for attendance, visit locations, and field activity tracking while you are punched in.</string>
+	<string>KSB-AAROH uses your location for attendance, visit locations, and field activity tracking while you are punched in.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>This app needs to save photos to your library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

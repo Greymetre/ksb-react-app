@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { rw } from '../../utils/responsive'
 import AppText from '../../components/AppText/AppText'
 import { ArrowDownIcon, CalenderIcon, CrossIcon, EyeballIcon, LOcationIcon, ThreeDotIcon } from '../../assets/svgs/SvgsFile'
-import { colors } from '../../utils/Colors'
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { shadowStyle } from '../../utils/typography'
 import { styles } from '../ExpenseReport/styles'
 import ActionSheet, { ActionSheetRef } from 'react-native-actions-sheet';
@@ -443,6 +443,21 @@ const AttendanceReport = ({ navigation }: any) => {
   };
 
   // Switch change handler
+  // A leave is usually applied for days that have not happened yet, so switching to L
+  // widens the range to this month and the next one. Switching back to A restores the
+  // range the attendance list was on.
+  const attendanceRangeRef = useRef<{ start: any; end: any }>({ start: startDate, end: endDate });
+
+  const leaveDateRange = () => {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    start.setHours(0, 0, 0, 0);
+    // Day 0 of the month after next is the last day of next month.
+    const end = new Date(now.getFullYear(), now.getMonth() + 2, 0);
+    end.setHours(23, 59, 59, 999);
+    return { start, end };
+  };
+
   const onSwitchChange = (val: boolean) => {
 
     setSwitchOption(val);
@@ -450,12 +465,33 @@ const AttendanceReport = ({ navigation }: any) => {
     setPage(1);
     setHasMore(true);
 
+    let nextStart = startDate;
+    let nextEnd = endDate;
+
+    if (val) {
+      const saved = attendanceRangeRef.current;
+      if (saved?.start && saved?.end) {
+        nextStart = saved.start;
+        nextEnd = saved.end;
+        setRange('currentMonth');
+      }
+    } else {
+      attendanceRangeRef.current = { start: startDate, end: endDate };
+      const range = leaveDateRange();
+      nextStart = range.start;
+      nextEnd = range.end;
+      setRange('custom');
+    }
+
+    setStartDate(nextStart);
+    setEndDate(nextEnd);
+
     handleAttendanceList(
       val ? 'normal' : 'leave',
       selectedUserId,
       selectedStatus,
-      startDate,
-      endDate,
+      nextStart,
+      nextEnd,
       1,
       false
     );
@@ -901,7 +937,7 @@ const AttendanceReport = ({ navigation }: any) => {
             }}
           >
             <Pressable onPress={resetFilters}>
-              <AppText color={colors.blue} size={14} family="InterMedium">
+              <AppText color={colors.navy} size={14} family="InterMedium">
                 Reset Filters
               </AppText>
             </Pressable>
@@ -911,12 +947,12 @@ const AttendanceReport = ({ navigation }: any) => {
         </View>
 
         {/* Placeholder for future date picker */}
-        <View style={[styles.row, { marginTop: 16, gap: 13 }]}>
-          <Pressable style={[styles.dateTimeBox, styles.row,]} onPress={() => setShowCal(true)}>
+        <View style={[styles.row, { marginTop: 16, gap: 10 }]}>
+          <Pressable style={[styles.dateTimeBox, styles.row, { flex: 1, height: 42, marginTop: 0 }]} onPress={() => setShowCal(true)}>
             <View style={{ flex: 1, justifyContent: 'center' }}>
               {
                 (startDate && endDate) ? (
-                  <AppText size={12} color="black" family="InterRegular">
+                  <AppText size={12} color="black" family="InterRegular" numLines={1}>
                     {formatYYYYMMDD(startDate)} : {formatYYYYMMDD(endDate)}
                   </AppText>
                 ) : (
@@ -928,12 +964,15 @@ const AttendanceReport = ({ navigation }: any) => {
 
             </View>
             <View style={[styles.calenderICon, styles.center]}>
-              <CalenderIcon size={16} color={colors.blue} />
+              <CalenderIcon size={16} color={colors.navy} />
             </View>
           </Pressable>
           <AnimatedSwitch
             text1="A"
             text2="L"
+            width={78}
+            height={42}
+            initialValue={switchOption}
             dataPress={onSwitchChange}
           />
         </View>
@@ -943,13 +982,13 @@ const AttendanceReport = ({ navigation }: any) => {
         {loader1 ? (
           <ActivityIndicator
             size="large"
-            color={colors.blue}
+            color={colors.navy}
             style={{ marginTop: 60 }}
           />
         ) : attendanceList.length === 0 ? (
           <View style={{ alignItems: 'center', marginTop: 60 }}>
             <AppText size={16} color="#718096" family="InterMedium">
-              No {switchOption ? "attendences" : "leaves"} records found
+              No {switchOption ? "attendance" : "leave"} records found
             </AppText>
           </View>
         ) : (
@@ -966,7 +1005,7 @@ const AttendanceReport = ({ navigation }: any) => {
                 {isFetchingMore && (
                   <ActivityIndicator
                     size="small"
-                    color={colors.blue}
+                    color={colors.navy}
                     style={{ marginVertical: 20 }}
                   />
                 )}
@@ -1186,7 +1225,7 @@ const AttendanceReport = ({ navigation }: any) => {
                       <AppText size={14} family='InterMedium' color='#333333'>Punch In Location</AppText>
                       <View style={[styles.row, { gap: 5 }]}>
                         <LOcationIcon />
-                        <AppText size={14} family='InterMedium' color={colors.blue}>View</AppText>
+                        <AppText size={14} family='InterMedium' color={colors.navy}>View</AppText>
                       </View>
                     </Pressable>
                   )
@@ -1215,7 +1254,7 @@ const AttendanceReport = ({ navigation }: any) => {
                       <AppText size={14} family='InterMedium' color='#333333'>Punch Out Location</AppText>
                       <View style={[styles.row, { gap: 5 }]}>
                         <LOcationIcon />
-                        <AppText size={14} family='InterMedium' color={colors.blue}></AppText>
+                        <AppText size={14} family='InterMedium' color={colors.navy}></AppText>
                       </View>
                     </View>
                   </View> */}
@@ -1663,7 +1702,7 @@ const AttendanceReport = ({ navigation }: any) => {
 const localStyles = StyleSheet.create({
   dropdown: {
     height: 50,
-    backgroundColor: 'rgba(57, 82, 153, 0.07)',
+    backgroundColor: 'rgba(138, 90, 8, 0.07)',
     borderRadius: 8,
     paddingHorizontal: 12,
     borderWidth: 1,
@@ -1672,7 +1711,7 @@ const localStyles = StyleSheet.create({
   },
   fullDropdown: {
     height: 50,
-    backgroundColor: 'rgba(57, 82, 153, 0.07)',
+    backgroundColor: 'rgba(138, 90, 8, 0.07)',
     borderRadius: 8,
     paddingHorizontal: 12,
     borderWidth: 1,
@@ -1744,7 +1783,7 @@ const localStyles = StyleSheet.create({
   },
   designationCheckboxSelected: {
     borderColor: colors.blue,
-    backgroundColor: colors.blue,
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
   },
   emptyDesignationText: {
     textAlign: 'center',
@@ -1767,7 +1806,7 @@ const localStyles = StyleSheet.create({
     flex: 1,
     paddingVertical: 14,
     borderRadius: 8,
-    backgroundColor: colors.blue,
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
     alignItems: 'center',
   },
 });

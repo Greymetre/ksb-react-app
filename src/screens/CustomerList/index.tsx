@@ -5,7 +5,7 @@ import { ArrowDownIcon, CrossIcon } from '../../assets/svgs/SvgsFile';
 import { styles } from './styles';
 import { rw } from '../../utils/responsive';
 import { NavigationProp, ParamListBase, useFocusEffect, useNavigation } from '@react-navigation/native';
-import { colors } from '../../utils/Colors';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { SearchSvgIcon } from '../../assets/svgs/HomePageSvgs';
 import { DATA } from '../../components/Comman/CommanFunction';
 import CustomerCard from '../../components/atoms/CustomerCard';
@@ -58,6 +58,9 @@ const CustomerList = ({ route }: any) => {
   // KYC. Pre-set when the Loyalty invoice tab opened this screen from its KYC tile, so
   // the list arrives already showing exactly the retailers that count referred to.
   const [kycFilter, setKycFilter] = useState<string | null>(route?.params?.kyc ?? null);
+  // Opened from the Loyalty screen's Active Retailer KYC tiles: the list and its chip counts
+  // cover only retailers who have submitted a loyalty invoice.
+  const invoiceActive = !!route?.params?.invoiceActive;
   // Counts for the four stages, over the same customers and filters as the list.
   const [kycCounts, setKycCounts] = useState<Record<string, number>>({});
   const KYC_STAGES = [
@@ -75,6 +78,7 @@ const CustomerList = ({ route }: any) => {
       if (selectedStatus && selectedStatus !== 'All') params.status = selectedStatus;
       if (selectedCity?.city_name) params.city_name = selectedCity.city_name;
       if (selectedUser?.id) params.for_user_id = selectedUser.id;
+      if (invoiceActive) params.invoice_active = 1;
       const response = await axiosClient.get(`${API_ENDPOINT.SECONDARY_CUSTOMER}/kyc-summary`, { params });
       setKycCounts(response?.data?.data ?? {});
     } catch {
@@ -121,7 +125,7 @@ const CustomerList = ({ route }: any) => {
   useFocusEffect(
     useCallback(() => {
       navigation.setOptions({
-        headerTitle: `${route?.params?.customerTypeName || route?.params?.type || 'Customers'}${total ? ` (${total})` : ''}`,
+        headerTitle: `${invoiceActive ? 'Active ' : ''}${route?.params?.customerTypeName || route?.params?.type || 'Customers'}${total ? ` (${total})` : ''}`,
       });
     }, [navigation, total, route?.params?.customerTypeName, route?.params?.type])
   );
@@ -304,6 +308,7 @@ const CustomerList = ({ route }: any) => {
           city_name: clearCity ? null : overrideCity?.city_name ?? selectedCity?.city_name,
           for_user_id: clearUser ? null : overrideUser?.id ?? selectedUser?.id,
           kyc: kycFilter,
+          invoice_active: invoiceActive,
         });
         console.log('Secondary customer list response:', {
           type: route.params.type,
@@ -462,7 +467,7 @@ const CustomerList = ({ route }: any) => {
 
         {
           route?.params?.type && !route?.params?.beatId && (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0 }} contentContainerStyle={{ gap: 8, paddingRight: 8 }}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.kycChipScroll} contentContainerStyle={styles.kycChipRow}>
               {KYC_STAGES.map(stage => {
                 const active = kycFilter === stage.key;
                 return (
@@ -494,8 +499,8 @@ const CustomerList = ({ route }: any) => {
         {
           loader1 || (loader && customerData.length === 0) ? (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-              <ActivityIndicator size="large" color={colors.blue} />
-              <AppText size={15} family="InterMedium" color={colors.blue}>
+              <ActivityIndicator size="large" color={colors.navy} />
+              <AppText size={15} family="InterMedium" color={colors.navy}>
                 Loading customers...
               </AppText>
             </View>
@@ -540,8 +545,8 @@ const CustomerList = ({ route }: any) => {
                 <View style={{ justifyContent: 'center', alignItems: 'center', paddingTop: 40 }}>
                   {loader ? (
                     <>
-                      <ActivityIndicator size="large" color={colors.blue} />
-                      <AppText size={15} family="InterMedium" color={colors.blue}>
+                      <ActivityIndicator size="large" color={colors.navy} />
+                      <AppText size={15} family="InterMedium" color={colors.navy}>
                         Loading customers...
                       </AppText>
                     </>
@@ -554,7 +559,7 @@ const CustomerList = ({ route }: any) => {
               ListFooterComponent={() =>
                 loader && page > 1 ? (
                   <View style={{ paddingVertical: 20 }}>
-                    <ActivityIndicator size="large" color={colors.blue} />
+                    <ActivityIndicator size="large" color={colors.navy} />
                   </View>
                 ) : (
                   <View style={{ height: 30 }} />
@@ -608,7 +613,7 @@ const CustomerList = ({ route }: any) => {
                     borderColor:
                       selectedStatus === item.value ? colors.blue : '#ccc',
                     backgroundColor:
-                      selectedStatus === item.value ? colors.blue : 'transparent',
+                      selectedStatus === item.value ? colors.navy : 'transparent', experimental_backgroundImage: selectedStatus === item.value ? BRAND_GRADIENT : undefined,
                     marginRight: 14,
                   }}
                 />

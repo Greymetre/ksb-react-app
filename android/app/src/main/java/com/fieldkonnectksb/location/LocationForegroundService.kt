@@ -308,7 +308,7 @@ class LocationForegroundService : Service() {
   private fun createNotificationChannel() {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
     val channel = NotificationChannel(CHANNEL_ID, "Live location tracking", NotificationManager.IMPORTANCE_LOW).apply {
-      description = "Shows when FieldKonnect is tracking location after punch-in"
+      description = "Shows when KSB-AAROH is tracking location after punch-in"
       setShowBadge(false)
     }
     getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
@@ -323,7 +323,7 @@ class LocationForegroundService : Service() {
       PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
     return NotificationCompat.Builder(this, CHANNEL_ID)
-      .setContentTitle("FieldKonnect live location")
+      .setContentTitle("KSB-AAROH live location")
       .setContentText(message)
       .setSmallIcon(R.mipmap.ic_launcher)
       .setOngoing(true)

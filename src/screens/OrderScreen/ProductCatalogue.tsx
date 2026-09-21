@@ -6,7 +6,7 @@ import { styles } from './styles';
 import { rw } from '../../utils/responsive';
 import FastImage from 'react-native-fast-image';
 import { AddCartMiunsIcon, PlaceOrderIcon, PlusIcon } from '../../assets/svgs/HomePageSvgs';
-import { colors } from '../../utils/Colors';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { Dropdown } from 'react-native-element-dropdown';
 import Toast from 'react-native-toast-message';
 import store from '../../components/redux/Store';
@@ -543,7 +543,7 @@ const ProductCatalogue = ({ navigation, route }: ProductCatalogueProps) => {
                                     flex: 1,
                                     fontSize: 15,
                                     fontFamily: 'InterBold',
-                                    color: '#395299',
+                                    color: '#8A5A08',
                                     textAlign: 'center',
                                     paddingHorizontal: 4,
                                 }}
@@ -591,12 +591,12 @@ const ProductCatalogue = ({ navigation, route }: ProductCatalogueProps) => {
                     </TouchableOpacity>
                 </View>
                 <View style={[styles.row, { justifyContent: 'space-between', marginTop: 25 }]}>
-                    <Pressable style={[styles.chatButton, { backgroundColor: colors.blue }]} onPress={resetForm}>
+                    <Pressable style={[styles.chatButton, { backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT }]} onPress={resetForm}>
                         <AppText size={14} color={colors.white} family='InterBold' >Add More Product</AppText>
                     </Pressable>
                     <Pressable style={[styles.chatButton, { backgroundColor: '#D2DAEE' }]} onPress={addToCart}>
                         <PlaceOrderIcon />
-                        <AppText size={14} color={'#395299'} family='InterBold' >Add to Cart</AppText>
+                        <AppText size={14} color={'#8A5A08'} family='InterBold' >Add to Cart</AppText>
                     </Pressable>
                 </View>
                 {/* </ScrollView> */}

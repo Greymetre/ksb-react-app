@@ -19,6 +19,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { createMMKV } from 'react-native-mmkv';
 import { activityApi, ActivityType, normalizeActivity } from '../../api/activityApi';
 import { resolveMediaUrl } from '../../api/AxiosClient';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 
 const offline = createMMKV({ id: 'promotional-activity-drafts' });
 const today = () => new Date().toISOString().slice(0, 10);
@@ -494,7 +495,7 @@ export default function ActivityFormScreen() {
       },
     ]);
   if (loading || !cfg)
-    return <ActivityIndicator style={{ flex: 1 }} color="#3b4db7" />;
+    return <ActivityIndicator style={{ flex: 1 }} color="#8A5A08" />;
   return (
     <SafeAreaView style={s.page}>
       <View style={s.header}>
@@ -503,7 +504,7 @@ export default function ActivityFormScreen() {
         </Pressable>
         <View style={{ flex: 1 }}>
           <Text style={s.mini}>
-            {form.activityCode ? form.activityCode : 'FIELDKONNECT'}
+            {form.activityCode ? form.activityCode : 'KSB-AAROH'}
           </Text>
           <Text style={s.title}>
             {readOnly ? 'View' : 'New'} {cfg.title}
@@ -1202,14 +1203,14 @@ const s = StyleSheet.create({
     borderColor: '#c9cfe4',
     backgroundColor: '#fff',
   },
-  selectChipActive: { borderColor: '#3b4db7', backgroundColor: '#e8ebff' },
+  selectChipActive: { borderColor: '#8A5A08', backgroundColor: '#e8ebff' },
   selectChipText: { fontSize: 13, color: '#4a5270' },
-  selectChipTextActive: { fontSize: 13, color: '#3b4db7', fontWeight: '700' },
-  page: { flex: 1, backgroundColor: '#f1f2f7' },
+  selectChipTextActive: { fontSize: 13, color: '#8A5A08', fontWeight: '700' },
+  page: { flex: 1, backgroundColor: 'transparent' },
   header: {
     height: 72,
     paddingHorizontal: 14,
-    backgroundColor: '#3b4db7',
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
@@ -1240,7 +1241,7 @@ const s = StyleSheet.create({
     gap: 7,
     backgroundColor: '#fff',
   },
-  chipActive: { backgroundColor: '#3b4db7', borderColor: '#3b4db7' },
+  chipActive: { backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT, borderColor: '#8A5A08' },
   chipNumber: {
     minWidth: 24,
     height: 24,
@@ -1271,7 +1272,7 @@ const s = StyleSheet.create({
     marginBottom: 12,
   },
   number: {
-    backgroundColor: '#3b4db7',
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
     color: '#fff',
     paddingHorizontal: 7,
     paddingVertical: 4,
@@ -1313,7 +1314,7 @@ const s = StyleSheet.create({
   selectOptionText: { color: '#252a36', fontSize: 16 },
   two: { flexDirection: 'row', gap: 8 },
   person: {
-    backgroundColor: '#f5f6fa',
+    backgroundColor: '#FDF9F1',
     padding: 10,
     borderRadius: 11,
     marginBottom: 9,
@@ -1332,12 +1333,12 @@ const s = StyleSheet.create({
   outline: {
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: '#3b4db7',
+    borderColor: '#8A5A08',
     borderRadius: 9,
     padding: 12,
     alignItems: 'center',
   },
-  blue: { color: '#3b4db7', fontWeight: '700' },
+  blue: { color: '#8A5A08', fontWeight: '700' },
   gift: {
     backgroundColor: '#fff2d8',
     padding: 12,
@@ -1367,7 +1368,7 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  totalValue: { fontWeight: '700', color: '#3b4db7' },
+  totalValue: { fontWeight: '700', color: '#8A5A08' },
   photos: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 },
   photo: { width: 72, height: 72, borderRadius: 8 },
   photoAdd: {
@@ -1375,7 +1376,7 @@ const s = StyleSheet.create({
     height: 72,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: '#3b4db7',
+    borderColor: '#8A5A08',
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
@@ -1401,7 +1402,7 @@ const s = StyleSheet.create({
     flex: 1.4,
     padding: 14,
     alignItems: 'center',
-    backgroundColor: '#3b4db7',
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
     borderRadius: 9,
   },
   white: { color: '#fff', fontWeight: '700' },

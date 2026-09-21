@@ -3,6 +3,7 @@
 // import AppText from '../AppText/AppText';
 // import { rw } from '../../utils/responsive';
 // import { colors } from '../../utils/Colors';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 // import { formatShortNumber } from '../../utils/misc';
 // import AnimatedSwitch from '../AnimatedSwitch/AnimatedSwitch';
 
@@ -44,13 +45,13 @@
 
 //         },
 //         {
-//             rank: 4, name: data?.top_5_products_current_year?.[3]?.product_name, value: data?.top_5_products_current_year?.[3]?.quantity || 0, progress: `${(data?.top_5_products_current_year?.[3]?.quantity || 1) / totalYTDQuantity * 100}%`, color: '#e8eaf2',
+//             rank: 4, name: data?.top_5_products_current_year?.[3]?.product_name, value: data?.top_5_products_current_year?.[3]?.quantity || 0, progress: `${(data?.top_5_products_current_year?.[3]?.quantity || 1) / totalYTDQuantity * 100}%`, color: '#FAF0DD',
 //             value2: data?.top_5_products_current_year?.[3]?.value || 0,
 //             progress2: `${(data?.top_5_products_current_year?.[3]?.value || 1) / totalYTDValue * 100}%`
 //         },
 
 //         {
-//             rank: 5, name: data?.top_5_products_current_year?.[4]?.product_name, value: data?.top_5_products_current_year?.[4]?.quantity || 0, progress: `${(data?.top_5_products_current_year?.[4]?.quantity || 1) / totalYTDQuantity * 100}%`, color: '#e8eaf2',
+//             rank: 5, name: data?.top_5_products_current_year?.[4]?.product_name, value: data?.top_5_products_current_year?.[4]?.quantity || 0, progress: `${(data?.top_5_products_current_year?.[4]?.quantity || 1) / totalYTDQuantity * 100}%`, color: '#FAF0DD',
 //             value2: data?.top_5_products_current_year?.[4]?.value || 0,
 //             progress2: `${(data?.top_5_products_current_year?.[4]?.value || 1) / totalYTDValue * 100}%`
 //         },
@@ -72,12 +73,12 @@
 //             progress2: `${(data?.top_5_products_current_month?.[2]?.value || 1) / totalMTDValue * 100}%`
 //         },
 //         {
-//             rank: 4, name: data?.top_5_products_current_month?.[3]?.product_name, value: data?.top_5_products_current_month?.[3]?.quantity || 0, progress: `${(data?.top_5_products_current_month?.[3]?.quantity || 1) / totalMTDQuantity * 100}%`, color: '#e8eaf2',
+//             rank: 4, name: data?.top_5_products_current_month?.[3]?.product_name, value: data?.top_5_products_current_month?.[3]?.quantity || 0, progress: `${(data?.top_5_products_current_month?.[3]?.quantity || 1) / totalMTDQuantity * 100}%`, color: '#FAF0DD',
 //             value2: data?.top_5_products_current_month?.[3]?.value || 0,
 //             progress2: `${(data?.top_5_products_current_month?.[3]?.value || 1) / totalMTDValue * 100}%`
 //         },
 //         {
-//             rank: 5, name: data?.top_5_products_current_month?.[4]?.product_name, value: data?.top_5_products_current_month?.[4]?.quantity || 0, progress: `${(data?.top_5_products_current_month?.[4]?.quantity || 1) / totalMTDQuantity * 100}%`, color: '#e8eaf2',
+//             rank: 5, name: data?.top_5_products_current_month?.[4]?.product_name, value: data?.top_5_products_current_month?.[4]?.quantity || 0, progress: `${(data?.top_5_products_current_month?.[4]?.quantity || 1) / totalMTDQuantity * 100}%`, color: '#FAF0DD',
 //             value2: data?.top_5_products_current_month?.[4]?.value || 0,
 //             progress2: `${(data?.top_5_products_current_month?.[4]?.value || 1) / totalMTDValue * 100}%`
 //         },
@@ -135,8 +136,8 @@
 //                                         {item.name}
 //                                     </AppText>
 //                                 </View>
-//                                 <AppText size={17} family="InterSemiBold" color="#3a4da0">
-//                                     <AppText align='right' size={10} family="InterSemiBold" color="#3a4da0">
+//                                 <AppText size={17} family="InterSemiBold" color="#8A5A08">
+//                                     <AppText align='right' size={10} family="InterSemiBold" color="#8A5A08">
 //                                         {' '}(QTY){' '}
 //                                     </AppText>
 //                                     {formatShortNumber(item.value)}
@@ -180,7 +181,7 @@
 //                         <AppText size={11} color="#6b7280" family="InterMedium">
 //                             YTD TOTAL VALUE
 //                         </AppText>
-//                         <AppText size={16} family='InterMedium' color="#1E40AF">
+//                         <AppText size={16} family='InterMedium' color="#8A5A08">
 //                             ₹{formatShortNumber(activeTab === 'MTD' ? totalMTDValue : totalYTDValue) || 0}
 //                         </AppText>
 //                     </View>
@@ -210,7 +211,7 @@
 //         borderRadius: 26,
 //     },
 //     activeTab: {
-//         backgroundColor: '#3a4da0',
+//         backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
 //     },
 //     card: {
 //         backgroundColor: 'white',
@@ -253,7 +254,7 @@
 //     },
 //     progressFill: {
 //         height: '100%',
-//         backgroundColor: '#1E40AF',
+//         backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
 //         borderRadius: 999,
 //     },
 //     footer: {
@@ -312,7 +313,7 @@ const TopProductsCard = ({ data }: { data: any }) => {
   // Sorted products based on current view mode
   const productsToDisplay = useMemo(() => {
 
-    const colorsList = ['#fac775', '#d3d1c7', '#f5c4b3', '#e8eaf2', '#e8eaf2'];
+    const colorsList = ['#fac775', '#d3d1c7', '#f5c4b3', '#FAF0DD', '#FAF0DD'];
 
     return currentRawProducts.slice(0, 5).map((item: any, index: number) => ({
       rank: index + 1,
@@ -383,10 +384,10 @@ const TopProductsCard = ({ data }: { data: any }) => {
                 </View>
 
                 {/* Primary Value */}
-                <AppText size={17} family="InterSemiBold" color={viewMode == 'qty' ? "#3a4da0" : "#156a06be"}>
+                <AppText size={17} family="InterSemiBold" color={viewMode == 'qty' ? "#8A5A08" : "#156a06be"}>
                   {viewMode === 'qty' ? (
                     <>
-                      <AppText size={10} family="InterSemiBold" color="#3a4da0">(QTY) </AppText>
+                      <AppText size={10} family="InterSemiBold" color="#8A5A08">(QTY) </AppText>
                       {formatShortNumber(item.quantity)}
                     </>
                   ) : (
@@ -411,10 +412,10 @@ const TopProductsCard = ({ data }: { data: any }) => {
                 )
               }
 
-              <AppText align='right' size={14} family="InterSemiBold" color={viewMode !== 'qty' ? "#3a4da0" : "#156a06be"}>
+              <AppText align='right' size={14} family="InterSemiBold" color={viewMode !== 'qty' ? "#8A5A08" : "#156a06be"}>
                 {viewMode !== 'qty' ? (
                   <>
-                    <AppText size={10} family="InterSemiBold" color="#3a4da0">(QTY) </AppText>
+                    <AppText size={10} family="InterSemiBold" color="#8A5A08">(QTY) </AppText>
                     {formatShortNumber(item.quantity)}
                   </>
                 ) : (
@@ -461,7 +462,7 @@ const TopProductsCard = ({ data }: { data: any }) => {
             <AppText size={11} color="#6b7280" family="InterMedium">
               TOTAL VALUE
             </AppText>
-            <AppText size={16} family="InterSemiBold" color="#1E40AF">
+            <AppText size={16} family="InterSemiBold" color="#8A5A08">
               ₹{formatShortNumber(totalValue)}
             </AppText>
           </View>
@@ -490,7 +491,7 @@ const styles = StyleSheet.create({
     borderRadius: 26,
   },
   activeTab: {
-    backgroundColor: '#3a4da0',
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
   },
   card: {
     backgroundColor: 'white',
@@ -529,7 +530,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#1E40AF',
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
     borderRadius: 999,
   },
   footer: {

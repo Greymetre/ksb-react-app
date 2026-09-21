@@ -90,25 +90,25 @@ export const summaryStats = [
     id: "1",
     title: "Order\nValue",
     value: "0 ( Lac )",
-    bgColor: '#395299',
+    bgColor: '#8A5A08',
   },
   {
     id: "2",
     title: "Order\nQuantity",
     value: "0",
-    bgColor: '#4C6ABD',
+    bgColor: '#8A5A08',
   },
   {
     id: "3",
     title: "Total\nCustomer",
     value: "0",
-    bgColor: '#5B77C2',
+    bgColor: '#8A5A08',
   },
   {
     id: "4",
     title: "Total\nCheck-Ins",
     value: "0",
-    bgColor: '#6A83C8',
+    bgColor: '#F5A623',
   },
 ];
 
@@ -117,25 +117,25 @@ export const summaryStats1 = [
     id: "1",
     title: "Order\nValue",
     value: "0 ( Lac )",
-    bgColor: '#395299',
+    bgColor: '#8A5A08',
   },
   {
     id: "2",
     title: "Order\nQuantity",
     value: "0",
-    bgColor: '#4C6ABD',
+    bgColor: '#8A5A08',
   },
   {
     id: "3",
     title: "New\nCustomers",
     value: "0",
-    bgColor: '#5B77C2',
+    bgColor: '#8A5A08',
   },
   {
     id: "4",
     title: "Total\nCheck-Ins",
     value: "0",
-    bgColor: '#6A83C8',
+    bgColor: '#F5A623',
   },
 ];
 

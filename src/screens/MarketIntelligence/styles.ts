@@ -1,17 +1,17 @@
 import { Platform, StyleSheet } from "react-native";
-import { colors } from "../../utils/Colors";
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { rw } from "../../utils/responsive";
 
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.bgColor
+        backgroundColor: 'transparent'
     },
     selectUser: {
         borderRadius: 12,
         borderWidth: 1,
         borderColor: "rgba(203, 213, 224, 1)",
-        backgroundColor: 'rgba(57, 82, 153, 0.07)',
+        backgroundColor: 'rgba(138, 90, 8, 0.07)',
         height: 48,
         marginVertical: 18,
         paddingHorizontal: 14
@@ -39,9 +39,9 @@ export const styles = StyleSheet.create({
         height: 95,
         width: '100%',
         borderWidth: 2,
-        borderColor: 'rgba(57, 82, 153, 1)',
+        borderColor: 'rgba(138, 90, 8, 1)',
         borderStyle: 'dashed',
-        backgroundColor: 'rgba(57, 82, 153, 0.1)',
+        backgroundColor: 'rgba(138, 90, 8, 0.1)',
         borderRadius: 9,
         justifyContent: 'center',
         alignItems: 'center',
@@ -49,7 +49,7 @@ export const styles = StyleSheet.create({
         marginTop: rw(14),
     },
     buttonView: {
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
         width: '100%',
         height: 44,
         justifyContent: 'center',

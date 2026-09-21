@@ -1,11 +1,11 @@
 import { StyleSheet } from 'react-native';
-import { colors } from '../../utils/Colors';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { rw } from '../../utils/responsive';
 
 /** One palette for both loyalty screens so a Live scheme looks the same on each. */
 export const statusTheme: Record<string, { from: string; to: string; pill: string; pillText: string; dot: string }> = {
   live: { from: '#0F7B4F', to: '#18A06A', pill: '#E7F7EF', pillText: '#0B6B43', dot: '#12A05F' },
-  upcoming: { from: '#395299', to: '#2F6FB8', pill: '#E8EEFB', pillText: '#2B4A8B', dot: '#3B62B5' },
+  upcoming: { from: '#11325B', to: '#173C68', pill: '#E8EEFB', pillText: '#2B4A8B', dot: '#3B62B5' },
   expired: { from: '#4B5563', to: '#6B7280', pill: '#EEF1F4', pillText: '#475569', dot: '#94A3B8' },
 };
 
@@ -25,11 +25,11 @@ export const shortDate = (value?: string | null) => {
 };
 
 export const loyaltyStyles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.offWHite },
+  container: { flex: 1, backgroundColor: 'transparent' },
 
   // The gradient paints behind the content rather than wrapping it: as a wrapper
   // it settles on a height that clips the bottom row of text.
-  hero: { marginHorizontal: rw(14), marginTop: 12, borderRadius: 18, backgroundColor: '#395299' },
+  hero: { marginHorizontal: rw(14), marginTop: 12, borderRadius: 18, backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT },
   heroGradient: { ...StyleSheet.absoluteFillObject, borderRadius: 18 },
   heroContent: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 18 },
   heroBadge: {

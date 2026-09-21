@@ -3,7 +3,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import AppText from '../../components/AppText/AppText';
 import { useGetCustomerSnapshot } from '../../api/query/CustomerApi';
-import { colors } from '../../utils/Colors';
+import { colors, gradients, BRAND_GRADIENT } from '../../utils/Colors';
 import { rw } from '../../utils/responsive';
 
 type Snapshot = {
@@ -85,7 +85,7 @@ const CustomerSnapshot = ({ entityId, entityType }: { entityId: any; entityType?
   if (loading) {
     return (
       <View style={[s.wrap, s.loadingWrap]}>
-        <ActivityIndicator color={colors.blue} size="small" />
+        <ActivityIndicator color={colors.navy} size="small" />
       </View>
     );
   }
@@ -114,7 +114,7 @@ const CustomerSnapshot = ({ entityId, entityType }: { entityId: any; entityType?
 
       <View style={s.board}>
         <LinearGradient
-          colors={['#1F3A6E', '#2F6FB8']}
+          colors={gradients.brand} locations={gradients.stops}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={s.boardGradient}
@@ -208,7 +208,7 @@ const s = StyleSheet.create({
 
   // Gradient painted behind the content: as a wrapper it settles on a height
   // that clips the bottom row of text.
-  board: { marginTop: 10, borderRadius: 18, backgroundColor: '#1F3A6E' },
+  board: { marginTop: 10, borderRadius: 18, backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT },
   boardGradient: { ...StyleSheet.absoluteFillObject, borderRadius: 18 },
   boardContent: { paddingHorizontal: 14, paddingTop: 13, paddingBottom: 14 },
   boardHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },

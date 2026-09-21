@@ -30,6 +30,7 @@ import UserTourList from '../screens/TourPlan/UserTourList';
 import BeatCustomerDetails from '../screens/BeatScreen/BeatCustomerDetails';
 import OrderHistoryDetailsScreen from '../screens/OrderScreen/OrderHistoryDetailsScreen';
 import Reports from '../screens/reports';
+import Documents from '../screens/Documents';
 import OrderList from '../screens/OrderScreen';
 import IndividualPage from '../screens/UserActivity/IndividualPage';
 import { useDispatch } from 'react-redux';
@@ -43,6 +44,7 @@ import ForceUpdateScreen from '../screens/Login/ForceUpdateScreen';
 import ActivityFormScreen from '../screens/Activities/ActivityForm';
 import ActivitySummaryScreen from '../screens/Activities/ActivitySummary';
 import MyProfileScreen from '../screens/Profile/MyProfile';
+import { colors } from '../utils/Colors';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -61,7 +63,10 @@ const Routes = () => {
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
-          header: (props) => <CustomHeader {...props} />
+          header: (props) => <CustomHeader {...props} />,
+          // Page titles and the back arrow in the brand navy.
+          headerTintColor: colors.navy,
+          headerTitleStyle: { color: colors.navy }
         }}
         initialRouteName={
           user?.access_token
@@ -102,6 +107,10 @@ const Routes = () => {
         <Stack.Screen name='Reports' component={Reports} options={{
           headerShown: true,
           title: 'Reports'
+        }} />
+        <Stack.Screen name='AppDocuments' component={Documents} options={{
+          headerShown: true,
+          title: 'Documents'
         }} />
 
         <Stack.Screen name='TourPlanPage' component={TourPlanPage} options={{

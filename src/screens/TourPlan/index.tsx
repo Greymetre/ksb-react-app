@@ -559,7 +559,7 @@ const TourPlanPage = ({ navigation }: TourPlanPageProps) => {
                       loadingDropDown ? (
                         <ActivityIndicator
                           size="large"
-                          color={colors.blue}
+                          color={colors.navy}
                         />
                       ) : null
                     }
@@ -584,7 +584,7 @@ const TourPlanPage = ({ navigation }: TourPlanPageProps) => {
               scrollEventThrottle={16}
               ListEmptyComponent={
                 loading ? <View style={{ flex: 1, marginTop: rw(50) }}>
-                  <ActivityIndicator size="large" color={colors.blue} />
+                  <ActivityIndicator size="large" color={colors.navy} />
                 </View> : (
                   <AppText size={16} color="gray" align="center" style={{ marginTop: rw(50) }}>
                     No users found
@@ -593,7 +593,7 @@ const TourPlanPage = ({ navigation }: TourPlanPageProps) => {
               }
               ListFooterComponent={
                 loading && page > 1 ? (
-                  <ActivityIndicator size='large' color={colors.blue} style={{ marginVertical: rw(20) }} />
+                  <ActivityIndicator size='large' color={colors.navy} style={{ marginVertical: rw(20) }} />
                 ) : (
                   <View style={{height:50}} />
                 )

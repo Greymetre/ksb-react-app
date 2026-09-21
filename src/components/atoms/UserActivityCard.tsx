@@ -1,7 +1,7 @@
 import React from "react";
 import { Alert, Linking, Platform, Pressable, StyleSheet, View } from "react-native";
 import AppText from "../AppText/AppText";
-import { colors } from "../../utils/Colors";
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { ClockIcon, LocationIcon } from "../../assets/svgs/HomePageSvgs";
 import Toast from "react-native-toast-message";
 
@@ -506,7 +506,7 @@ const styles = StyleSheet.create({
   line: {
     borderTopLeftRadius: 6,
     borderTopRightRadius: 6,
-    backgroundColor: '#3654a4',
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
     paddingHorizontal: 14,
     paddingVertical: 12,
     shadowOffset: { width: 0, height: 10 },

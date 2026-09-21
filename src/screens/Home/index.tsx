@@ -6,7 +6,7 @@ import { FirstUserIcon, LogoIcon, SecondUserIcon, VillageIcon } from '../../asse
 import { SafeAreaView } from 'react-native-safe-area-context'
 import AppText from '../../components/AppText/AppText'
 import { CrossIcon } from '../../assets/svgs/SvgsFile'
-import { colors } from '../../utils/Colors'
+import { colors, gradients, BRAND_GRADIENT } from '../../utils/Colors';
 import { dashboardTiles } from '../../components/Comman/CommanFunction'
 import TileCard from '../../components/atoms/TileCard'
 import { NavigationProp, ParamListBase, useFocusEffect, useNavigation } from '@react-navigation/native'
@@ -37,6 +37,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import { startLiveLocationTracking, stopLiveLocationTracking } from '../../services/liveLocationService'
 import { API_BASE_URL, BASE_URL } from '../../api/AxiosClient'
 import { getDeviceUniqueId, getInstalledAppVersion, isAppUpdateRequired } from '../../utils/appVersion'
+import { KsbAarohBrand, MenuLines } from '../../components/AarohLogo';
 
 interface DropdownItem {
   label: string;
@@ -685,11 +686,12 @@ const Home = () => {
           <ScrollView style={[styles.container, { marginBottom: 100 }]} showsVerticalScrollIndicator={false}
           nestedScrollEnabled={true}
           keyboardShouldPersistTaps='handled'>
-            <View style={styles.blueContaier} />
+            <LinearGradient colors={gradients.brand} locations={gradients.stops} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.blueContaier} />
             <SafeAreaView style={{ flex: 1 }} edges={['top']}>
               <View style={[styles.header, styles.row]}>
-                <Pressable onPress={handleDrawerPress}>
-                  <LogoIcon />
+                <Pressable onPress={handleDrawerPress} hitSlop={8} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                  <MenuLines />
+                  <KsbAarohBrand variant="pill" />
                 </Pressable>
                 <View style={[styles.row, styles.button]}>
                   {loadingPunchStatus ? (
@@ -700,14 +702,14 @@ const Home = () => {
                         isPunchedIn == "end" ? (
                           <>
                             <Pressable style={{ height: 30, paddingHorizontal: 12, borderRadius: 19, justifyContent: 'center', alignItems: 'center', backgroundColor: 'white' }}>
-                              <AppText color={colors.blue} size={12} family='InterMedium'>Day Ended</AppText>
+                              <AppText color={colors.navy} size={12} family='InterMedium'>Day Ended</AppText>
                             </Pressable>
                           </>
                         ) : (
                           <Switch
                             value={isPunchedIn}
                             onValueChange={() => handleToggleAttendance()}
-                            trackColor={{ false: '#767577', true: '#81b0ff' }}
+                            trackColor={{ false: '#767577', true: '#F5A623' }}
                             thumbColor={isPunchedIn ? '#36fd36' : '#f4f3f4'}
                           />
                         )
@@ -769,11 +771,11 @@ const Home = () => {
                   <View style={[styles.row, { gap: 10 }]}>
                     <AppText color={colors.black} size={18} family="InterSemiBold">Attendance</AppText>
                     <View style={styles.todayContainer}>
-                      <AppText color={colors.blue} family={'InterMedium'} size={11}>TODAY</AppText>
+                      <AppText color={colors.navy} family={'InterMedium'} size={11}>TODAY</AppText>
                     </View>
                   </View>
                   <Pressable onPress={() => navigation?.navigate("AttendanceViewAllScreen")} hitSlop={10}>
-                    <AppText color={colors.blue} family={'InterMedium'} size={13}>View All →</AppText>
+                    <AppText color={colors.navy} family={'InterMedium'} size={13}>View All →</AppText>
                   </Pressable>
                 </View>
               </View>
@@ -816,11 +818,11 @@ const Home = () => {
                   <View style={[styles.row, { gap: 10 }]}>
                     <AppText color={colors.black} size={18} family="InterSemiBold">Target VS Achievement</AppText>
                     <View style={styles.todayContainer}>
-                      <AppText color={colors.blue} family={'InterMedium'} size={11}>YTD</AppText>
+                      <AppText color={colors.navy} family={'InterMedium'} size={11}>YTD</AppText>
                     </View>
                   </View>
                   <Pressable onPress={() => navigation.navigate("TargetArchieViewAllScreen")} hitSlop={10}>
-                    <AppText color={colors.blue} family={'InterMedium'} size={13}>View All →</AppText>
+                    <AppText color={colors.navy} family={'InterMedium'} size={13}>View All →</AppText>
                   </Pressable>
                 </View>
               </View>
@@ -834,7 +836,7 @@ const Home = () => {
                     <AppText color={colors.black} size={18} family="InterSemiBold">Promotional Activities</AppText>
                   </View>
                   <Pressable onPress={() => navigation.navigate('ActivitySummary')} hitSlop={10}>
-                    <AppText color={colors.blue} family={'InterMedium'} size={13}>View Summary →</AppText>
+                    <AppText color={colors.navy} family={'InterMedium'} size={13}>View Summary →</AppText>
                   </Pressable>
                 </View>
               </View>
@@ -844,11 +846,11 @@ const Home = () => {
                   <View style={[styles.row, { gap: 10 }]}>
                     <AppText color={colors.black} size={18} family="InterSemiBold">Retailers</AppText>
                     <View style={styles.todayContainer}>
-                      <AppText color={colors.blue} family={'InterMedium'} size={11}>YTD</AppText>
+                      <AppText color={colors.navy} family={'InterMedium'} size={11}>YTD</AppText>
                     </View>
                   </View>
                   <Pressable onPress={() => navigation.navigate("RetailersPerformanceViewAllScreen")} hitSlop={10}>
-                    <AppText color={colors.blue} family={'InterMedium'} size={13}>View All →</AppText>
+                    <AppText color={colors.navy} family={'InterMedium'} size={13}>View All →</AppText>
                   </Pressable>
                 </View>
               </View>
@@ -859,7 +861,7 @@ const Home = () => {
                     <AppText color={colors.black} size={18} family="InterSemiBold">Top Performing SKUs</AppText>
                   </View>
                   {/* <Pressable>
-                    <AppText color={colors.blue} family={'InterMedium'} size={13}>View All →</AppText>
+                    <AppText color={colors.navy} family={'InterMedium'} size={13}>View All →</AppText>
                   </Pressable> */}
                 </View>
               </View>
@@ -902,7 +904,7 @@ const Home = () => {
               showsVerticalScrollIndicator={false}
             >
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <AppText size={20} family="InterSemiBold" color={colors.blue}>
+                <AppText size={20} family="InterSemiBold" color={colors.navy}>
                   Leave Request
                 </AppText>
                 <TouchableOpacity onPress={() => setShowLeaveModal(false)}>
@@ -1128,7 +1130,7 @@ const Home = () => {
                   style={{
                     flex: 1,
                     padding: 14,
-                    backgroundColor: colors.blue,
+                    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
                     borderRadius: 12,
                     alignItems: 'center',
                   }}
@@ -1274,7 +1276,7 @@ const Home = () => {
                     Select User
                   </AppText>
                   <TouchableOpacity onPress={() => setShowUserModal(false)}>
-                    <AppText size={16} color={colors.blue} family="InterMedium">
+                    <AppText size={16} color={colors.navy} family="InterMedium">
                       Close
                     </AppText>
                   </TouchableOpacity>
@@ -1336,7 +1338,7 @@ const Home = () => {
                     loading ? (
                       <ActivityIndicator
                         size="large"
-                        color={colors.blue}
+                        color={colors.navy}
                         style={{ marginVertical: 20 }}
                       />
                     ) : null

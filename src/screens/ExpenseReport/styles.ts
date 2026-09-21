@@ -1,11 +1,11 @@
 import { StyleSheet } from "react-native";
-import { colors } from "../../utils/Colors";
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { rw } from "../../utils/responsive";
 
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.offWHite
+        backgroundColor: 'transparent'
     },
     row: {
         flexDirection: "row",
@@ -22,7 +22,7 @@ export const styles = StyleSheet.create({
         borderRadius: 8,
         borderWidth: 1,
         borderColor: "rgba(203, 213, 224, 1)",
-        backgroundColor: "rgba(57, 82, 153, 0.07)",
+        backgroundColor: "rgba(138, 90, 8, 0.07)",
         paddingHorizontal: 14,
         gap: 8,
     },
@@ -33,7 +33,7 @@ export const styles = StyleSheet.create({
         borderRadius: 8,
         borderWidth: 1,
         borderColor: "rgba(203, 213, 224, 1)",
-        backgroundColor: "rgba(57, 82, 153, 0.07)",
+        backgroundColor: "rgba(138, 90, 8, 0.07)",
         paddingHorizontal: 14,
         paddingVertical: 9,
         marginTop: 12,
@@ -69,7 +69,7 @@ export const styles = StyleSheet.create({
         height: 60,
         width: 60,
         borderRadius: 30,
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
         justifyContent: 'center',
         alignItems: 'center',
         elevation: 5,
@@ -107,7 +107,7 @@ export const styles = StyleSheet.create({
         paddingHorizontal: 15,
         height: 34,
         borderRadius: 6,
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
     },
     listItem: {
         backgroundColor: 'white',
@@ -131,7 +131,7 @@ export const styles = StyleSheet.create({
     },
     modalheader: {
         height: 61,
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
         width: "100%",
         overflow: 'hidden',
         zIndex: 10,
@@ -149,7 +149,7 @@ export const styles = StyleSheet.create({
         backgroundColor: colors.white
     },
     buttonView: {
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
         width: '100%',
         height: 44,
         justifyContent: 'center',
@@ -171,7 +171,7 @@ export const styles = StyleSheet.create({
         borderRadius: 12,
         borderWidth: 1,
         borderColor: "rgba(203, 213, 224, 1)",
-        backgroundColor: 'rgba(57, 82, 153, 0.07)',
+        backgroundColor: 'rgba(138, 90, 8, 0.07)',
         height: 48,
         marginTop: 12,
         paddingHorizontal: 14
@@ -195,7 +195,7 @@ export const styles = StyleSheet.create({
     },
     detailHeader: {
         height: 52,
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -272,7 +272,7 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     presetChipOn: {
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
         borderColor: colors.blue,
     },
     rangeChip: {
@@ -286,7 +286,7 @@ export const styles = StyleSheet.create({
         gap: 2,
     },
     rangeChipOn: {
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
         borderColor: colors.blue,
     },
     inlineCalendar: {
@@ -294,7 +294,7 @@ export const styles = StyleSheet.create({
     },
     rangeDone: {
         alignSelf: 'flex-end',
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
         borderRadius: 8,
         paddingHorizontal: 22,
         height: 36,
@@ -347,7 +347,7 @@ export const styles = StyleSheet.create({
         borderBottomColor: '#EDF0F5',
     },
     done:{
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
         paddingHorizontal: 6,
         height: 45,
         borderRadius: 8,

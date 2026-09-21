@@ -49,7 +49,8 @@ export const useMutateSecondaryCustListApi = () => {
             status,
             city_name,
             for_user_id,
-            kyc
+            kyc,
+            invoice_active
         }: any) => {
 
             const params: any = {
@@ -73,6 +74,10 @@ export const useMutateSecondaryCustListApi = () => {
             }
             if (kyc) {
                 params.kyc = kyc;
+            }
+            // Only retailers who have submitted a loyalty invoice.
+            if (invoice_active) {
+                params.invoice_active = 1;
             }
 
             console.log(`${API_ENDPOINT.SECONDARY_CUSTOMER_GET}${type}`,

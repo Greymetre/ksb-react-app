@@ -7,7 +7,7 @@ import * as Yup from 'yup';
 
 import { styles } from './styles';
 import AppText from '../../components/AppText/AppText';
-import { colors } from '../../utils/Colors';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { useDispatch } from 'react-redux';
 import { useMutateLogin } from '../../api/query/AuthAPI';
 import { setToken, setUser } from '../../components/redux/slice/AuthSlice';
@@ -17,6 +17,7 @@ import Toast from 'react-native-toast-message';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { initializeLiveLocationTracking } from '../../services/liveLocationService';
 import { getDeviceUniqueId, getInstalledAppVersion } from '../../utils/appVersion';
+import { KsbAarohBrand } from '../../components/AarohLogo';
 
 type LoginFormValues = {
   email: string;
@@ -99,7 +100,7 @@ const LoginScreen = ({ navigation }: { navigation: any }) => {
       const loginErrorMessage =
         error?.response?.data?.message ||
         (error?.request
-          ? 'Unable to connect to FieldKonnect server. Please check your internet connection and try again.'
+          ? 'Unable to connect to the KSB-AAROH server. Please check your internet connection and try again.'
           : error?.message) ||
         'Login failed';
 
@@ -131,16 +132,7 @@ const LoginScreen = ({ navigation }: { navigation: any }) => {
         keyboardDismissMode="on-drag"
       > */}
         <View style={[styles.logoView, styles.center]}>
-          <FastImage
-            style={styles.logo}
-            resizeMode="contain"
-            source={require('../../assets/images/FieldKonnectLogo.png')}
-          />
-          <FastImage
-            style={styles.ksbLogo}
-            resizeMode="contain"
-            source={require('../../assets/images/KsbLogo.png')}
-          />
+          <KsbAarohBrand />
         </View>
 
         <View style={[styles.container, styles.subContainer]}>
@@ -243,7 +235,7 @@ const LoginScreen = ({ navigation }: { navigation: any }) => {
                     styles.buttonView,
                     {
                       // opacity: isValid && !isSubmitting ? 1 : 0.5,
-                      backgroundColor: isValid ? colors.blue : '#A0A0A0',
+                      backgroundColor: isValid ? colors.navy : '#A0A0A0', experimental_backgroundImage: isValid ? BRAND_GRADIENT : undefined,
                       marginTop: 24,
                     },
                   ]}
@@ -261,7 +253,7 @@ const LoginScreen = ({ navigation }: { navigation: any }) => {
                 <View style={{ height: 5 }} />
                 {
                   Platform.OS == 'ios' && (
-                    <AppText color="gray" family="InterSemiBold" size={14}>Don't have an account <AppText color={colors.blue} onPress={() => {
+                    <AppText color="gray" family="InterSemiBold" size={14}>Don't have an account <AppText color={colors.navy} onPress={() => {
                       navigation.replace('SignUpScreen')
                     }} family="InterSemiBold" size={14}>Sign Up</AppText></AppText>
                   )

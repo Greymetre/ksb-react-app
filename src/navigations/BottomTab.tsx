@@ -10,6 +10,7 @@ import { SCREEN_WIDTH } from '../utils/misc';
 import { colors } from '../utils/Colors';
 import { ActiveHomeIcon, ActiveTaskIcon, ActiveTwoMenIcon, HomeIcon, MessageIcon, TaskIcon, TwoMenIcon } from '../assets/svgs/BottomTabSvgs';
 import AppText from '../components/AppText/AppText';
+import AarohTabBar from './AarohTabBar';
 import Home from '../screens/Home';
 import OrderList from '../screens/OrderScreen';
 import ActivitiesScreen from '../screens/Activities';
@@ -27,6 +28,7 @@ const BottomTab = () => {
   return (
     <Tab.Navigator
       detachInactiveScreens={false}
+      tabBar={(props) => <AarohTabBar {...props} />}
       screenOptions={{
         headerShown: false,
         animation: 'none',
@@ -42,7 +44,8 @@ const BottomTab = () => {
           paddingHorizontal: 8,
           paddingBottom: 8,
           paddingTop: 8,
-          backgroundColor: '#fff',
+          // Navy bar from the logo; orange icons, white labels.
+          backgroundColor: colors.navy,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: -2 },
           shadowOpacity: 0.1,
@@ -63,7 +66,7 @@ const BottomTab = () => {
           <View
             style={[
               !activeBg && {
-              backgroundColor: focused ? 'rgba(0,0,0,0.10)' : 'transparent',
+              backgroundColor: focused ? 'rgba(138, 90, 8, 0.22)' : 'transparent',
               borderRadius: 33,
             },{
               height: 66,
@@ -78,7 +81,7 @@ const BottomTab = () => {
             }]}
           >
             {focused ? <ActiveHomeIcon /> : <HomeIcon />}
-            <AppText color={colors.blue} family={focused ? "InterRegular" : 'InterMedium'} size={13}>Home</AppText>
+            <AppText color={colors.white} family={focused ? "InterRegular" : 'InterMedium'} size={13}>Home</AppText>
           </View>
         ),
       }} />
@@ -91,7 +94,7 @@ const BottomTab = () => {
               height: 66,
               width: (SCREEN_WIDTH * 0.9) / 3 - 8,
               borderRadius: 33,
-              backgroundColor: focused ? 'rgba(0,0,0,0.10)' : 'transparent', // Active circle
+              backgroundColor: focused ? 'rgba(138, 90, 8, 0.22)' : 'transparent', // Active circle
               justifyContent: 'center',
               alignItems: 'center',
               marginTop: 28,
@@ -99,7 +102,7 @@ const BottomTab = () => {
             }}
           >
             {focused ? <ActiveHomeIcon /> : <HomeIcon />}
-            <AppText color={colors.blue} family={focused ? "InterRegular" : 'InterMedium'} size={13}>Home</AppText>
+            <AppText color={colors.white} family={focused ? "InterRegular" : 'InterMedium'} size={13}>Home</AppText>
           </View>
         ),
       }} /> */}
@@ -116,7 +119,7 @@ const BottomTab = () => {
                   ? (SCREEN_WIDTH * 0.9) / 4 + 10
                   : (SCREEN_WIDTH * 0.9) / 4 - 8,
                 borderRadius: 33,
-                backgroundColor: focused ? 'rgba(0,0,0,0.10)' : 'transparent',
+                backgroundColor: focused ? 'rgba(138, 90, 8, 0.22)' : 'transparent',
                 justifyContent: 'center',
                 alignItems: 'center',
                 marginTop: 28,
@@ -125,7 +128,7 @@ const BottomTab = () => {
             >
               {focused ? <ActiveTwoMenIcon /> : <TwoMenIcon />}
               <AppText
-                color={colors.blue}
+                color={colors.white}
                 family={focused ? 'InterRegular' : 'InterMedium'}
                 size={13}
               >
@@ -144,7 +147,7 @@ const BottomTab = () => {
               height: 66,
               width: (SCREEN_WIDTH * 0.9) / 3 - 8,
               borderRadius: 33,
-              backgroundColor: focused ? 'rgba(0,0,0,0.10)' : 'transparent',
+              backgroundColor: focused ? 'rgba(138, 90, 8, 0.22)' : 'transparent',
               justifyContent: 'center',
               alignItems: 'center',
               marginTop: 28,
@@ -152,7 +155,7 @@ const BottomTab = () => {
             }}
           >
             {focused ? <ActiveTaskIcon /> : <TaskIcon />}
-            <AppText color={colors.blue} family={focused ? "InterRegular" : 'InterMedium'} size={13}>Rating</AppText>
+            <AppText color={colors.white} family={focused ? "InterRegular" : 'InterMedium'} size={13}>Rating</AppText>
           </View>
         ),
       }} />
@@ -166,7 +169,7 @@ const BottomTab = () => {
               height: 66,
               width: (SCREEN_WIDTH * 0.9) / 3 - 8,
               borderRadius: 33,
-              backgroundColor: focused ? 'rgba(0,0,0,0.10)' : 'transparent', // Active circle
+              backgroundColor: focused ? 'rgba(138, 90, 8, 0.22)' : 'transparent', // Active circle
               justifyContent: 'center',
               alignItems: 'center',
               marginTop: 28,
@@ -174,7 +177,7 @@ const BottomTab = () => {
             }}
           >
             <MessageIcon />
-            <AppText color={colors.blue} family={focused ? "InterRegular" : 'InterMedium'} size={13}>History</AppText>
+            <AppText color={colors.white} family={focused ? "InterRegular" : 'InterMedium'} size={13}>History</AppText>
           </View>
         ),
       }} />

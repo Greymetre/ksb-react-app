@@ -366,7 +366,7 @@ const OrderHistoryDetailsScreen = () => {
             {
                 loading ? (
                     <View style={{ flex: 1, marginTop: 100 }}>
-                        <ActivityIndicator size="large" color={colors.blue} />
+                        <ActivityIndicator size="large" color={colors.navy} />
                     </View>
                 ) : (
                     <ScrollView style={[styles.container, { paddingHorizontal: rw(18) }]} >
@@ -426,7 +426,7 @@ const OrderHistoryDetailsScreen = () => {
                                 <AppText size={14} color={'#333333'} family={'InterRegular'}>
                                     Total Quantity
                                 </AppText>
-                                <AppText size={16} color={colors.blue} family="InterBold">
+                                <AppText size={16} color={colors.navy} family="InterBold">
                                     {totalQuantity}
                                 </AppText>
                             </View>
@@ -434,7 +434,7 @@ const OrderHistoryDetailsScreen = () => {
                                 <AppText size={14} color={'#333333'} family={'InterRegular'}>
                                     Total Order Value
                                 </AppText>
-                                <AppText size={16} color={colors.blue} family="InterBold" horizontal={20}>
+                                <AppText size={16} color={colors.navy} family="InterBold" horizontal={20}>
                                     {totalOrderValue.toFixed(2)}
                                 </AppText>
                             </View>

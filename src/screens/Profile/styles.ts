@@ -1,14 +1,14 @@
 import { StyleSheet } from 'react-native';
-import { colors } from '../../utils/Colors';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { rw } from '../../utils/responsive';
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.bgColor,
+    backgroundColor: 'transparent',
   },
   hero: {
-    backgroundColor: colors.blue,
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
     paddingHorizontal: rw(20),
     paddingTop: 22,
     paddingBottom: 26,

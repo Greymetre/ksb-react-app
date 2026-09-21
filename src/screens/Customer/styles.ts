@@ -1,11 +1,11 @@
 import { Platform, StyleSheet } from "react-native";
 import { rw } from "../../utils/responsive";
-import { colors } from "../../utils/Colors";
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.offWHite
+        backgroundColor: 'transparent'
     },
     tabBarView: {
         height: 65,
@@ -33,7 +33,7 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
     },
     activeTab: {
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
         height: '100%',
         borderRadius: 63,
     },
@@ -65,7 +65,7 @@ export const styles = StyleSheet.create({
         borderRadius: 40,
         justifyContent: 'center',
         alignItems: "center",
-        backgroundColor: colors.blue
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT
     },
     orderInformation: {
         backgroundColor: colors.white,
@@ -131,7 +131,7 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 36,
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
         marginBottom: 20,
         marginTop: 25,
         width: '90%'

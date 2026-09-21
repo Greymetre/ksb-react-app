@@ -41,8 +41,8 @@ const STATUS_COLOR: Record<number, string> = {
   0: '#E78422',
   1: '#339D4F',
   2: '#FF3333',
-  3: '#395299',
-  4: '#395299',
+  3: '#8A5A08',
+  4: '#8A5A08',
   5: '#888888',
 };
 
@@ -359,10 +359,10 @@ const ExpenseReport = ({ navigation }: any) => {
             </AppText>
           </View>
           <View style={{ width: '44%', alignItems: 'flex-end' }}>
-            <AppText color="#395299" family="InterBold" size={18}>
+            <AppText color="#8A5A08" family="InterBold" size={18}>
               {money(item.claimAmount)}
             </AppText>
-            <AppText color="#395299" family="InterSemiBold" size={14} numLines={1}>
+            <AppText color="#8A5A08" family="InterSemiBold" size={14} numLines={1}>
               {item.expenseTypeName || '-'}
               {item.totalKm ? ` · ${item.totalKm} km` : ''}
             </AppText>
@@ -459,7 +459,7 @@ const ExpenseReport = ({ navigation }: any) => {
           </AppText>
         </View>
         <View style={[styles.calenderICon, styles.center]}>
-          <CalenderIcon size={16} color={colors.blue} />
+          <CalenderIcon size={16} color={colors.navy} />
         </View>
       </Pressable>
 
@@ -562,7 +562,7 @@ const ExpenseReport = ({ navigation }: any) => {
             <AppText size={12} color="#718096" family="InterRegular">
               Claimed
             </AppText>
-            <AppText size={15} color={colors.blue} family="InterBold">
+            <AppText size={15} color={colors.navy} family="InterBold">
               {money(summary.claim_amount)}
             </AppText>
           </View>
@@ -616,7 +616,7 @@ const ExpenseReport = ({ navigation }: any) => {
         }}
         ListEmptyComponent={
           loading ? (
-            <ActivityIndicator style={{ marginTop: 40 }} color={colors.blue} />
+            <ActivityIndicator style={{ marginTop: 40 }} color={colors.navy} />
           ) : (
             <View style={{ paddingVertical: 50, alignItems: 'center' }}>
               <AppText size={14} color="#888888" family="InterMedium">
@@ -627,7 +627,7 @@ const ExpenseReport = ({ navigation }: any) => {
         }
         ListFooterComponent={
           loadingMore ? (
-            <ActivityIndicator style={{ marginVertical: 16 }} color={colors.blue} />
+            <ActivityIndicator style={{ marginVertical: 16 }} color={colors.navy} />
           ) : null
         }
       />
@@ -854,7 +854,7 @@ const ExpenseReport = ({ navigation }: any) => {
                   <AppText size={13} family="InterMedium" color="#718096">
                     Claim Amount
                   </AppText>
-                  <AppText size={14} family="InterBold" color={colors.blue}>
+                  <AppText size={14} family="InterBold" color={colors.navy}>
                     {money(detail?.claimAmount)}
                   </AppText>
                 </View>
@@ -914,7 +914,7 @@ const ExpenseReport = ({ navigation }: any) => {
                           style={styles.attachmentDoc}
                           onPress={() => openPdf(file)}
                         >
-                          <AppText size={14} color={colors.blue} family="InterBold">
+                          <AppText size={14} color={colors.navy} family="InterBold">
                             PDF
                           </AppText>
                           <AppText size={10} color="#718096" family="InterRegular">
@@ -932,7 +932,7 @@ const ExpenseReport = ({ navigation }: any) => {
                   History
                 </AppText>
                 {logsLoading ? (
-                  <ActivityIndicator color={colors.blue} />
+                  <ActivityIndicator color={colors.navy} />
                 ) : logs.length ? (
                   logs.map((log: any) => (
                     <View

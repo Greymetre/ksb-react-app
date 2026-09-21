@@ -348,7 +348,7 @@ const OrderList = ({ navigation }: OrderListProps) => {
 
                     </View>
                     <View style={[styles.calenderICon, styles.center]}>
-                        <CalenderIcon size={16} color={colors.blue} />
+                        <CalenderIcon size={16} color={colors.navy} />
                     </View>
                 </Pressable>
                 <FlatList
@@ -363,7 +363,7 @@ const OrderList = ({ navigation }: OrderListProps) => {
                     ListEmptyComponent={
                         loadingOrders ? (
                             <View style={{ marginTop: 40, alignItems: 'center' }}>
-                                <ActivityIndicator size="large" color={colors.blue} />
+                                <ActivityIndicator size="large" color={colors.navy} />
                             </View>
                         ) : (
                             <View style={{ marginTop: 20 }}>
@@ -381,7 +381,7 @@ const OrderList = ({ navigation }: OrderListProps) => {
                             {loadingMore && (
                                 <ActivityIndicator
                                     size="small"
-                                    color={colors.blue}
+                                    color={colors.navy}
                                     style={{ marginVertical: 20 }}
                                 />
                             )}

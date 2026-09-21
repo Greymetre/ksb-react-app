@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { colors } from '../../utils/Colors';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { SCREEN_WIDTH } from '../../utils/misc';
 
 const ZONE_CARD_WIDTH = Math.round(SCREEN_WIDTH * 0.62);
@@ -17,7 +17,7 @@ const card = {
 };
 
 export const ratingStyles = StyleSheet.create<any>({
-  container: { flex: 1, backgroundColor: '#F4F6FB' },
+  container: { flex: 1, backgroundColor: 'transparent' },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   // The bottom bar floats over the list, so the last row needs room to clear it.
   listContent: { padding: 14, paddingBottom: 120, gap: 10 },
@@ -26,7 +26,7 @@ export const ratingStyles = StyleSheet.create<any>({
   allIndiaHeading: { alignItems: 'center', gap: 2, marginBottom: 10 },
 
   allIndiaCard: {
-    backgroundColor: colors.blue,
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
     borderRadius: 14,
     padding: 16,
   },
@@ -97,7 +97,7 @@ export const ratingStyles = StyleSheet.create<any>({
     borderColor: '#C9CFE4',
     backgroundColor: '#fff',
   },
-  toggleActive: { backgroundColor: colors.blue, borderColor: colors.blue },
+  toggleActive: { backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT, borderColor: colors.blue },
   periodLine: { marginBottom: 10 },
 
   row: { ...card, padding: 12, gap: 10 },
@@ -149,7 +149,7 @@ export const ratingStyles = StyleSheet.create<any>({
     maxHeight: '88%',
   },
   modalHead: {
-    backgroundColor: colors.blue,
+    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
     paddingHorizontal: 16,
     paddingVertical: 14,
     flexDirection: 'row',

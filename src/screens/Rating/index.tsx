@@ -96,13 +96,13 @@ const ZoneCard = ({ entry }: { entry: ZoneEntry }) => {
         {photo ? (
           <Image source={{ uri: photo }} style={styles.avatarImage} resizeMode="cover" />
         ) : (
-          <AppText size={22} family="InterBold" color={colors.blue}>
+          <AppText size={22} family="InterBold" color={colors.navy}>
             {initialsOf(entry.performer.name)}
           </AppText>
         )}
       </View>
       <View style={styles.zoneDetails}>
-        <AppText size={11} family="InterSemiBold" color={colors.blue}>
+        <AppText size={11} family="InterSemiBold" color={colors.navy}>
           {entry.zone}
         </AppText>
         <AppText size={13} family="InterSemiBold" color="black" numLines={1}>
@@ -338,7 +338,7 @@ const Rating = () => {
     <View style={styles.container}>
       {loading ? (
         <View style={styles.loading}>
-          <ActivityIndicator color={colors.blue} />
+          <ActivityIndicator color={colors.navy} />
         </View>
       ) : (
         <FlatList

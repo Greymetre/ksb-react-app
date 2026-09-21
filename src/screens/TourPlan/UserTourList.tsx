@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { styles } from './styles'
 import AppText from '../../components/AppText/AppText'
 import { useMutateChangeTourStatusApi, useMutateTourPlanSelectUserApi } from '../../api/query/TourPlanApi'
-import { colors } from '../../utils/Colors'
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { CalenderIcon } from '../../assets/svgs/SvgsFile'
 import CustomerCalendar from '../../components/CustomCalendar/CalendarPopupView'
 import ActionSheet, { ActionSheetRef } from 'react-native-actions-sheet'
@@ -369,7 +369,7 @@ const UserTourList = ({ navigation, route }: any) => {
                 padding: 6,
                 borderRadius: 20,
                 paddingHorizontal: 10,
-                backgroundColor: colors.blue,
+                backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
               }}
             >
               <AppText align="center" family='InterRegular' color='white' size={12}>
@@ -444,7 +444,7 @@ const UserTourList = ({ navigation, route }: any) => {
             marginHorizontal: 16,
             marginBottom: 12,
             padding: 12,
-            backgroundColor: 'rgba(57, 82, 153, 0.07)',
+            backgroundColor: 'rgba(138, 90, 8, 0.07)',
             borderRadius: 8,
             borderWidth: 1,
             borderColor: '#e2e8f0',
@@ -459,12 +459,12 @@ const UserTourList = ({ navigation, route }: any) => {
               ? `${formatYYYYMMDD(startDate)}  –  ${formatYYYYMMDD(endDate)}`
               : 'Select date range to filter'}
           </AppText>
-          <CalenderIcon size={20} color={colors.blue} />
+          <CalenderIcon size={20} color={colors.navy} />
         </Pressable>
 
 
         {loading ? (
-          <ActivityIndicator size="large" color={colors.blue} style={{ marginTop: 60 }} />
+          <ActivityIndicator size="large" color={colors.navy} style={{ marginTop: 60 }} />
         ) : tourPlanData.length === 0 ? (
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <AppText size={16} color="#718096">
@@ -484,7 +484,7 @@ const UserTourList = ({ navigation, route }: any) => {
               renderItem={renderItem}
               showsVerticalScrollIndicator={false}
               ListFooterComponent={() => loadingMore
-                ? <ActivityIndicator size="small" color={colors.blue} />
+                ? <ActivityIndicator size="small" color={colors.navy} />
                 : <View style={{ height: 40 }} />}
               ListHeaderComponent={() => (
                 <View style={[styles.boxView, styles.row, { marginTop: 12, }]}>
@@ -553,7 +553,7 @@ const UserTourList = ({ navigation, route }: any) => {
             borderTopLeftRadius: 24,
             borderTopRightRadius: 24,
           }}
-          indicatorStyle={{ backgroundColor: colors.blue, width: 60 }}
+          indicatorStyle={{ backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT, width: 60 }}
         >
           {/* <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -586,7 +586,7 @@ const UserTourList = ({ navigation, route }: any) => {
                     borderBottomColor: '#eee',
                     backgroundColor:
                       selectedStatus === opt.value
-                        ? 'rgba(57,82,153,0.08)'
+                        ? 'rgba(138, 90, 8,0.08)'
                         : 'transparent',
                   }}
                   onPress={() => setSelectedStatus(opt.value)}
@@ -600,7 +600,7 @@ const UserTourList = ({ navigation, route }: any) => {
                       borderColor:
                         selectedStatus === opt.value ? colors.blue : '#ccc',
                       backgroundColor:
-                        selectedStatus === opt.value ? colors.blue : 'transparent',
+                        selectedStatus === opt.value ? colors.navy : 'transparent', experimental_backgroundImage: selectedStatus === opt.value ? BRAND_GRADIENT : undefined,
                       marginRight: 14,
                     }}
                   />
@@ -650,7 +650,7 @@ const UserTourList = ({ navigation, route }: any) => {
                 backgroundColor: statusLoading
                   ? '#a0aec0'
                   : pressed
-                    ? '#2f4bb5'
+                    ? '#8A5A08'
                     : colors.blue,
                 paddingVertical: 14,
                 borderRadius: 12,

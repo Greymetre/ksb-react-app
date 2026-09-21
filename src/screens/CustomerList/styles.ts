@@ -1,12 +1,12 @@
 import { StyleSheet } from "react-native";
-import { colors } from "../../utils/Colors";
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { rw } from "../../utils/responsive";
 import { fonts } from "../../utils/typography";
 
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor:'#F2F2F4'
+        backgroundColor: 'transparent'
     },
     row: {
         flexDirection: "row",
@@ -18,18 +18,30 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
         padding: rw(100)
     },
-    kycChip: {
-        alignSelf: 'flex-start',
+    // The list below is flex: 1, so without flexShrink: 0 the chip row gets squeezed to a
+    // sliver and the chip text is cut; the chips keep a fixed height for the same reason.
+    kycChipScroll: {
+        flexGrow: 0,
+        flexShrink: 0,
+        height: 36,
         marginBottom: 12,
+    },
+    kycChipRow: {
+        gap: 8,
+        paddingRight: 8,
+        alignItems: 'center',
+    },
+    kycChip: {
+        height: 36,
+        justifyContent: 'center',
         paddingHorizontal: 14,
-        paddingVertical: 8,
         borderRadius: 18,
         borderWidth: 1,
         borderColor: "rgba(203, 213, 224, 1)",
-        backgroundColor: "rgba(57, 82, 153, 0.07)",
+        backgroundColor: "rgba(138, 90, 8, 0.07)",
     },
     kycChipActive: {
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
         borderColor: colors.blue,
     },
     UserBox: {
@@ -38,11 +50,11 @@ export const styles = StyleSheet.create({
         borderRadius: 8,
         borderWidth: 1,
         borderColor: "rgba(203, 213, 224, 1)",
-        backgroundColor: "rgba(57, 82, 153, 0.07)",
+        backgroundColor: "rgba(138, 90, 8, 0.07)",
         paddingHorizontal: 14
     },
     textInputMainView: {
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
         padding: rw(2),
         marginTop: rw(20),
         alignItems: "center",

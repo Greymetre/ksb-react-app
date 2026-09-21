@@ -5,7 +5,8 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
 import { styles } from './styles';
 import AppText from '../../components/AppText/AppText';
-import { colors } from '../../utils/Colors';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
+import { KsbAarohBrand } from '../../components/AarohLogo';
 
 const PLAY_STORE_URL =
   Platform.OS === "android" 
@@ -32,11 +33,7 @@ const ForceUpdateScreen = () => {
       >
         {/* Logo */}
         <View style={[styles.logoView, styles.center]}>
-          <FastImage
-            style={styles.logo}
-            resizeMode="contain"
-            source={require('../../assets/images/FieldKonnectLogo.png')}
-          />
+          <KsbAarohBrand />
         </View>
 
         {/* Main Container */}
@@ -62,7 +59,7 @@ const ForceUpdateScreen = () => {
             size={16}
             lineHeight={27}
           >
-            A new version of FieldKonnect is now available.
+            A new version of KSB-AAROH is now available.
             {'\n\n'}
             Please update the app to continue using the latest features,
             improvements, and security updates.
@@ -75,7 +72,7 @@ const ForceUpdateScreen = () => {
             style={[
               styles.buttonView,
               {
-                backgroundColor: colors.blue,
+                backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
                 alignSelf: 'center',
                 width:"80%"
               },

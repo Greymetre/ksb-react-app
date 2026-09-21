@@ -4,7 +4,7 @@ import { colors } from "../../utils/Colors";
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.bgColor
+        backgroundColor: 'transparent'
     },
     row: {
         flexDirection: "row",
@@ -16,7 +16,7 @@ export const styles = StyleSheet.create({
         borderRadius: 8,
         borderWidth: 1,
         borderColor: "rgba(203, 213, 224, 1)",
-        backgroundColor: "rgba(57, 82, 153, 0.07)",
+        backgroundColor: "rgba(138, 90, 8, 0.07)",
         paddingHorizontal: 14
     },
     dateTimeBox: {
@@ -25,7 +25,7 @@ export const styles = StyleSheet.create({
         borderRadius: 8,
         borderWidth: 1,
         borderColor: "rgba(203, 213, 224, 1)",
-        backgroundColor: "rgba(57, 82, 153, 0.07)",
+        backgroundColor: "rgba(138, 90, 8, 0.07)",
         paddingHorizontal: 14,
         flex: 1
 
@@ -36,7 +36,7 @@ export const styles = StyleSheet.create({
         borderRadius: 8,
         borderWidth: 1,
         borderColor: "rgba(203, 213, 224, 1)",
-        backgroundColor: "rgba(57, 82, 153, 0.07)",
+        backgroundColor: "rgba(138, 90, 8, 0.07)",
         paddingHorizontal: 14,
         // flex: 1
 

@@ -14,7 +14,7 @@ import { ArrowDownIcon, CalenderIcon, EyeIcon } from '../../assets/svgs/SvgsFile
 import AppText from '../../components/AppText/AppText';
 import { styles } from './styles';
 import { rw } from '../../utils/responsive';
-import { colors } from '../../utils/Colors';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import store from '../../components/redux/Store';
 import SummaryCard from '../../components/atoms/SummaryCard';
 import { summaryStats1 } from '../../components/Comman/CommanFunction';
@@ -559,7 +559,7 @@ const UserActivityScreen = ({ navigation }: any) => {
             </AppText>
           </View>
           <View style={[styles.calenderICon, styles.center]}>
-            <CalenderIcon size={16} color={colors.blue} />
+            <CalenderIcon size={16} color={colors.navy} />
           </View>
         </Pressable>
 
@@ -569,7 +569,7 @@ const UserActivityScreen = ({ navigation }: any) => {
         {/* Loading & Error */}
         {loading && (
           <View style={{ marginTop: 50, alignItems: 'center' }}>
-            <ActivityIndicator size="large" color={colors.blue} />
+            <ActivityIndicator size="large" color={colors.navy} />
             <AppText style={{ marginTop: 12 }}>Loading activity...</AppText>
           </View>
         )}
@@ -594,7 +594,7 @@ const UserActivityScreen = ({ navigation }: any) => {
           ListFooterComponent={
             loading && currentPage > 1 ? (
               <View style={{ padding: 20, alignItems: 'center', height: 90 }}>
-                <ActivityIndicator size="small" color={colors.blue} />
+                <ActivityIndicator size="small" color={colors.navy} />
               </View>
             ) : (
               <View style={{ padding: 20, alignItems: 'center', height: 90 }}>
@@ -674,7 +674,7 @@ const UserActivityScreen = ({ navigation }: any) => {
                         borderRadius: 6,
                         borderWidth: 2,
                         borderColor: isSelected ? colors.blue : '#ccc',
-                        backgroundColor: isSelected ? colors.blue : 'transparent',
+                        backgroundColor: isSelected ? colors.navy : 'transparent', experimental_backgroundImage: isSelected ? BRAND_GRADIENT : undefined,
                         marginRight: 12,
                         justifyContent: 'center',
                         alignItems: 'center',
@@ -716,7 +716,7 @@ const UserActivityScreen = ({ navigation }: any) => {
                   flex: 1,
                   paddingVertical: 14,
                   borderRadius: 8,
-                  backgroundColor: colors.blue,
+                  backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
                   alignItems: 'center',
                 }}
               >

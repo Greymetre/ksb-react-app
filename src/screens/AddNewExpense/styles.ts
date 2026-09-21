@@ -2,7 +2,7 @@
 
 import { Platform, StyleSheet } from "react-native";
 import { rw } from "../../utils/responsive";
-import { colors } from "../../utils/Colors";
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 
 export const styles = StyleSheet.create({
     container: {
@@ -38,9 +38,9 @@ export const styles = StyleSheet.create({
         height: 69,
         width: 150,
         borderWidth: 2,
-        borderColor: 'rgba(57, 82, 153, 1)',
+        borderColor: 'rgba(138, 90, 8, 1)',
         borderStyle: 'dashed',
-        backgroundColor: 'rgba(57, 82, 153, 0.1)',
+        backgroundColor: 'rgba(138, 90, 8, 0.1)',
         borderRadius: 10,
         justifyContent: 'center',
         alignItems: 'center',
@@ -67,7 +67,7 @@ export const styles = StyleSheet.create({
     },
     rangeDone: {
         alignSelf: 'flex-end',
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
         borderRadius: 8,
         paddingHorizontal: 22,
         height: 36,
@@ -136,7 +136,7 @@ export const styles = StyleSheet.create({
         borderBottomColor: '#EDF0F5',
     },
     buttonView: {
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
         width: '100%',
         height: 44,
         justifyContent: 'center',

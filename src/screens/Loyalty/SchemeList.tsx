@@ -70,7 +70,7 @@ const SchemeList = () => {
   if (loading) {
     return (
       <View style={{ paddingTop: 60 }}>
-        <ActivityIndicator color={colors.blue} />
+        <ActivityIndicator color={colors.navy} />
       </View>
     );
   }
@@ -148,7 +148,7 @@ const SchemeList = () => {
                   </View>
                   {item.isLive ? (
                     <View style={styles.daysPill}>
-                      <AppText size={10.5} family="InterSemiBold" customColor={colors.blue}>
+                      <AppText size={10.5} family="InterSemiBold" customColor={colors.navy}>
                         {item.daysRemaining === 0 ? 'Ends today' : `${item.daysRemaining} days left`}
                       </AppText>
                     </View>
@@ -167,7 +167,7 @@ const SchemeList = () => {
             <View style={styles.sheetHandle} />
             {detailLoading || !detail ? (
               <View style={{ padding: 40 }}>
-                <ActivityIndicator color={colors.blue} />
+                <ActivityIndicator color={colors.navy} />
               </View>
             ) : (
               <>
@@ -234,7 +234,7 @@ const SchemeList = () => {
                               ? `${money(slab.fromAmount)} – ${money(slab.toAmount)}`
                               : `${money(slab.fromAmount)} and above`}
                           </AppText>
-                          <AppText size={13} family="InterSemiBold" customColor={colors.blue}>{slabRewardText(slab)}</AppText>
+                          <AppText size={13} family="InterSemiBold" customColor={colors.navy}>{slabRewardText(slab)}</AppText>
                         </View>
                       ))}
                     </View>

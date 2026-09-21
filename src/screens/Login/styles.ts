@@ -1,23 +1,31 @@
 import { StyleSheet } from "react-native";
-import { colors } from "../../utils/Colors";
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { SCREEN_HEIGHT } from "../../utils/misc";
 import { rw } from "../../utils/responsive";
 import { fonts } from "../../utils/typography";
 
 export const styles = StyleSheet.create({
-    container:{
+    // A warm light top, so the logo shows in its own colours; the form sheet below is white.
+    container: {
         flex: 1,
-        backgroundColor: colors.blue
+        backgroundColor: 'transparent'
     },
     logoView:{
-        height: SCREEN_HEIGHT * 0.3
+        height: SCREEN_HEIGHT * 0.4
     },
     subContainer:{
         flex: 1,
         backgroundColor: colors.white,
         borderTopLeftRadius: 40,
         borderTopRightRadius: 40,
-        paddingTop: 46
+        paddingTop: 46,
+        borderTopWidth: 3,
+        borderColor: colors.orange,
+        shadowColor: '#7A2E0A',
+        shadowOpacity: 0.08,
+        shadowRadius: 16,
+        shadowOffset: { width: 0, height: -4 },
+        elevation: 6
     },
     logo:{
         height: 55,
@@ -49,7 +57,7 @@ export const styles = StyleSheet.create({
         color: colors.black
     },
     buttonView:{
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
         width:'100%',
         height: 44,
         justifyContent: 'center',

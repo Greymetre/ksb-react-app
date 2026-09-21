@@ -11,11 +11,13 @@ import { logout, setToken, setUser } from '../../components/redux/slice/AuthSlic
 import { useDispatch } from 'react-redux'
 import { useAppSelector } from '../../components/redux/Store'
 import { BASE_URL, resolveMediaUrl } from '../../api/AxiosClient'
-import { colors } from '../../utils/Colors'
+import { colors, gradients } from '../../utils/Colors'
 import { BackIcon, UserIcon } from '../../assets/svgs/SvgsFile'
 import axios from 'axios'
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from '../../utils/misc'
 import { stopLiveLocationTracking } from '../../services/liveLocationService'
+import { KsbAarohBrand } from '../../components/AarohLogo';
+import AppBackdrop from '../../components/AppBackdrop'
 
 const data = [
   { id: 1, icon: require('../../assets/images/HomeTabs/myprofile.png'), name: 'My Profile' },
@@ -23,7 +25,7 @@ const data = [
   { id: 3, icon: require('../../assets/images/HomeTabs/report.png'), name: 'Report' },
   // Moved out of the bottom bar. Same screen, reached from here instead.
   { id: 8, icon: require('../../assets/images/HomeTabs/mspactivity.png'), name: 'Beats' },
-  // { id: 4, icon: require('../../assets/images/HomeTabs/documents.png'), name: 'Documents' },
+  { id: 4, icon: require('../../assets/images/HomeTabs/documents.png'), name: 'Documents' },
   // { id: 5, icon: require('../../assets/images/HomeTabs/mspactivity.png'), name: 'MSP Activity' },
   { id: 6, icon: require('../../assets/images/HomeTabs/logout.png'), name: 'Logout' },
   { id: 7, icon: require('../../assets/images/Dummy/danger.png'), name: 'Delete Account' },
@@ -90,6 +92,9 @@ const ProfileTab = ({ handleDrawerClose }: any) => {
 
   return (
     <View style={{ flex: 1 }}>
+      {/* The drawer slides over Home, whose page is transparent, so it carries its own copy of
+          the app backdrop - otherwise Home shows through the menu. */}
+      <AppBackdrop faded />
 
       <ScrollView style={[styles.container, { marginBottom: 20 }]} showsVerticalScrollIndicator={false}>
         {/* <View style={[styles.blueContaier, {
@@ -110,16 +115,16 @@ const ProfileTab = ({ handleDrawerClose }: any) => {
                 position: 'absolute',
               }}
             >
-              <ActivityIndicator size="large" color={colors.blue} />
+              <ActivityIndicator size="large" color={colors.navy} />
             </View>
           )
         }
 
-        <View style={[{ width: '100%', backgroundColor: colors.blue, justifyContent: 'space-between', paddingTop: useSafeAreaInsets()?.top, gap: 30 }]}>
+        <View style={[{ width: '100%', backgroundColor: colors.primaryDark, justifyContent: 'space-between', paddingTop: useSafeAreaInsets()?.top, gap: 30 }]}>
           <View style={[styles.header, styles.row, {}]}>
             <Pressable style={{ alignItems: 'center', flexDirection: "row", gap: 20 }} onPress={handleDrawerClose}>
               <BackIcon size={28} color="white" />
-              <LogoIcon />
+              <KsbAarohBrand variant="pill" />
             </Pressable>
             <View style={[styles.row, styles.button]}>
               <AppText size={12} color='white' family='InterMedium'>Good Day</AppText>
@@ -127,7 +132,7 @@ const ProfileTab = ({ handleDrawerClose }: any) => {
             </View>
 
           </View>
-          <LinearGradient style={[styles.profileView, styles.row]} colors={['#395299', 'rgba(56, 143, 205, 0.5)']} locations={[0.5, 1]}>
+          <LinearGradient style={[styles.profileView, styles.row]} colors={gradients.brand} locations={gradients.stops} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
             <View style={{ height: 101, width: 101, borderRadius: 55, marginLeft: 16, marginBottom: 20, backgroundColor: 'rgba(255,255,255,0.2)', overflow: 'hidden', justifyContent: 'center', alignItems: 'center', }}>
               <UserIcon />
               {/* <FastImage source={require('../../assets/images/HomeTabs/profile.png')} style={{ height: 101, width: 101, borderRadius: 101, position: 'absolute' }} /> */}
@@ -148,7 +153,7 @@ const ProfileTab = ({ handleDrawerClose }: any) => {
         </View>
         <SafeAreaView style={{ flex: 1 }} edges={['top']}>
 
-          <View style={{ flex: 1, marginTop: 16, gap: 16, paddingHorizontal: 16 }}>
+          <View style={{ flex: 1, marginTop: 16, gap: 14, paddingHorizontal: 16, paddingBottom: 120 }}>
             {
               data?.map((item: any, index: number) => {
                 if(Platform.OS == "android" && item?.name == "Delete Account"){
@@ -162,6 +167,10 @@ const ProfileTab = ({ handleDrawerClose }: any) => {
                     }
                     if (item?.name == "Beats") {
                       navigation.navigate('Beats')
+                      handleDrawerClose()
+                    }
+                    if (item?.name == "Documents") {
+                      navigation.navigate('AppDocuments')
                       handleDrawerClose()
                     }
                     if (item?.name == "Report") {

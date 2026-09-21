@@ -81,7 +81,7 @@ const IndividualPage = ({ navigation, route }: any) => {
     <View style={styles.container}>
       <View style={styles.individualContent}>
         <View>
-          <AppText size={17} color={colors.blue} family='InterBold'>{routeItem?.name} - {routeItem?.date}</AppText>
+          <AppText size={17} color={colors.navy} family='InterBold'>{routeItem?.name} - {routeItem?.date}</AppText>
           <AppText
             size={14}
             color={reportingManagerMobile ? colors.blue : '#1E1E1E'}

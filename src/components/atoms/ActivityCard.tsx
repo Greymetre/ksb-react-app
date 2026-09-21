@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   line: {
     borderTopLeftRadius: 6,
     borderTopRightRadius: 6,
-    backgroundColor: '#5870B4',
+    backgroundColor: '#8A5A08',
     paddingHorizontal: 14,
     paddingVertical: 12,
     shadowOffset: { width: 0, height: 10 },

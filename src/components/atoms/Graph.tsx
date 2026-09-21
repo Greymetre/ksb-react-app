@@ -48,7 +48,7 @@ export default function Graph() {
           r={RADIUS}
           style="stroke"
           strokeWidth={STROKE}
-          color="#395299"
+          color="#11325B"
         />
 
         <Path
@@ -56,7 +56,7 @@ export default function Graph() {
           style="stroke"
           strokeWidth={STROKE}
           strokeCap="round"
-          color="#4C6ABD"
+          color="#11325B"
         />
 
         <Path
@@ -64,7 +64,7 @@ export default function Graph() {
           style="stroke"
           strokeWidth={STROKE}
           strokeCap="round"
-          color="#5B77C2"
+          color="#8A5A08"
         />
 
         <Path
@@ -72,7 +72,7 @@ export default function Graph() {
           style="stroke"
           strokeWidth={STROKE}
           strokeCap="round"
-          color="#6A83C8"
+          color="#F5A623"
         />
 
         <Path
@@ -80,7 +80,7 @@ export default function Graph() {
           style="stroke"
           strokeWidth={STROKE}
           strokeCap="round"
-          color="#889CD3"
+          color="#744A07"
         />
 
         <Path
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   value: {
     marginTop: 6,
     fontSize: 17,
-    color: colors.blue,
+    color: colors.navy,
     opacity:0.8,
     fontFamily: fonts.InterExtraBold,
   },

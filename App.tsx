@@ -28,6 +28,7 @@ import Toast, {
 import { colors } from './src/utils/Colors';
 import store, { persistor } from './src/components/redux/Store';
 import SplashScreen from './src/screens/Splash';
+import AppBackdrop from './src/components/AppBackdrop';
 import Routes from './src/navigations/Routes';
 import { navigationRef } from './src/services/NavigationService';
 import {
@@ -39,15 +40,25 @@ import {
 
 const queryClient = new QueryClient();
 
+const FULL_BACKDROP_ROUTES = ['LoginScreen', 'SignUpScreen', 'ForceUpdateScreen', 'AccountPendingScreen'];
+
 const App = () => {
   const [loading, setLoading] = useState(true);
+  // The backdrop is at full strength where it is the design (splash, sign-in screens) and a wash
+  // behind everything else.
+  const [fullBackdrop, setFullBackdrop] = useState(true);
+  const syncBackdrop = () => {
+    const name = navigationRef.getCurrentRoute()?.name;
+    setFullBackdrop(!name || FULL_BACKDROP_ROUTES.includes(name));
+  };
   // const navigationRef = React.useRef<NavigationContainerRef<any>>(null);
   //  const navigationRef = createNavigationContainerRef();
 
   useEffect(() => {
+    // Long enough for the splash's needle to sweep up and settle, and to be seen there.
     setTimeout(() => {
       setLoading(false);
-    }, 2000);
+    }, 6500);
   }, []);
 
   const initializeAfterRehydrate = () => {
@@ -91,6 +102,7 @@ const App = () => {
           <PersistGate persistor={persistor} onBeforeLift={initializeAfterRehydrate}>
             <QueryClientProvider client={queryClient}>
                 <View style={{ flex: 1, backgroundColor: colors.bgColor }}>
+                  <AppBackdrop faded={!loading && !fullBackdrop} />
                   <StatusBar
                     translucent
                     backgroundColor="transparent"
@@ -103,7 +115,9 @@ const App = () => {
                     onReady={() => {
                       // Navigation is ready
                       console.log('Navigation is ready');
+                      syncBackdrop();
                     }}
+                    onStateChange={syncBackdrop}
                   >
 
                     {loading ? <SplashScreen /> : <Routes />}

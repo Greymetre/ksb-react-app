@@ -31,4 +31,4 @@ Package id: `com.fieldkonnect.ksb`
 
 ## Run iOS
 
-Open `ios/FieldConnect.xcworkspace` in Xcode and run the `FieldConnect` scheme.
+Open `ios/KSB-AAROH.xcworkspace` in Xcode and run the `FieldConnect` scheme.

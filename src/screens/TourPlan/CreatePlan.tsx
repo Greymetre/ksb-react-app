@@ -15,7 +15,7 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { styles } from './styles';
 import AppText from '../../components/AppText/AppText';
-import { colors } from '../../utils/Colors';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { PlusAddIcon } from '../../assets/svgs/SvgsFile';
 import Toast from 'react-native-toast-message';
 import store from '../../components/redux/Store';
@@ -537,7 +537,7 @@ const CreatePlan: React.FC = ({ navigation, route }: any) => {
                   >
                     {plans.length > 1 && (
                       <TouchableOpacity
-                        style={{ height: 18, width: 18, backgroundColor: colors.blue, borderRadius: 50, alignItems: 'center' }}
+                        style={{ height: 18, width: 18, backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT, borderRadius: 50, alignItems: 'center' }}
                         onPress={() => removePlan(plan.id)}
                       >
                         <AppText size={12} color="white">-</AppText>
@@ -765,7 +765,7 @@ const CreatePlan: React.FC = ({ navigation, route }: any) => {
                     }
                   }}
                   style={{
-                    backgroundColor: '#395299',
+                    backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
                     paddingVertical: 10,
                     paddingHorizontal: 20,
                     borderRadius: 8,
@@ -806,7 +806,7 @@ const CreatePlan: React.FC = ({ navigation, route }: any) => {
                     Select District
                   </AppText>
                   <TouchableOpacity onPress={() => setShowDistrictModal(false)}>
-                    <AppText size={16} color={colors.blue} family="InterMedium">
+                    <AppText size={16} color={colors.navy} family="InterMedium">
                       Close
                     </AppText>
                   </TouchableOpacity>
@@ -905,7 +905,7 @@ const CreatePlan: React.FC = ({ navigation, route }: any) => {
                     Select City
                   </AppText>
                   <TouchableOpacity onPress={() => setShowCityModal(false)}>
-                    <AppText size={16} color={colors.blue} family="InterMedium">
+                    <AppText size={16} color={colors.navy} family="InterMedium">
                       Close
                     </AppText>
                   </TouchableOpacity>
@@ -977,7 +977,7 @@ const CreatePlan: React.FC = ({ navigation, route }: any) => {
           borderTopLeftRadius: 24,
           borderTopRightRadius: 24,
         }}
-        indicatorStyle={{ backgroundColor: colors.blue, width: 60 }}
+        indicatorStyle={{ backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT, width: 60 }}
       >
         <View style={{ paddingHorizontal: 20, paddingBottom: 0, paddingTop: 20 }}>
           <AppText
@@ -1000,7 +1000,7 @@ const CreatePlan: React.FC = ({ navigation, route }: any) => {
                   paddingVertical: 14,
                   borderBottomWidth: 1,
                   borderBottomColor: '#eee',
-                  backgroundColor: selectedOptions.includes(opt) ? 'rgba(57,82,153,0.08)' : 'transparent',
+                  backgroundColor: selectedOptions.includes(opt) ? 'rgba(138, 90, 8,0.08)' : 'transparent',
                 }}
                 onPress={() => {
                   setSelectedOptions(prev =>
@@ -1017,7 +1017,7 @@ const CreatePlan: React.FC = ({ navigation, route }: any) => {
                     borderRadius: 6,
                     borderWidth: 2,
                     borderColor: selectedOptions.includes(opt) ? colors.blue : '#ccc',
-                    backgroundColor: selectedOptions.includes(opt) ? colors.blue : 'transparent',
+                    backgroundColor: selectedOptions.includes(opt) ? colors.navy : 'transparent', experimental_backgroundImage: selectedOptions.includes(opt) ? BRAND_GRADIENT : undefined,
                     marginRight: 14,
                   }}
                 />
@@ -1061,7 +1061,7 @@ const CreatePlan: React.FC = ({ navigation, route }: any) => {
             onPress={saveObjective}
             style={{
               marginTop: 28,
-              backgroundColor: colors.blue,
+              backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
               paddingVertical: 14,
               borderRadius: 12,
               alignItems: 'center',

@@ -4,7 +4,7 @@ export const attendanceData = [
     id: '1',
     count: 105,
     label: 'Total',
-    color: '#e8eaf2',
+    color: '#FAF0DD',
     textColor:"#1f2937",
     image: require('../assets/images/Dummy/smile.png')
   },
@@ -41,8 +41,8 @@ export const breakdownData = [
     id: '1',
     type: 'ASR',
     total: 65,
-    badgeColor: '#e8eaf2',
-    textColor: '#1E40AF',
+    badgeColor: '#FAF0DD',
+    textColor: '#8A5A08',
     items: [
       { label: 'Market', value: 55, color: '#106e56',text:'#075041'  },
       { label: 'Leave', value: 5, color: '#ba7518',text:'#633806'  },
@@ -69,8 +69,8 @@ export const orderData = [
     id: '1',
     count: "800",
     label: 'Nos.Of Orders',
-    color: '#e8eaf2',
-    imageColor:'#3a4da0',
+    color: '#FAF0DD',
+    imageColor:'#8A5A08',
     image: require('../assets/images/Dummy/check.png')
   },
   {

@@ -5,7 +5,8 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
 import { styles } from './styles';
 import AppText from '../../components/AppText/AppText';
-import { colors } from '../../utils/Colors';
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
+import { KsbAarohBrand } from '../../components/AarohLogo';
 
 const AccountPendingScreen = ({ navigation }: { navigation: any }) => {
   return (
@@ -18,11 +19,7 @@ const AccountPendingScreen = ({ navigation }: { navigation: any }) => {
       >
         {/* Logo */}
         <View style={[styles.logoView, styles.center]}>
-          <FastImage
-            style={styles.logo}
-            resizeMode="contain"
-            source={require('../../assets/images/FieldKonnectLogo.png')}
-          />
+          <KsbAarohBrand />
         </View>
 
         {/* Main Container */}
@@ -57,7 +54,7 @@ const AccountPendingScreen = ({ navigation }: { navigation: any }) => {
             style={[
               styles.buttonView,
               {
-                backgroundColor: colors.blue,
+                backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
                 marginTop: 40,
                 width:'80%',
                 alignSelf:"center"

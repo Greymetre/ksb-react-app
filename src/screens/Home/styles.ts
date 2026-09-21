@@ -1,17 +1,17 @@
 import { Platform, StyleSheet } from "react-native";
-import { colors } from "../../utils/Colors";
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { rw } from "../../utils/responsive";
 import { SCREEN_WIDTH } from "../../utils/misc";
 
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.bgColor
+        backgroundColor: 'transparent'
     },
     blueContaier: {
         height: 250,
         width: '100%',
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
         borderBottomLeftRadius: 15,
         borderBottomRightRadius: 15,
         position: "absolute"
@@ -77,7 +77,7 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
         width:'90%',
         borderRadius: 8,
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT,
         alignSelf: 'center',
         marginTop: 10
     },
@@ -86,14 +86,24 @@ export const styles = StyleSheet.create({
         // paddingBottom: 36,
         // paddingHorizontal: 20
     },
+    // Drawer menu rows: white cards on the backdrop, the way the VRiDDHi drawer has them.
     itemVIew:{
-        height: 54,
+        height: 58,
         width: '100%',
-        paddingHorizontal: 20,
-        gap: 18
+        paddingHorizontal: 18,
+        gap: 16,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: '#EAD9B8',
+        backgroundColor: '#FFFFFF',
+        shadowColor: '#5C3B05',
+        shadowOpacity: 0.06,
+        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 2 },
+        elevation: 2
     },
     todayContainer:{
-        backgroundColor:'#e8eaf2',
+        backgroundColor:'#FAF0DD',
         borderRadius:40,
         paddingHorizontal:8,
         paddingVertical:2

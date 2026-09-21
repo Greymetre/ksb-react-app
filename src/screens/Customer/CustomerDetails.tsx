@@ -5,7 +5,7 @@ import { rw } from '../../utils/responsive'
 import AppText from '../../components/AppText/AppText'
 import FastImage from 'react-native-fast-image'
 import { BuyOrderIcon, CalenderAddIcon, CalenderIcon, CrossIcon, OrderBoxIcon, OrderHistoryIcon } from '../../assets/svgs/SvgsFile'
-import { colors } from '../../utils/Colors'
+import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import CustomerSnapshot from './CustomerSnapshot'
 import { useGetCustomerData, useGetSecondaryCustomerData, useGetSubmitCheckIN } from '../../api/query/CustomerApi'
 import axiosClient, { resolveMediaUrl } from '../../api/AxiosClient'
@@ -18,6 +18,7 @@ import Gallery, { GalleryRef } from 'react-native-awesome-gallery'
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import ActionSheet, { ActionSheetRef } from 'react-native-actions-sheet'
 import { useAppSelector } from '../../components/redux/Store'
+import { bankAccountTypeLabel } from '../../utils/bankAccountType';
 
 type CustomerDetailsProps = {
   navigation: any
@@ -627,7 +628,7 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
                 </Pressable>
 
                 <Pressable
-                  style={[styles.button, styles.actionButton, styles.row, { backgroundColor: colors.blue }]}
+                  style={[styles.button, styles.actionButton, styles.row, { backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT }]}
                   onPress={() => navigation.navigate('CustomerActivity', {
                     entityId: routeItem?.id,
                     entityType: route?.params?.type,
@@ -738,7 +739,7 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
 
             {/* <View style={[styles.row, styles.gapView]}>
               <Pressable
-                style={[styles.activityButton, styles.center, { backgroundColor: colors.blue }]}
+                style={[styles.activityButton, styles.center, { backgroundColor: colors.primary, experimental_backgroundImage: BRAND_GRADIENT }]}
                 onPress={() => navigation.navigate('TourPlanPage')}
               >
                 <FastImage
@@ -751,7 +752,7 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
                 </AppText>
               </Pressable>
 
-              <View style={[styles.activityButton, styles.center, { backgroundColor: 'rgba(57, 82, 153, 0.07)' }]}>
+              <View style={[styles.activityButton, styles.center, { backgroundColor: 'rgba(138, 90, 8, 0.07)' }]}>
                 <FastImage
                   source={require('../../assets/images/DetailsIcon/MenTImers.png')}
                   style={{ height: 29, width: 29 }}
@@ -1304,7 +1305,7 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
                 </AppText>
                 <View style={{ height: 6 }} />
                 <AppText color="black" size={14} family="InterBold">
-                  {customerData?.bank_account_type || '-'}
+                  {bankAccountTypeLabel(customerData?.bank_account_type) || '-'}
                 </AppText>
               </View>
             </View>
