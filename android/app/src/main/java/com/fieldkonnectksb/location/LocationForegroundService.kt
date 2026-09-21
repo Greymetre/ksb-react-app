@@ -56,7 +56,12 @@ class LocationForegroundService : Service() {
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
     when (intent?.action) {
       ACTION_STOP -> {
-        ensureForeground("Stopping live location tracking")
+        if (!ensureForeground("Stopping live location tracking")) {
+          // Punch-out must still end tracking even if Android will not show the notification.
+          LocationStorage.setActive(this, false)
+          stopSelf()
+          return START_NOT_STICKY
+        }
         if (!LocationStorage.isActive(this)) {
           stopSelf()
           return START_NOT_STICKY
@@ -64,18 +69,20 @@ class LocationForegroundService : Service() {
         stopTracking()
       }
       ACTION_SYNC -> {
-        ensureForeground("Syncing pending live locations")
-        if (!LocationStorage.isActive(this)) {
+        if (!ensureForeground("Syncing pending live locations") || !LocationStorage.isActive(this)) {
           stopSelf()
           return START_NOT_STICKY
         }
         syncPendingLocations(stopIfInactive = true)
       }
       ACTION_CAPTURE_NOW -> {
-        ensureForeground("Capturing live location")
+        if (!ensureForeground("Capturing live location")) {
+          stopSelf()
+          return START_NOT_STICKY
+        }
         captureLocation(force = true)
       }
-      else -> startTracking(intent)
+      else -> if (!startTracking(intent)) return START_NOT_STICKY
     }
     return START_STICKY
   }
@@ -97,17 +104,24 @@ class LocationForegroundService : Service() {
     super.onTaskRemoved(rootIntent)
   }
 
-  private fun startTracking(intent: Intent?) {
+  /** False when tracking could not start; the service has then already stopped itself. */
+  private fun startTracking(intent: Intent?): Boolean {
     val token = intent?.getStringExtra(EXTRA_TOKEN) ?: LocationStorage.token(this)
     val userData = intent?.getStringExtra(EXTRA_USER_DATA)
+    // Foreground first: a service started with startForegroundService that stops before calling
+    // startForeground crashes the app (ForegroundServiceDidNotStartInTimeException).
+    if (!ensureForeground("Location tracking is active after punch-in.")) {
+      stopSelf()
+      return false
+    }
     if (token.isNullOrBlank()) {
       Log.e(TAG, "Punch-in tracking start blocked: missing token")
+      stopForeground(STOP_FOREGROUND_REMOVE)
       stopSelf()
-      return
+      return false
     }
 
     LocationStorage.setActive(this, true, token, userData)
-    ensureForeground("Location tracking is active after punch-in.")
     Log.d(TAG, "Foreground service started")
 
     if (!running) {
@@ -115,6 +129,7 @@ class LocationForegroundService : Service() {
       captureLocation(force = true)
       scheduleNextCapture()
     }
+    return true
   }
 
   private fun stopTracking() {
@@ -128,8 +143,25 @@ class LocationForegroundService : Service() {
     }
   }
 
-  private fun ensureForeground(message: String) {
-    startForeground(NOTIFICATION_ID, notification(message))
+  /**
+   * Shows the tracking notification. Android refuses (SecurityException, or
+   * ForegroundServiceStartNotAllowedException) when location permission is missing or the start
+   * came from the background without "Allow all the time"; that used to crash the whole app. Now it
+   * answers false and the caller stops the service. The app asks the user to turn location back on
+   * the next time it is opened, and tracking resumes from there.
+   */
+  private fun ensureForeground(message: String): Boolean {
+    if (!LocationPermissions.hasForeground(this)) {
+      Log.w(TAG, "Location permission missing; not starting the foreground service")
+      return false
+    }
+    return try {
+      startForeground(NOTIFICATION_ID, notification(message))
+      true
+    } catch (error: Exception) {
+      Log.w(TAG, "Android refused the foreground service", error)
+      false
+    }
   }
 
   private fun scheduleNextCapture() {

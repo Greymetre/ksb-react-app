@@ -20,7 +20,18 @@ class BootReceiver : BroadcastReceiver() {
       val serviceIntent = Intent(context, LocationForegroundService::class.java).apply {
         this.action = LocationForegroundService.ACTION_START
       }
-      ContextCompat.startForegroundService(context, serviceIntent)
+      // From boot or an app update the app is in the background: Android 14+ only allows a
+      // location service then with "Allow all the time". Without it tracking resumes when the
+      // user next opens the app, instead of crashing here.
+      if (!LocationPermissions.hasBackground(context)) {
+        Log.w("FieldKonnectLocation", "Not restarting tracking after $action: background location not allowed")
+        return
+      }
+      try {
+        ContextCompat.startForegroundService(context, serviceIntent)
+      } catch (error: Exception) {
+        Log.w("FieldKonnectLocation", "Could not restart tracking after $action", error)
+      }
     }
   }
 }

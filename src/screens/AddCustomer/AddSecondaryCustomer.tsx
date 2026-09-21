@@ -296,6 +296,8 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
 
   // Optional: more strict validation before submit
   const isBankInfoValid = () => {
+    // Edit does not show or send bank details, so there is nothing of them to check.
+    if (isEdit) return true;
     const hasBankNumber = !!formData.bank_account_number?.trim();
     const hasConfirm = !!formData.bank_account_number_confirm?.trim();
 
@@ -610,7 +612,9 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
     fd.append('belt_area_market_name', formData.belt_area_market_name || '');
     fd.append('gps_location', formData.gps_location || '');
 
-    if (formData.type === 'RETAILER') {
+    // KYC is entered once, when the customer is created. Edit neither shows nor sends it, so
+    // it cannot be changed or cleared from here (the server keeps what is stored).
+    if (formData.type === 'RETAILER' && !isEdit) {
       fd.append('gst_number', formData.gst_number || '');
       fd.append('pan_number', formData.pan_number || '');
       fd.append('aadhar_no', formData.aadhar_no || '');
@@ -636,10 +640,12 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
     };
 
     addPhoto('shop_photo', formData.shop_photo);
-    addPhoto('gst_attachment', formData.gst_attachment);
-    addPhoto('pan_attachment', formData.pan_attachment);
-    addPhoto('aadhar_attachment', formData.aadhar_attachment);
-    addPhoto('bank_proof', formData.bank_proof);
+    if (!isEdit) {
+      addPhoto('gst_attachment', formData.gst_attachment);
+      addPhoto('pan_attachment', formData.pan_attachment);
+      addPhoto('aadhar_attachment', formData.aadhar_attachment);
+      addPhoto('bank_proof', formData.bank_proof);
+    }
 
     return fd;
   };
@@ -1063,6 +1069,8 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
               </View>
             </AccordionSection>
 
+            {/* KYC (bank, tax and their documents) only when creating a customer. */}
+            {!isEdit && (
             <AccordionSection title="Bank & Tax Information">
               <CustomTextInput
                 placeholder="GST Number (optional)"
@@ -1134,8 +1142,9 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
                 renderRightIcon={() => <ArrowDownIcon />}
               />
             </AccordionSection>
+            )}
 
-            <AccordionSection title="Attachments">
+            <AccordionSection title={isEdit ? 'Shop Photo' : 'Attachments'}>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
                 <ImageUploadBox
                   label="Shop Photo"
@@ -1144,30 +1153,34 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
                   required
                   existingUri={isEdit ? formData.shop_photo?.uri : null}
                 />
-                <ImageUploadBox
-                  label="GST Attachment (optional)"
-                  field="gst_attachment"
-                  value={formData.gst_attachment}
-                  existingUri={isEdit ? formData.gst_attachment?.uri : null}
-                />
-                <ImageUploadBox
-                  label="PAN Attachment (optional)"
-                  field="pan_attachment"
-                  value={formData.pan_attachment}
-                  existingUri={isEdit ? formData.pan_attachment?.uri : null}
-                />
-                <ImageUploadBox
-                  label="Aadhaar Attachment (optional)"
-                  field="aadhar_attachment"
-                  value={formData.aadhar_attachment}
-                  existingUri={isEdit ? formData.aadhar_attachment?.uri : null}
-                />
-                <ImageUploadBox
-                  label="Bank Proof / Cheque (optional)"
-                  field="bank_proof"
-                  value={formData.bank_proof}
-                  existingUri={isEdit ? formData.bank_proof?.uri : null}
-                />
+                {!isEdit && (
+                  <>
+                    <ImageUploadBox
+                      label="GST Attachment (optional)"
+                      field="gst_attachment"
+                      value={formData.gst_attachment}
+                      existingUri={null}
+                    />
+                    <ImageUploadBox
+                      label="PAN Attachment (optional)"
+                      field="pan_attachment"
+                      value={formData.pan_attachment}
+                      existingUri={null}
+                    />
+                    <ImageUploadBox
+                      label="Aadhaar Attachment (optional)"
+                      field="aadhar_attachment"
+                      value={formData.aadhar_attachment}
+                      existingUri={null}
+                    />
+                    <ImageUploadBox
+                      label="Bank Proof / Cheque (optional)"
+                      field="bank_proof"
+                      value={formData.bank_proof}
+                      existingUri={null}
+                    />
+                  </>
+                )}
               </View>
             </AccordionSection>
 

@@ -37,6 +37,7 @@ export type RootStackParamList = {
   RetailerSchemeDetail: { retailerId: number | string; schemeId: number | string; schemeName?: string } | undefined;
   LoyaltyMenu: undefined;
   LoyaltyNewInvoice: { invoice?: any } | undefined;
+  RetailerKyc: { retailerId: number | string; retailerName?: string };
   UserTourList:undefined;
   BeatCustomerList:undefined;
   OrderHistoryDetailsScreen:undefined

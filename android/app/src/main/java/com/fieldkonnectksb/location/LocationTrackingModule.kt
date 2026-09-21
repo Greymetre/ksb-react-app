@@ -26,6 +26,10 @@ class LocationTrackingModule(private val reactContext: ReactApplicationContext) 
         promise.reject("missing_token", "Cannot start live location tracking without an auth token")
         return
       }
+      if (!LocationPermissions.hasForeground(reactContext)) {
+        promise.reject("permission_missing", "Location permission is required for live location tracking")
+        return
+      }
       val intent = Intent(reactContext, LocationForegroundService::class.java).apply {
         action = LocationForegroundService.ACTION_START
         putExtra(LocationForegroundService.EXTRA_TOKEN, authToken)
@@ -42,6 +46,13 @@ class LocationTrackingModule(private val reactContext: ReactApplicationContext) 
   @ReactMethod
   fun stopLocationTrackingAfterPunchOut(promise: Promise) {
     try {
+      if (!LocationPermissions.hasForeground(reactContext)) {
+        // The service cannot come to the foreground without permission; just end tracking.
+        LocationStorage.setActive(reactContext, false)
+        reactContext.stopService(Intent(reactContext, LocationForegroundService::class.java))
+        promise.resolve(true)
+        return
+      }
       val intent = Intent(reactContext, LocationForegroundService::class.java).apply {
         action = LocationForegroundService.ACTION_STOP
       }
@@ -60,6 +71,10 @@ class LocationTrackingModule(private val reactContext: ReactApplicationContext) 
         return
       }
 
+      if (!LocationPermissions.hasForeground(reactContext)) {
+        promise.resolve(false)
+        return
+      }
       val intent = Intent(reactContext, LocationForegroundService::class.java).apply {
         action = LocationForegroundService.ACTION_SYNC
       }

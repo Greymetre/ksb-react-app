@@ -29,6 +29,7 @@ import { colors } from './src/utils/Colors';
 import store, { persistor } from './src/components/redux/Store';
 import SplashScreen from './src/screens/Splash';
 import AppBackdrop from './src/components/AppBackdrop';
+import LocationRequiredGate from './src/components/LocationRequiredGate';
 import Routes from './src/navigations/Routes';
 import { navigationRef } from './src/services/NavigationService';
 import {
@@ -121,6 +122,7 @@ const App = () => {
                   >
 
                     {loading ? <SplashScreen /> : <Routes />}
+                    {!loading && <LocationRequiredGate />}
                   </NavigationContainer>
 
                   <Toast config={toastConfig} visibilityTime={1500} />

@@ -19,6 +19,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import ActionSheet, { ActionSheetRef } from 'react-native-actions-sheet'
 import { useAppSelector } from '../../components/redux/Store'
 import { bankAccountTypeLabel } from '../../utils/bankAccountType';
+import KycDocumentCards from './KycDocumentCards';
 
 type CustomerDetailsProps = {
   navigation: any
@@ -1341,66 +1342,41 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
                   </AppText>
                 </Pressable>
 
-                {customerData?.gst_attachment && (
-                  <Pressable
-                    style={{ width: '48%', marginBottom: 16 }}
-                    onPress={() => {
-                      setImages([resolveMediaUrl(customerData.gst_attachment)]);
-                      setInitialIndex(0);
-                      setModalVisible(true);
-                    }}
-                  >
-                    <FastImage
-                      style={{ height: 140, width: '100%', borderRadius: 12 }}
-                      source={{ uri: resolveMediaUrl(customerData.gst_attachment) }}
-                      resizeMode="cover"
-                    />
-                    <AppText align="center" size={13} color="black" family="InterBold" style={{ marginTop: 6 }}>
-                      GST Attachment
-                    </AppText>
-                  </Pressable>
-                )}
-
-                {customerData?.pan_attachment && (
-                  <Pressable
-                    style={{ width: '48%', marginBottom: 16 }}
-                    onPress={() => {
-                      setImages([resolveMediaUrl(customerData.pan_attachment)]);
-                      setInitialIndex(0);
-                      setModalVisible(true);
-                    }}
-                  >
-                    <FastImage
-                      style={{ height: 140, width: '100%', borderRadius: 12 }}
-                      source={{ uri: resolveMediaUrl(customerData.pan_attachment) }}
-                      resizeMode="cover"
-                    />
-                    <AppText align="center" size={13} color="black" family="InterBold" style={{ marginTop: 6 }}>
-                      PAN Attachment
-                    </AppText>
-                  </Pressable>
-                )}
-
-                {customerData?.bank_proof && (
-                  <Pressable
-                    style={{ width: '48%', marginBottom: 16 }}
-                    onPress={() => {
-                      setImages([resolveMediaUrl(customerData.bank_proof)]);
-                      setInitialIndex(0);
-                      setModalVisible(true);
-                    }}
-                  >
-                    <FastImage
-                      style={{ height: 140, width: '100%', borderRadius: 12 }}
-                      source={{ uri: resolveMediaUrl(customerData.bank_proof) }}
-                      resizeMode="cover"
-                    />
-                    <AppText align="center" size={13} color="black" family="InterBold" style={{ marginTop: 6 }}>
-                      Bank Proof
-                    </AppText>
-                  </Pressable>
-                )}
               </View>
+
+              {/* GST, PAN, Aadhaar and Bank - attachment, number, review status and the reviewer's note.
+                  View opens the retailer's KYC screen, where pending and rejected documents are updated. */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 }}>
+                <AppText size={16} color="black" family="InterSemiBold">
+                  KYC Documents
+                </AppText>
+                {route?.params?.type && isRetailerCustomer && (customerData?.id || routeItem?.id) ? (
+                  <Pressable
+                    hitSlop={8}
+                    onPress={() => navigation.navigate('RetailerKyc', {
+                      retailerId: customerData?.id || routeItem?.id,
+                      retailerName: customerData?.shop_name || customerData?.owner_name || routeItem?.shop_name || 'Retailer',
+                    })}
+                    style={({ pressed }) => ({
+                      paddingHorizontal: 14,
+                      paddingVertical: 6,
+                      borderRadius: 16,
+                      backgroundColor: colors.primary,
+                      experimental_backgroundImage: BRAND_GRADIENT,
+                      opacity: pressed ? 0.7 : 1,
+                    })}>
+                    <AppText size={12.5} color="white" family="InterSemiBold">View</AppText>
+                  </Pressable>
+                ) : null}
+              </View>
+              <KycDocumentCards
+                data={customerData}
+                onOpenImage={(url: string) => {
+                  setImages([url]);
+                  setInitialIndex(0);
+                  setModalVisible(true);
+                }}
+              />
             </View>
 
             {/* Edit Button */}

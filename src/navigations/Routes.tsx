@@ -25,6 +25,7 @@ import CustomerActivity from '../screens/Customer/CustomerActivity';
 import RetailerLoyalty from '../screens/Customer/RetailerLoyalty';
 import LoyaltyMenu from '../screens/Loyalty';
 import LoyaltyNewInvoice from '../screens/Loyalty/NewInvoice';
+import RetailerKyc from '../screens/Loyalty/RetailerKyc';
 import RetailerSchemeDetail from '../screens/Customer/RetailerSchemeDetail';
 import UserTourList from '../screens/TourPlan/UserTourList';
 import BeatCustomerDetails from '../screens/BeatScreen/BeatCustomerDetails';
@@ -184,6 +185,11 @@ const Routes = () => {
           headerShown: true,
           title: route?.params?.invoice ? 'Edit Invoice' : 'New Invoice'
         })} />
+
+        <Stack.Screen name='RetailerKyc' component={RetailerKyc} options={{
+          headerShown: true,
+          title: 'Retailer KYC'
+        }} />
 
         <Stack.Screen name='CustomerList' component={CustomerList} options={{
           headerShown: true,

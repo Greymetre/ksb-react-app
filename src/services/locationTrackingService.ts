@@ -163,24 +163,24 @@ const todayInIndia = () =>
     day: '2-digit',
   }).format(new Date());
 
-const hasActivePunchInToday = async () => {
+/** The server's answer to "is this user punched in right now": true / false, or null when the
+ *  server could not be asked (offline, error). */
+export const getPunchInStateToday = async (): Promise<boolean | null> => {
   const token = store.getState().auth?.token;
   if (!token) return false;
 
   try {
     const response = await axiosClient.get('api/getPunchin');
+    if (response?.data?.status !== 'success') return null;
     const latest = response?.data?.data?.[0];
-    return Boolean(
-      response?.data?.status === 'success' &&
-        latest?.punchin_date === todayInIndia() &&
-        latest?.punchin_date &&
-        !latest?.punchout_date,
-    );
+    return Boolean(latest?.punchin_date && latest.punchin_date === todayInIndia() && !latest?.punchout_date);
   } catch (error) {
     devLog('Punch-in status check failed', error);
-    return false;
+    return null;
   }
 };
+
+export const hasActivePunchInToday = async () => (await getPunchInStateToday()) === true;
 
 const queueIosPosition = (position: GeoPosition) => {
   const state = getLiveLocationTrackingState();

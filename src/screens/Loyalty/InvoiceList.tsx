@@ -25,8 +25,6 @@ import {
   invoiceApi,
 } from '../../api/invoiceApi';
 import { apiErrorMessage } from '../../utils/misc';
-import axiosClient from '../../api/AxiosClient';
-import { API_ENDPOINT } from '../../api/ApiUrls';
 import { isPdfAsset } from '../../utils/invoiceAttachments';
 import { invoiceStyles as styles } from './styles';
 
@@ -76,9 +74,6 @@ const InvoiceList = ({ navigation }: any) => {
   const [detailLoading, setDetailLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [canCreate, setCanCreate] = useState(false);
-  // The four KYC stages of the retailers this user can see, counted by the server from
-  // the same index the CRM's KYC screen reads.
-  const [kycSummary, setKycSummary] = useState<Record<string, number>>({});
 
   const load = useCallback(
     async (nextPage: number, mode: 'replace' | 'append') => {
@@ -101,21 +96,6 @@ const InvoiceList = ({ navigation }: any) => {
     [search, status],
   );
 
-  // Asked for separately from the invoice list because it counts retailers, not invoices,
-  // and must not move with the status chips above it.
-  const loadKycSummary = useCallback(async () => {
-    try {
-      const response = await axiosClient.get(`${API_ENDPOINT.SECONDARY_CUSTOMER}/kyc-summary`, {
-        // Active retailers only - those who have submitted at least one loyalty invoice.
-        params: { type: 'RETAILER', invoice_active: 1 },
-      });
-      setKycSummary(response?.data?.data ?? {});
-    } catch {
-      // A count that cannot be fetched is not worth an error toast over the list.
-      setKycSummary({});
-    }
-  }, []);
-
   // Typing should not fire a request per keystroke.
   useEffect(() => {
     setLoading(true);
@@ -123,13 +103,11 @@ const InvoiceList = ({ navigation }: any) => {
     return () => clearTimeout(timer);
   }, [search, status, load]);
 
-  // Coming back from the create screen must show what was just raised - and coming back
-  // from the KYC list must show a count that reflects anything approved while there.
+  // Coming back from the create screen must show what was just raised.
   useFocusEffect(
     useCallback(() => {
       load(1, 'replace');
-      loadKycSummary();
-    }, [load, loadKycSummary]),
+    }, [load]),
   );
 
   const openDetail = useCallback(async (invoice: InvoiceListItem) => {
@@ -188,29 +166,6 @@ const InvoiceList = ({ navigation }: any) => {
     [summary],
   );
 
-  // The CRM's four KYC stages, over active retailers only (at least one loyalty invoice).
-  // Each opens the same active retailers it counted.
-  const kycCards = useMemo(
-    () => [
-      { stage: 'approved', label: 'Fully Approved', count: kycSummary.approved, tone: '#16A34A' },
-      { stage: 'complete_pending', label: 'Awaiting Review', count: kycSummary.complete_pending, tone: '#D97706' },
-      { stage: 'partial', label: 'Partly Submitted', count: kycSummary.partial, tone: '#2563EB' },
-      { stage: 'none', label: 'Not Started', count: kycSummary.not_started, tone: '#64748B' },
-    ].map(card => ({
-      label: card.label,
-      value: String(card.count ?? 0),
-      tone: card.tone,
-      onPress: () =>
-        navigation?.navigate('CustomerList', {
-          type: 'RETAILER',
-          customerTypeName: 'Retailer',
-          kyc: card.stage,
-          invoiceActive: true,
-        }),
-    })),
-    [kycSummary, navigation],
-  );
-
   const canLoadMore = items.length < total && !loadingMore && !loading;
 
   return (
@@ -251,23 +206,6 @@ const InvoiceList = ({ navigation }: any) => {
 
       <View style={styles.summaryRow}>
         {summaryCards.map(card => (
-          <Pressable
-            key={card.label}
-            disabled={!card.onPress}
-            onPress={card.onPress}
-            style={({ pressed }) => [styles.summaryCard, pressed && card.onPress ? { opacity: 0.6 } : null]}>
-            <View style={[styles.summaryAccent, { backgroundColor: card.tone }]} />
-            <AppText size={19} family="InterSemiBold" color="black">{card.value}</AppText>
-            <AppText size={11} color="black" opacity={0.5}>{card.label}</AppText>
-          </Pressable>
-        ))}
-      </View>
-
-      <AppText size={12} family="InterSemiBold" color="black" opacity={0.6} style={{ marginHorizontal: 16, marginTop: 4 }}>
-        Active Retailer KYC ({kycSummary.total ?? 0})
-      </AppText>
-      <View style={styles.summaryRow}>
-        {kycCards.map(card => (
           <Pressable
             key={card.label}
             disabled={!card.onPress}
