@@ -8,7 +8,7 @@ import { apiErrorMessage } from '../../utils/misc';
 import { kycSummary, listActiveRetailers } from '../../api/retailerKycApi';
 import { invoiceStyles as styles } from './styles';
 
-// The CRM's four KYC stages, in its order.
+// The CRM's four KYC stages, in its order - the stage every retailer is in.
 const STAGES = [
   { key: 'approved', countKey: 'approved', label: 'Fully Approved', tone: '#16A34A', bg: '#E7F6EC' },
   { key: 'complete_pending', countKey: 'complete_pending', label: 'Awaiting Review', tone: '#D97706', bg: '#FEF3C7' },
@@ -16,7 +16,16 @@ const STAGES = [
   { key: 'none', countKey: 'not_started', label: 'Not Started', tone: '#64748B', bg: '#F1F5F9' },
 ];
 
+// The tiles: Total, the four stages, then Has a Rejection - the CRM KYC screen's filter for a
+// retailer with at least one rejected document, whatever its stage, so it overlaps the others.
+const TILES: { key: string | null; countKey: string; label: string; tone: string; bg: string }[] = [
+  { key: null, countKey: 'total', label: 'Total', tone: colors.navy, bg: '#E8EEF7' },
+  ...STAGES,
+  { key: 'rejected', countKey: 'rejected', label: 'Has a Rejection', tone: '#DC2626', bg: '#FDECEC' },
+];
+
 const stageOf = (key: string) => STAGES.find(stage => stage.key === key) ?? STAGES[3];
+const tileOf = (key: string) => TILES.find(tile => tile.key === key) ?? STAGES[3];
 
 /**
  * The Loyalty screen's KYC tab: the active retailers (at least one loyalty invoice) this user
@@ -90,10 +99,11 @@ const KycList = ({ navigation }: any) => {
     }, [load, loadSummary]),
   );
 
-  const tiles = useMemo(
-    () => STAGES.map(item => ({ ...item, count: summary[item.countKey] ?? 0 })),
-    [summary],
-  );
+  // Two rows of three.
+  const tileRows = useMemo(() => {
+    const tiles = TILES.map(item => ({ ...item, count: summary[item.countKey] ?? 0 }));
+    return [tiles.slice(0, 3), tiles.slice(3, 6)];
+  }, [summary]);
 
   const canLoadMore = items.length < total && !loadingMore && !loading;
 
@@ -118,27 +128,30 @@ const KycList = ({ navigation }: any) => {
       </View>
 
       <AppText size={12} family="InterSemiBold" color="black" opacity={0.6} style={{ marginHorizontal: 16, marginTop: 12 }}>
-        Active Retailer KYC ({summary.total ?? 0})
+        Active Retailer KYC
       </AppText>
-      <View style={[styles.summaryRow, { marginTop: 8 }]}>
-        {tiles.map(tile => {
-          const active = stage === tile.key;
-          return (
-            <Pressable
-              key={tile.key}
-              onPress={() => setStage(active ? null : tile.key)}
-              style={({ pressed }) => [
-                styles.summaryCard,
-                active && { borderWidth: 1.5, borderColor: tile.tone, backgroundColor: tile.bg },
-                pressed ? { opacity: 0.6 } : null,
-              ]}>
-              <View style={[styles.summaryAccent, { backgroundColor: tile.tone }]} />
-              <AppText size={19} family="InterSemiBold" color="black">{String(tile.count)}</AppText>
-              <AppText size={11} color="black" opacity={0.5}>{tile.label}</AppText>
-            </Pressable>
-          );
-        })}
-      </View>
+      {tileRows.map((row, rowIndex) => (
+        <View key={rowIndex} style={[styles.summaryRow, { marginTop: rowIndex === 0 ? 8 : 7 }]}>
+          {row.map(tile => {
+            const active = stage === tile.key;
+            return (
+              <Pressable
+                key={tile.label}
+                // Total clears the filter; any other tile toggles its own.
+                onPress={() => setStage(tile.key === null || active ? null : tile.key)}
+                style={({ pressed }) => [
+                  styles.summaryCard,
+                  active && { borderWidth: 1.5, borderColor: tile.tone, backgroundColor: tile.bg },
+                  pressed ? { opacity: 0.6 } : null,
+                ]}>
+                <View style={[styles.summaryAccent, { backgroundColor: tile.tone }]} />
+                <AppText size={19} family="InterSemiBold" color="black">{String(tile.count)}</AppText>
+                <AppText size={11} color="black" opacity={0.5}>{tile.label}</AppText>
+              </Pressable>
+            );
+          })}
+        </View>
+      ))}
 
       {loading ? (
         <View style={{ paddingTop: 60 }}>
@@ -175,7 +188,7 @@ const KycList = ({ navigation }: any) => {
                 No retailers found
               </AppText>
               <AppText size={12} color="black" opacity={0.45} align="center">
-                {stage ? `No active retailer is at ${stageOf(stage).label}.` : 'Retailers with at least one loyalty invoice appear here.'}
+                {stage === 'rejected' ? 'No active retailer has a rejected document.' : stage ? `No active retailer is at ${tileOf(stage).label}.` : 'Retailers with at least one loyalty invoice appear here.'}
               </AppText>
             </View>
           }
