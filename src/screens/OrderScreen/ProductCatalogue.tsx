@@ -208,9 +208,13 @@ const ProductCatalogue = ({ navigation, route }: ProductCatalogueProps) => {
         setLoadingProducts(true);
 
         try {
-            const url = subcategoryId
-                ? `${BASE_URL}api/getProductList?subcategory_id=${subcategoryId}`
-                : `${BASE_URL}api/getProductList`;
+            // A product's segment is its own (product master); a family can hold products of
+            // another segment, so with a segment picked only that segment's products are listed.
+            const params = [
+                subcategoryId ? `subcategory_id=${subcategoryId}` : '',
+                subcategoryId && selectedSegmentId ? `category_id=${selectedSegmentId}` : '',
+            ].filter(Boolean).join('&');
+            const url = `${BASE_URL}api/getProductList${params ? `?${params}` : ''}`;
 
             const res = await fetch(url, {
                 headers: {
