@@ -3,6 +3,7 @@ import React
 import React_RCTAppDelegate
 import ReactAppDependencyProvider
 import UserNotifications
+import FirebaseCore
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
@@ -21,6 +22,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
     reactNativeDelegate = delegate
     reactNativeFactory = factory
+
+    // Push notifications: Firebase starts only when GoogleService-Info.plist is in the app.
+    // Without it the app runs as before and simply does not register for push.
+    if Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist") != nil {
+      FirebaseApp.configure()
+    }
 
     UNUserNotificationCenter.current().delegate = self
 

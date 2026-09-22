@@ -16,6 +16,7 @@ import { BackIcon, UserIcon } from '../../assets/svgs/SvgsFile'
 import axios from 'axios'
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from '../../utils/misc'
 import { stopLiveLocationTracking } from '../../services/liveLocationService'
+import { stopPushForUser } from '../../services/pushNotifications'
 import { KsbAarohBrand } from '../../components/AarohLogo';
 import AppBackdrop from '../../components/AppBackdrop'
 
@@ -54,6 +55,7 @@ const ProfileTab = ({ handleDrawerClose }: any) => {
           onPress: async () => {
             try {
               setLoading(true);
+              await stopPushForUser();
 
               await axios.post(
                 `${BASE_URL}api/delete-user`,
@@ -186,6 +188,8 @@ const ProfileTab = ({ handleDrawerClose }: any) => {
                       if (loading) return;
                       setLoading(true);
                       try {
+                        // While the session still works: this phone stops getting this user's notifications.
+                        await stopPushForUser();
                         await stopLiveLocationTracking({ captureFinalLocation: false });
                         if (token) {
                           await axios.post(`${BASE_URL}api/logout`, null, {

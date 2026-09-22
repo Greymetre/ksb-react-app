@@ -215,6 +215,8 @@ const ProductCatalogue = ({ navigation, route }: ProductCatalogueProps) => {
             const productData = json?.data?.map((item: any) => ({
                 label: item.product_name,
                 value: item.id,
+                // What the search box matches: the name and the Part No, so either finds it.
+                search: `${item.product_name ?? ''} ${item.part_no ?? ''}`,
                 subcategory_id: item.subcategory_id,
                 subcategory_name: item.subcategory_name,
                 category_id: item.category_id,
@@ -438,11 +440,12 @@ const ProductCatalogue = ({ navigation, route }: ProductCatalogueProps) => {
                         inputSearchStyle={{ height: 40, fontSize: 14 }}
                         data={productList.length > 0 ? productList : [{label: 'Loading...', value: 1}]}
                         search
+                        searchField="search"
                         maxHeight={300}
                         labelField="label"
                         valueField="value"
                         placeholder="Select Product"
-                        searchPlaceholder="Select Product..."
+                        searchPlaceholder="Search name or Part No..."
                         value={selectedProduct}
                         // disable={loadingProducts}
                         onChange={(item) => {

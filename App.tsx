@@ -36,6 +36,7 @@ import {
   initializeLiveLocationTracking,
   runAndroidFirstTimeLiveLocationSetup,
 } from './src/services/liveLocationService';
+import { startPushNotifications } from './src/services/pushNotifications';
 ;
 
 
@@ -69,6 +70,7 @@ const App = () => {
     void initializeLiveLocationTracking().catch(error => {
       console.warn('Live location initialization failed', error);
     });
+    startPushNotifications();
   };
 
   const MyTheme = {

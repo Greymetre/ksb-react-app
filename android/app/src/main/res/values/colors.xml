@@ -1,0 +1,4 @@
+<resources>
+    <!-- Push notification accent (brand colour). -->
+    <color name="notification_color">#8A5A08</color>
+</resources>
