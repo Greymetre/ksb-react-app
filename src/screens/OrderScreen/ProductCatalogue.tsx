@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, BackHandler, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { ArrowDownIcon } from '../../assets/svgs/SvgsFile';
 import AppText from '../../components/AppText/AppText';
@@ -37,6 +37,10 @@ const ProductCatalogue = ({ navigation, route }: ProductCatalogueProps) => {
     const [segmentList, setSegmentList] = useState<DropdownItem[]>([]);
     const [familyList, setFamilyList] = useState<DropdownItem[]>([]);
     const [productList, setProductList] = useState<DropdownItem[]>([]);
+    // Only the latest family / product request may fill its list. Switching segment or family
+    // quickly used to let a slower, older response land last and replace the right list.
+    const familyRequest = useRef(0);
+    const productRequest = useRef(0);
     const [selectedSegmentId, setSelectedSegmentId] = useState<number | string | null>(null);
     const [selectedFamilyId, setSelectedFamilyId] = useState<number | string | null>(null);
 
@@ -159,6 +163,7 @@ const ProductCatalogue = ({ navigation, route }: ProductCatalogueProps) => {
     }, [selectedSegmentId]);
 
     const fetchFamily = async () => {
+        const requestId = ++familyRequest.current;
         setLoadingFamily(true)
         console.log(selectedSegmentId, 'selectedSegmentId', 'selectedSegmentId')
         try {
@@ -180,9 +185,11 @@ const ProductCatalogue = ({ navigation, route }: ProductCatalogueProps) => {
                 value: item.id,
             }));
 
+            if (requestId !== familyRequest.current) return;
             setFamilyList(familyData || []);
             setLoadingFamily(false)
         } catch (error) {
+            if (requestId !== familyRequest.current) return;
             setLoadingFamily(false)
             console.log('Family error', error);
         }
@@ -197,6 +204,7 @@ const ProductCatalogue = ({ navigation, route }: ProductCatalogueProps) => {
     }, []);
 
     const fetchProducts = async (subcategoryId?: number | string) => {
+        const requestId = ++productRequest.current;
         setLoadingProducts(true);
 
         try {
@@ -223,11 +231,12 @@ const ProductCatalogue = ({ navigation, route }: ProductCatalogueProps) => {
                 category_name: item.category_name,
             }));
 
+            if (requestId !== productRequest.current) return;
             setProductList(productData || []);
         } catch (error) {
             console.log("Product error", error);
         } finally {
-            setLoadingProducts(false);
+            if (requestId === productRequest.current) setLoadingProducts(false);
         }
     };
     /*
