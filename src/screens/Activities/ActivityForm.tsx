@@ -33,6 +33,7 @@ const GIFT_OPTIONS = [
   'Lunch Box',
   'Thermos Cup Set',
   'Pipe Wrench',
+  'Umraila',
 ];
 const FORM_SECTIONS = [
   { id: 1, label: 'Details' },

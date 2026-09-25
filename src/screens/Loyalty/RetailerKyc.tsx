@@ -28,15 +28,18 @@ const DOC_FIELDS: Record<KycDocKey, FieldSpec[]> = {
   ],
 };
 
-const REQUIRED: [KycFieldKey, string][] = [
-  ['gstNumber', 'GST Number'],
-  ['panNumber', 'PAN Number'],
-  ['aadharNo', 'Aadhaar Number'],
-  ['accountHolderName', 'Account Holder'],
-  ['bankName', 'Bank Name'],
-  ['bankAccountType', 'Account Type'],
-  ['bankAccountNumber', 'Account Number'],
-  ['ifscCode', 'IFSC Code'],
+// Every number a retailer can give. KYC is submitted a piece at a time - one document, or
+// one number - so none of these is demanded; the list is here to check that a submit
+// carries something rather than nothing.
+const KYC_FIELDS: KycFieldKey[] = [
+  'gstNumber',
+  'panNumber',
+  'aadharNo',
+  'accountHolderName',
+  'bankName',
+  'bankAccountType',
+  'bankAccountNumber',
+  'ifscCode',
 ];
 
 const TONE = {
@@ -111,14 +114,11 @@ const RetailerKyc = ({ navigation, route }: any) => {
 
   const submit = async () => {
     if (!kyc) return;
-    const missing = REQUIRED.find(([key]) => !String(kyc[key] ?? '').trim());
-    if (missing) {
-      Toast.show({ type: 'error', position: 'top', text1: `${missing[1]} is required` });
-      return;
-    }
-    const noFile = kyc.documents.find(doc => !files[doc.key] && !doc.attachmentUrl);
-    if (noFile) {
-      Toast.show({ type: 'error', position: 'top', text1: `${noFile.title} attachment is required` });
+    // Only an empty submit is refused: whatever is ready goes in now, the rest later.
+    const hasNumber = KYC_FIELDS.some(key => String(kyc[key] ?? '').trim().length > 0);
+    const hasAttachment = Object.keys(files).length > 0 || kyc.documents.some(doc => !!doc.attachmentUrl);
+    if (!hasNumber && !hasAttachment) {
+      Toast.show({ type: 'error', position: 'top', text1: 'Add a document or a detail before submitting' });
       return;
     }
     setSaving(true);
