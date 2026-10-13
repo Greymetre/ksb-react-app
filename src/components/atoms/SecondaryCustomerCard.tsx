@@ -28,23 +28,20 @@ import { BASE_URL, resolveMediaUrl } from '../../api/AxiosClient';
 import FastImage from 'react-native-fast-image';
 import { useGetSubmitCheckIN } from '../../api/query/CustomerApi';
 import Toast from 'react-native-toast-message';
+import { CurrentCheckin, CustomerCardItem } from './customerCardTypes';
+import { rfmCategoryColors } from '../../utils/rfmCategory';
 
 const { width } = Dimensions.get('window');
 
 interface SolarCardProps {
-  item: {
-    rating?: string;
-    type?: string;
-    company?: string;
-    address?: string;
-    imageUrl: any;
-  };
+  item: CustomerCardItem;
   navigation?: any
   currentLat?: any;
   currentLng?: any;
   locationError?: any;
   index?: number
-  type?: string;
+  /** Set when this card is the customer the user is currently checked in to. */
+  type?: CurrentCheckin | null;
   customerType?: string;
   isPunchedIn?: any
   locationLoading?: any;
@@ -73,7 +70,8 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
   // The API can return the approval as APPROVED, Approved or a legacy value from
   // customer_details.visit_status. Read it one way here so the badge and the
   // Check In / Add Order gates never disagree.
-  const approvalStatus = String((item as any)?.status || 'PENDING').trim().toUpperCase();
+  const approvalStatus = String(item?.status || 'PENDING').trim().toUpperCase();
+  const categoryColors = rfmCategoryColors(item?.rfm_category);
 
   const customerTypeText = [
     customerType,
@@ -173,7 +171,7 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
       navigation.navigate('VisitReport', {
         checkin_id: type ? type?.checkin_id :  newCheckInData || item?.last_checkin_id,
         entity_type: 'secondary_customer',
-        entity_id: item?.id,
+        entity_id: item.id,
         customerData: item, // pass full customer data if needed in report
         latitude: currentLat,
         longitude: currentLng,
@@ -181,6 +179,13 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
       return
     } else {
       setCheckInLoading(true)
+      // Without an id the check-in would post entity_id: undefined and fail with no
+      // explanation, so it is stopped here instead.
+      if (item?.id == null) {
+        Toast.show({ type: 'error', text1: 'Cannot check in', text2: 'This customer has no id.', position: 'top', visibilityTime: 3000 })
+        setCheckInLoading(false)
+        return
+      }
       const payload = {
         entity_type: 'secondary_customer',
         entity_id: item?.id,
@@ -207,7 +212,7 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
         } else {
           Toast.show({
             type: 'error',
-            text1: res,
+            text1: checkInHandle ? 'Check out failed' : 'Check in failed',
             text2: res?.data?.message || 'Please try again',
             position: 'top',
             visibilityTime: 4000,
@@ -313,7 +318,7 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
 
     // Prefer coordinates if available
     if (gps && gps.includes(',')) {
-      const [lat, lng] = gps.split(',').map(s => s.trim());
+      const [lat, lng] = gps.split(',').map((s: string) => s.trim());
       if (lat && lng) {
         query = `${lat},${lng}`;
       }
@@ -370,7 +375,7 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
         !type && (
           <>
             <FastImage
-              source={require('../../assets/images/Dummy/Customer2.png')}
+              source={require('../../assets/images/NoImage.png')}
               style={[styles.mainImage, { position: 'absolute', top: 14, left: 12 }]}
               resizeMode="cover"
             />
@@ -400,18 +405,31 @@ const SecondaryCustomerCard: React.FC<SolarCardProps> = ({
           <Text style={styles.tagText}>{item?.rating}</Text>
         </View>
       </TouchableOpacity> */}
+      {/* Both chips ride in one row pinned over the picture, so a long word like APPROVED
+          simply pushes the category along instead of sitting under it. */}
       {
         !type && (
-          <TouchableOpacity style={[styles.playIconWrapper, { top: 30, left: 9 }]} >
-            <BlurView
-              blurType="dark"
-              blurAmount={36}
-              reducedTransparencyFallbackColor="rgba(255, 255, 255, 0.8)"
-            />
-            <View style={[styles.playIconContainer, { backgroundColor: 'rgba(255, 255, 255, 0.9)' }]}>
-              <Text style={styles.tagText}>{approvalStatus}</Text>
-            </View>
-          </TouchableOpacity>
+          <View style={styles.cardChipRow}>
+            <TouchableOpacity style={styles.playIconWrapper}>
+              <BlurView
+                blurType="dark"
+                blurAmount={36}
+                reducedTransparencyFallbackColor="rgba(255, 255, 255, 0.8)"
+              />
+              <View style={[styles.playIconContainer, { backgroundColor: 'rgba(255, 255, 255, 0.9)' }]}>
+                <Text style={styles.tagText}>{approvalStatus}</Text>
+              </View>
+            </TouchableOpacity>
+
+            {/* Where this retailer stands among the retailers of its own state; one that has
+                never ordered reads Bronze. */}
+            {!!item?.rfm_category && (
+              <View style={[styles.categoryChip, { backgroundColor: categoryColors.background }]}>
+                <View style={[styles.categoryDot, { backgroundColor: categoryColors.dot }]} />
+                <Text style={[styles.categoryText, { color: categoryColors.text }]}>{item.rfm_category}</Text>
+              </View>
+            )}
+          </View>
         )
       }
 
@@ -568,8 +586,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     height: 32,
     borderRadius: 100,
-    position: 'absolute',
+    overflow: 'hidden',
   },
+
+  // The strip both chips sit in. It stops short of the right edge so the chevron button in
+  // that corner stays clear.
+  cardChipRow: {
+    position: 'absolute',
+    top: 30,
+    left: 9,
+    right: 56,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+
+  categoryChip: {
+    height: 32,
+    paddingHorizontal: 12,
+    borderRadius: 100,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  categoryDot: { width: 8, height: 8, borderRadius: 4 },
+  categoryText: { fontSize: rw(11), fontWeight: '600' },
 
   tagText: {
     color: '#000',

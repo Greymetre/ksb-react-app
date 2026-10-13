@@ -6,6 +6,7 @@ import { styles } from './styles';
 import { rw } from '../../utils/responsive';
 import { NavigationProp, ParamListBase, useFocusEffect, useNavigation } from '@react-navigation/native';
 import { colors, BRAND_GRADIENT } from '../../utils/Colors';
+import { rfmCategoryColors } from '../../utils/rfmCategory';
 import { SearchSvgIcon } from '../../assets/svgs/HomePageSvgs';
 import { DATA } from '../../components/Comman/CommanFunction';
 import CustomerCard from '../../components/atoms/CustomerCard';
@@ -50,6 +51,15 @@ const CustomerList = ({ route }: any) => {
   const isCurrentRetailer = ['secondary_customer', 'retailer'].includes(currentCheckinType);
   const [citySearchText, setCitySearchText] = useState('');
   const [selectedCity, setSelectedCity] = useState<any>(null);
+  const [stateList, setStateList] = useState<any[]>([]);
+  const [selectedState, setSelectedState] = useState<any>(null);
+  const [showStateModal, setShowStateModal] = useState(false);
+  const [stateSearchText, setStateSearchText] = useState('');
+
+  // The retailer's RFM category. Worked out on the server against the other retailers of
+  // the same state; a retailer that has never ordered is Bronze.
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
 
   // STATUS
   const [showStatusModal, setShowStatusModal] = useState(false);
@@ -78,6 +88,8 @@ const CustomerList = ({ route }: any) => {
       if (selectedStatus && selectedStatus !== 'All') params.status = selectedStatus;
       if (selectedCity?.city_name) params.city_name = selectedCity.city_name;
       if (selectedUser?.id) params.for_user_id = selectedUser.id;
+      if (selectedCategory) params.category = selectedCategory;
+      if (selectedState?.state_name) params.state_name = selectedState.state_name;
       if (invoiceActive) params.invoice_active = 1;
       const response = await axiosClient.get(`${API_ENDPOINT.SECONDARY_CUSTOMER}/kyc-summary`, { params });
       setKycCounts(response?.data?.data ?? {});
@@ -92,7 +104,10 @@ const CustomerList = ({ route }: any) => {
   const [userSearchText, setUserSearchText] = useState('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
 
-  const STATUS_LIST = [
+  /** The RFM categories, best first. Bronze is where a retailer that has never ordered sits. */
+const RFM_CATEGORIES: (string | null)[] = [null, 'Platinum', 'Diamond', 'Gold', 'Silver', 'Bronze'];
+
+const STATUS_LIST = [
     { label: 'All', value: 'All' },
     { label: 'Approved', value: 'APPROVED' },
     { label: 'Pending', value: 'PENDING' },
@@ -118,7 +133,7 @@ const CustomerList = ({ route }: any) => {
       // setSelectedStatus('All')
       // setSearchText('')
       // setSelectedUser(null)
-    }, [selectedStatus, selectedCity, selectedUser, kycFilter])
+    }, [selectedStatus, selectedCity, selectedUser, selectedCategory, selectedState, kycFilter])
   )
 
   // Option A: Fixed title (recommended for most cases)
@@ -222,6 +237,18 @@ const CustomerList = ({ route }: any) => {
     }
   };
 
+  const fetchStates = async () => {
+    try {
+      const token = store.getState()?.auth?.token;
+      const res = await axios.get(`${BASE_URL}api/secondary-customer/states`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res?.data?.status) setStateList(res.data.data || []);
+    } catch (e) {
+      console.log('states', e);
+    }
+  };
+
   const fetchCities = async () => {
     try {
       const token = store.getState()?.auth?.token;
@@ -259,7 +286,17 @@ const CustomerList = ({ route }: any) => {
     }
   };
 
-  const filteredCities = cityList.filter((item: any) =>
+  const filteredStates = stateList.filter((item: any) =>
+    item.state_name.toLowerCase().includes(stateSearchText.toLowerCase())
+  );
+
+  // With a state chosen the city list offers only that state's cities; with none, all of
+  // them. A city that carries no state of its own is kept rather than quietly dropped.
+  const citiesInState = selectedState
+    ? cityList.filter((item: any) => item.state_id == null || Number(item.state_id) === Number(selectedState.id))
+    : cityList;
+
+  const filteredCities = citiesInState.filter((item: any) =>
     item.city_name.toLowerCase().includes(citySearchText.toLowerCase())
   );
 
@@ -276,7 +313,11 @@ const CustomerList = ({ route }: any) => {
     overrideCity?: any,
     overrideUser?: any,
     clearCity = false,
-    clearUser = false
+    clearUser = false,
+    overrideCategory?: string | null,
+    clearCategory = false,
+    overrideState?: any,
+    clearState = false
   ) => {
     try {
       setLoader(true);
@@ -309,6 +350,8 @@ const CustomerList = ({ route }: any) => {
           for_user_id: clearUser ? null : overrideUser?.id ?? selectedUser?.id,
           kyc: kycFilter,
           invoice_active: invoiceActive,
+          category: clearCategory ? null : overrideCategory ?? selectedCategory,
+          state_name: clearState ? null : overrideState?.state_name ?? selectedState?.state_name,
         });
         console.log('Secondary customer list response:', {
           type: route.params.type,
@@ -357,7 +400,7 @@ const CustomerList = ({ route }: any) => {
       setLoader(false);
       setLoader1(false)
     }
-  }, [searchText, isSecondary, selectedStatus, selectedCity, selectedUser, kycFilter, navigation, route]);
+  }, [searchText, isSecondary, selectedStatus, selectedCity, selectedUser, selectedCategory, selectedState, kycFilter, navigation, route]);
 
 
   const clearFilters = () => {
@@ -412,9 +455,14 @@ const CustomerList = ({ route }: any) => {
         </View>
         {
           route?.params?.type && (
-            <View style={[styles.row, { gap: 13, marginVertical: 15 }]}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.filterScroll}
+              contentContainerStyle={styles.filterRow}
+            >
               <Pressable
-                style={[styles.UserBox, styles.row]}
+                style={[styles.UserBox, styles.filterBox, styles.row]}
                 onPress={() => setShowStatusModal(true)}
               >
                 <View style={{ flex: 1 }}>
@@ -427,7 +475,7 @@ const CustomerList = ({ route }: any) => {
               {
                 !route?.params?.beatId && (
                   <Pressable
-                    style={[styles.UserBox, styles.row]}
+                    style={[styles.UserBox, styles.filterBox, styles.row]}
                     onPress={() => {
                       setShowUserModal(true);
                       fetchHierarchyUsers();
@@ -448,7 +496,21 @@ const CustomerList = ({ route }: any) => {
 
 
               <Pressable
-                style={[styles.UserBox, styles.row]}
+                style={[styles.UserBox, styles.filterBox, styles.row]}
+                onPress={() => {
+                  setShowStateModal(true);
+                  fetchStates();
+                }}
+              >
+                <View style={{ flex: 1 }}>
+                  <AppText size={12} color={selectedState ? 'black' : '#718096'} numLines={1}>
+                    {selectedState ? selectedState.state_name : 'State'}
+                  </AppText>
+                </View>
+                <ArrowDownIcon />
+              </Pressable>
+              <Pressable
+                style={[styles.UserBox, styles.filterBox, styles.row]}
                 onPress={() => {
                   setShowCityModal(true);
                   fetchCities();
@@ -461,7 +523,20 @@ const CustomerList = ({ route }: any) => {
                 </View>
                 <ArrowDownIcon />
               </Pressable>
-            </View>
+
+              <Pressable
+                style={[styles.UserBox, styles.filterBox, styles.row]}
+                onPress={() => setShowCategoryModal(true)}
+              >
+                <View style={{ flex: 1 }}>
+                  <AppText size={12} color={selectedCategory ? 'black' : '#718096'}>
+                    {selectedCategory ?? 'Category'}
+                  </AppText>
+                </View>
+                <ArrowDownIcon />
+              </Pressable>
+
+            </ScrollView>
           )
         }
 
@@ -571,6 +646,99 @@ const CustomerList = ({ route }: any) => {
         }
 
       </View>
+      <Modal visible={showStateModal} statusBarTranslucent transparent animationType="slide">
+        <Pressable
+          style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' }}
+          onPress={() => setShowStateModal(false)}
+        >
+          <Pressable style={{ backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, maxHeight: '75%' }}>
+            <View style={[styles.row, { justifyContent: 'space-between', alignItems: 'center' }]}>
+              <AppText size={18} family="InterSemiBold">Select State</AppText>
+              <Pressable
+                onPress={() => {
+                  setSelectedState(null);
+                  setShowStateModal(false);
+                  setStateSearchText('');
+                  setLoader1(true);
+                  setPage(1);
+                  fetchCustomers(1, false, selectedStatus, selectedCity, selectedUser, false, false, selectedCategory, false, null, true);
+                }}
+                style={{ paddingVertical: 8, paddingHorizontal: 20, borderRadius: 8, borderWidth: 1, borderColor: '#ccc' }}
+              >
+                <AppText size={14} family="InterMedium" color="black">Clear Filter</AppText>
+              </Pressable>
+            </View>
+
+            <TextInput
+              placeholder="Search state..."
+              value={stateSearchText}
+              onChangeText={setStateSearchText}
+              style={{ borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 10, marginVertical: 12 }}
+            />
+
+            <FlatList
+              data={filteredStates}
+              keyExtractor={item => String(item.id)}
+              renderItem={({ item }: { item: any }) => (
+                <Pressable
+                  onPress={() => {
+                    // A city already chosen in another state would leave the listing empty,
+                    // so it is dropped along with the state change.
+                    const cityFits = !selectedCity || selectedCity.state_id == null
+                      || Number(selectedCity.state_id) === Number(item.id);
+                    if (!cityFits) { setSelectedCity(null); setCitySearchText(''); }
+                    setSelectedState(item);
+                    setShowStateModal(false);
+                    setStateSearchText('');
+                    setLoader1(true);
+                    setPage(1);
+                    fetchCustomers(1, false, selectedStatus, cityFits ? selectedCity : null, selectedUser,
+                      !cityFits, false, selectedCategory, false, item);
+                  }}
+                  style={({ pressed }) => ({
+                    paddingVertical: 14,
+                    borderBottomWidth: 1,
+                    borderColor: '#eee',
+                    backgroundColor: pressed ? '#f5f5f5' : 'transparent',
+                  })}
+                >
+                  <AppText size={16}>{item.state_name}</AppText>
+                </Pressable>
+              )}
+            />
+          </Pressable>
+        </Pressable>
+      </Modal>
+      <Modal visible={showCategoryModal} statusBarTranslucent transparent animationType="slide">
+        <Pressable
+          style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' }}
+          onPress={() => setShowCategoryModal(false)}
+        >
+          <Pressable style={{ backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20 }}>
+            <AppText size={18} family="InterSemiBold">Select Category</AppText>
+            <AppText size={12} color="#718096">Rated against the other retailers of the same state.</AppText>
+            <View style={{ height: 16 }} />
+            {RFM_CATEGORIES.map(item => (
+              <Pressable
+                key={item ?? 'all'}
+                onPress={() => {
+                  setSelectedCategory(item);
+                  setShowCategoryModal(false);
+                  setLoader1(true);
+                  setPage(1);
+                  fetchCustomers(1, false, selectedStatus, selectedCity, selectedUser, false, false, item, item === null, selectedState);
+                }}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#eee' }}
+              >
+                {item ? <View style={[styles.categoryDot, { backgroundColor: rfmCategoryColors(item).dot }]} /> : null}
+                <AppText size={16} color={selectedCategory === item ? '#8A5A08' : 'black'}>
+                  {item ?? 'All Categories'}
+                </AppText>
+              </Pressable>
+            ))}
+          </Pressable>
+        </Pressable>
+      </Modal>
       <Modal visible={showStatusModal} statusBarTranslucent transparent animationType="slide">
         <Pressable
           style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' }}

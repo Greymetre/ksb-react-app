@@ -20,7 +20,7 @@ import { fonts } from '../../utils/typography';
 import { rw } from '../../utils/responsive';
 import store from '../../components/redux/Store';
 import Toast from 'react-native-toast-message';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const BORDER = '#cfd3e6';
 
@@ -290,6 +290,9 @@ const RetailersPerformanceViewAllScreen = ({ navigation }: any) => {
     return label.includes(search.toLowerCase());
   });
 
+  // The header sits under a translucent status bar; this is how far down it has to
+  // start. It used to be a hardcoded 40, which is short on a punch-hole phone.
+  const insets = useSafeAreaInsets();
   return (
     <View style={styles.container} >
       <StatusBar
@@ -297,7 +300,7 @@ const RetailersPerformanceViewAllScreen = ({ navigation }: any) => {
         backgroundColor="transparent"
         barStyle={"light-content"}
       />
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <Pressable style={styles.backBtn} onPress={() => navigation.goBack()}>
           <Image
             source={require('../../assets/images/Dummy/back.png')}

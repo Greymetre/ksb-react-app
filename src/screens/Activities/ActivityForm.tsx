@@ -4,6 +4,7 @@ import {
   Alert,
   Image,
   Modal,
+  Platform,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -14,6 +15,7 @@ import {
   View,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { createMMKV } from 'react-native-mmkv';
@@ -102,6 +104,15 @@ export default function ActivityFormScreen() {
     expenses: [],
     photos: [],
   });
+  // The footer floats over the form, so it has to clear the phone's own bottom bar - the
+  // gesture pill or the three buttons - or the two sit on top of each other. The screen's
+  // SafeAreaView already does this on iOS and does nothing on Android, so only Android
+  // needs the inset added by hand; adding it on both would pad iOS twice.
+  const insets = useSafeAreaInsets();
+  const bottomBar = Platform.OS === 'android' ? insets.bottom : 0;
+  // Same on the other end: the status bar is translucent, so on Android the header would
+  // otherwise sit behind the notification bar.
+  const statusBar = Platform.OS === 'android' ? insets.top : 0;
   const formScrollRef = useRef<ScrollView>(null);
   const chipScrollRef = useRef<ScrollView>(null);
   const sectionOffsets = useRef<Record<number, number>>({});
@@ -165,7 +176,7 @@ export default function ActivityFormScreen() {
           const assignedUser = (c.asr_dsr_users || []).find(
             (user: any) => Number(user.id) === Number(next.userId),
           );
-          next.userName = assignedUser?.name || next.userName || '';
+          next.userName = next.userName || assignedUser?.name || '';
         }
         else {
           const cached = offline.getString(`activity-${type}`);
@@ -205,7 +216,10 @@ export default function ActivityFormScreen() {
             ...x,
             ...defaults,
             ...next,
-            ...forcedAuto,
+            // forcedAuto describes whoever is signed in. It belongs on a new form only -
+            // on a saved activity it used to paint the reader's own branch, manager and
+            // ASR over the record's, and on a draft it was saved straight back over them.
+            ...(id ? {} : forcedAuto),
             participants: next.participants?.length
               ? next.participants
               : defaults.participants,
@@ -499,7 +513,7 @@ export default function ActivityFormScreen() {
     return <ActivityIndicator style={{ flex: 1 }} color="#8A5A08" />;
   return (
     <SafeAreaView style={s.page}>
-      <View style={s.header}>
+      <View style={[s.header, { paddingTop: statusBar, height: 72 + statusBar }]}>
         <Pressable onPress={() => nav.goBack()}>
           <Text style={s.back}>‹</Text>
         </Pressable>
@@ -541,7 +555,7 @@ export default function ActivityFormScreen() {
       </View>
       <ScrollView
         ref={formScrollRef}
-        contentContainerStyle={s.scroll}
+        contentContainerStyle={[s.scroll, { paddingBottom: 110 + bottomBar }]}
         scrollEventThrottle={16}
         onScroll={event => {
           const { contentOffset, layoutMeasurement, contentSize } =
@@ -955,7 +969,7 @@ export default function ActivityFormScreen() {
         </Section>
       </ScrollView>
       {!readOnly && (
-        <View style={s.footer}>
+        <View style={[s.footer, { paddingBottom: 12 + bottomBar }]}>
           <Pressable
             disabled={saving}
             style={s.draft}

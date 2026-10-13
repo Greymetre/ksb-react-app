@@ -36,6 +36,10 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
   const [checkInLoading, setCheckInLoading] = useState<boolean>(false)
   const [customerData, setCustomerData] = useState<any>(null)
   const [hierarchyLevel, setHierarchyLevel] = useState<number>(-1)
+  // Whether the server allows this user to review the retailer's approval: a creator or the
+  // assigned person cannot, anyone who sees it reporting-wise (or an admin) can - the same
+  // rule the CRM uses.
+  const [canReviewApproval, setCanReviewApproval] = useState<boolean>(false)
   const [data, setData] = useState<any>(null)
   const [checkInHanlde, seCheckInHandle] = useState<any>(null)
   const [modalVisible, setModalVisible] = useState(false);
@@ -147,6 +151,7 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
         if (route?.params?.type) {
           const data = res?.data?.data
           setHierarchyLevel(Number(res?.data?.hierarchy_level ?? -1))
+          setCanReviewApproval(res?.data?.can_review_approval === true)
           setPunchInStatus(data?.status)
           setData(data)
           const distributorNames = res?.data?.distributors
@@ -436,15 +441,13 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
                   <Pressable
                     style={[styles.circle, styles.center]}
                     onPress={() => {
-                      if (!canManageRetailerApproval || hierarchyLevel < 1 || hierarchyLevel > 2 || user?.id == customerData?.created_by) {
+                      if (!canManageRetailerApproval || !canReviewApproval) {
                         Toast.show({
                           type: 'error',
                           text1: 'Approval not allowed',
                           text2: !canManageRetailerApproval
                             ? 'Retailer approval permission is required.'
-                            : hierarchyLevel < 1 || hierarchyLevel > 2
-                              ? 'Retailer creator must be within your first two reporting levels.'
-                              : 'You cannot approve a retailer created by you.',
+                            : 'You created or are assigned to this retailer - it is reviewed by a reporting manager above you.',
                           position: 'top',
                         });
                         return
@@ -493,15 +496,13 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
 
                 <View style={[styles.approveView, styles.row]}>
                   <Pressable style={[styles.circle, styles.center, { borderColor: "#FF3333" }]} onPress={() => {
-                    if (!canManageRetailerApproval || hierarchyLevel < 1 || hierarchyLevel > 2 || user?.id == customerData?.created_by) {
+                    if (!canManageRetailerApproval || !canReviewApproval) {
                       Toast.show({
                         type: 'error',
                         text1: 'Approval not allowed',
                         text2: !canManageRetailerApproval
                           ? 'Retailer approval permission is required.'
-                          : hierarchyLevel < 1 || hierarchyLevel > 2
-                            ? 'Retailer creator must be within your first two reporting levels.'
-                            : 'You cannot update a retailer created by you.',
+                          : 'You created or are assigned to this retailer - it is reviewed by a reporting manager above you.',
                         position: 'top',
                       });
                       return
@@ -520,15 +521,13 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
 
                 <View style={[styles.approveView, styles.row]}>
                   <Pressable style={[styles.circle, styles.center, { borderColor: "#d1c10c" }]} onPress={() => {
-                    if (!canManageRetailerApproval || hierarchyLevel < 1 || hierarchyLevel > 2 || user?.id == customerData?.created_by) {
+                    if (!canManageRetailerApproval || !canReviewApproval) {
                       Toast.show({
                         type: 'error',
                         text1: 'Approval not allowed',
                         text2: !canManageRetailerApproval
                           ? 'Retailer approval permission is required.'
-                          : hierarchyLevel < 1 || hierarchyLevel > 2
-                            ? 'Retailer creator must be within your first two reporting levels.'
-                            : 'You cannot update a retailer created by you.',
+                          : 'You created or are assigned to this retailer - it is reviewed by a reporting manager above you.',
                         position: 'top',
                       });
                       return
@@ -571,7 +570,7 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
               }}>
                 <FastImage
                   source={customerData?.shop_image
-                    ? { uri: resolveMediaUrl(customerData?.shop_image) } : require('../../assets/images/Dummy/Customer2.png')}
+                    ? { uri: resolveMediaUrl(customerData?.shop_image) } : require('../../assets/images/NoImage.png')}
                   style={styles.firstImage}
 
                 />
@@ -900,7 +899,7 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
                       style={styles.attImg}
                       source={customerData?.shop_image
                         ? { uri: resolveMediaUrl(customerData.shop_image) }
-                        : require('../../assets/images/Dummy/Customer2.png')}
+                        : require('../../assets/images/NoImage.png')}
                     />
                     <AppText align="center" size={14} color="black" family="InterBold">
                       Outlet Image
@@ -914,7 +913,7 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
                           style={styles.attImg}
                           source={customerData?.owner_photo
                             ? { uri: resolveMediaUrl(customerData?.owner_photo) }
-                            : require('../../assets/images/Dummy/Customer2.png')}
+                            : require('../../assets/images/NoImage.png')}
                         />
                         : (
                           <>
@@ -924,7 +923,7 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
                                   style={styles.attImg}
                                   source={documents[0]
                                     ? { uri: resolveMediaUrl(documents[0]) }
-                                    : require('../../assets/images/Dummy/Customer2.png')}
+                                    : require('../../assets/images/NoImage.png')}
                                 />
                               )
                             }
@@ -1333,7 +1332,7 @@ const CustomerDetails = ({ navigation, route }: CustomerDetailsProps) => {
                     source={
                       customerData?.shop_image
                         ? { uri: resolveMediaUrl(customerData.shop_image) }
-                        : require('../../assets/images/Dummy/Customer2.png')
+                        : require('../../assets/images/NoImage.png')
                     }
                     resizeMode="cover"
                   />

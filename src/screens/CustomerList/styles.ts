@@ -4,6 +4,14 @@ import { rw } from "../../utils/responsive";
 import { fonts } from "../../utils/typography";
 
 export const styles = StyleSheet.create({
+    // Five filters do not fit a phone's width, so the row scrolls sideways instead of
+    // wrapping onto a second line and pushing the list down.
+    filterScroll: { flexGrow: 0, flexShrink: 0, marginVertical: 15 },
+    filterRow: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingRight: 4 },
+    // Inside the scroller the boxes need a width of their own; UserBox's flex only means
+    // something in a row that is measuring itself against the screen.
+    filterBox: { flex: 0, width: 132 },
+    categoryDot: { width: 10, height: 10, borderRadius: 5 },
     container: {
         flex: 1,
         backgroundColor: 'transparent'

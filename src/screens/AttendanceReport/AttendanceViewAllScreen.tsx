@@ -16,7 +16,7 @@ import AppText from '../../components/AppText/AppText';
 import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 import { fonts } from '../../utils/typography';
 import store from '../../components/redux/Store';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 
 type RowType = {
@@ -85,7 +85,7 @@ const DATA: SectionType[] = [
 const AttendanceViewAllScreen = ({ navigation }: any) => {
   const [tab, setTab] = useState<'ASR' | 'DSR'>('ASR');
   const [activeFilter, setActiveFilter] = useState('User');
-  const [sections, setSections] = useState([]);
+  const [sections, setSections] = useState<SectionType[]>([]);
   const [summary, setSummary] = useState<any>(null);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [activeModal, setActiveModal] = useState<
@@ -98,7 +98,11 @@ const AttendanceViewAllScreen = ({ navigation }: any) => {
     type: '' as 'punch_in' | 'not_punch_in' | 'leave' | '',
   });
 
-  const [filterData, setFilterData] = useState({
+  const [filterData, setFilterData] = useState<{
+    users: { id: number; name: string }[];
+    branches: string[];
+    zones: string[];
+  }>({
     users: [],
     branches: [],
     zones: [],
@@ -235,43 +239,10 @@ const AttendanceViewAllScreen = ({ navigation }: any) => {
       .toUpperCase();
   };
 
-  const toggleSelection = (key: 'users' | 'branches' | 'zones', value: any) => {
-    const list: any = filters[key];
-
-    if (list.includes(value)) {
-      setFilters({
-        ...filters,
-        [key]: list.filter((v: any) => v !== value),
-      });
-    } else {
-      setFilters({
-        ...filters,
-        [key]: [...list, value],
-      });
-    }
-  };
-
-  const resetFilters = () => {
-    setFilters({
-      users: [],
-      branches: [],
-      zones: [],
-      type: '',
-    });
-  };
-
-  const applyFilters = () => {
-    console.log('APPLIED FILTERS:', filters);
-
-    // 👉 call your attendance API here with params
-  };
-
-  const removeFilter = (key: 'users' | 'branches' | 'zones', value: any) => {
-    setFilters({
-      ...filters,
-      [key]: filters[key].filter((v: any) => v !== value),
-    });
-  };
+  // A multi-select version of these filters was started and never finished - its
+  // toggle/reset/remove/apply helpers were never called from anywhere and set
+  // users/branches/zones, which this screen's filters do not have. The live path is
+  // fetchAttendanceWithFilters below.
 
   const getModalData = () => {
     switch (activeModal) {
@@ -446,6 +417,9 @@ const AttendanceViewAllScreen = ({ navigation }: any) => {
     month: 'short',
     year: 'numeric',
   });
+  // The header sits under a translucent status bar; this is how far down it has to
+  // start. It used to be a hardcoded 40, which is short on a punch-hole phone.
+  const insets = useSafeAreaInsets();
   return (
     <View style={styles.container} >
       <StatusBar
@@ -453,7 +427,7 @@ const AttendanceViewAllScreen = ({ navigation }: any) => {
         backgroundColor="transparent"
         barStyle={"light-content"}
       />
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <Pressable style={styles.backBtn} onPress={() => navigation.goBack()}>
           <Image
             source={require('../../assets/images/Dummy/back.png')}

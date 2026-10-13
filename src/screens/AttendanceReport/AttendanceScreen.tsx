@@ -75,6 +75,9 @@ interface TourPlanItem {
   id: number;
   date: string;
   town: string;
+  /** The resolved city name the tour plan API sends alongside the raw `town`
+   *  (COALESCE(city_name, town) server side); the screen prefers it. */
+  town_name?: string;
   district: number | string;
   objectives: string;
   type: string;

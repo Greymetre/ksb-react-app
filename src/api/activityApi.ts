@@ -11,6 +11,10 @@ export const normalizeActivity = (row: any) => ({
   userId: row?.userId ?? row?.user_id ?? null,
   branchId: row?.branchId ?? row?.branch_id ?? row?.branch ?? null,
   reportingManagerId: row?.reportingManagerId ?? row?.reporting_manager_id ?? null,
+  // The names the activity was recorded under. A saved activity carries its own; only a
+  // brand new form falls back to whoever is signed in.
+  userName: row?.userName ?? row?.user_name ?? '',
+  reportingManagerName: row?.reportingManagerName ?? row?.reporting_manager_name ?? '',
   distributorId: row?.distributorId ?? row?.distributor_id ?? null,
   distributorName: row?.distributorName ?? row?.distributor_name ?? '',
   dealerName: row?.dealerName ?? row?.dealer_name ?? '',

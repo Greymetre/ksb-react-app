@@ -14,6 +14,7 @@ import {
   ratingApi,
 } from '../../api/ratingApi';
 import { ratingStyles as styles } from './styles';
+import { ratingSolidTone, ratingTextTone } from './ratingBands';
 import EmployeeRatingModal from './EmployeeRatingModal';
 import { useAppSelector } from '../../components/redux/Store';
 import { isAdminUser } from '../../utils/roles';
@@ -23,8 +24,6 @@ const DESIGNATIONS: { label: string; value: number }[] = [
   { label: 'ASR', value: 3 },
   { label: 'DSR', value: 6 },
 ];
-
-const ratingTone = (value: number) => (value >= 75 ? '#16A34A' : value >= 50 ? '#D97706' : '#DC2626');
 
 /** Two initials, used until somebody actually uploads a photo - which today is nobody. */
 const initialsOf = (name: string) =>
@@ -114,7 +113,7 @@ const ZoneCard = ({ entry }: { entry: ZoneEntry }) => {
         <AppText size={10} color="black" opacity={0.55} numLines={1}>
           {[entry.performer.branch, entry.performer.zone].filter(Boolean).join(' · ') || '-'}
         </AppText>
-        <AppText size={14} family="InterBold" color={ratingTone(entry.performer.rating)}>
+        <AppText size={14} family="InterBold" color={ratingTextTone(entry.performer.rating)}>
           {entry.performer.rating.toFixed(2)}%
         </AppText>
       </View>
@@ -290,7 +289,7 @@ const Rating = () => {
             {[item.employeeCode, item.branch, item.zone].filter(Boolean).join(' · ')}
           </AppText>
         </View>
-        <View style={[styles.avgPill, { backgroundColor: ratingTone(item.averageRating) }]}>
+        <View style={[styles.avgPill, { backgroundColor: ratingSolidTone(item.averageRating) }]}>
           <AppText size={10} family="InterSemiBold" color="white" opacity={0.85}>
             AVG
           </AppText>
@@ -309,7 +308,7 @@ const Rating = () => {
                 {month.label}
                 {month.inProgress ? '*' : ''}
               </AppText>
-              <AppText size={12} family="InterSemiBold" color={ratingTone(value)}>
+              <AppText size={12} family="InterSemiBold" color={ratingTextTone(value)}>
                 {value.toFixed(0)}%
               </AppText>
             </View>

@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView, initialWindowMetrics } from 'react-native-safe-area-context';
 import { Button, PermissionsAndroid, Platform, StatusBar, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Provider } from 'react-redux';
@@ -100,6 +100,10 @@ const App = () => {
   return (
 
     <KeyboardProvider statusBarTranslucent navigationBarTranslucent>
+      {/* Screens read the phone's own top and bottom bars through this. initialMetrics
+          hands it the sizes straight away, so nothing lays out at zero for a frame and
+          then jumps. */}
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <Provider store={store}>
           <PersistGate persistor={persistor} onBeforeLift={initializeAfterRehydrate}>
@@ -137,6 +141,7 @@ const App = () => {
           </PersistGate>
         </Provider>
       </GestureHandlerRootView>
+      </SafeAreaProvider>
     </KeyboardProvider>
   );
 };

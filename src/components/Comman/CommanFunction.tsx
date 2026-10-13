@@ -78,7 +78,7 @@ export const DATA = [
     id: '3',
     company: 'Soil & Brick Infrastructures Private Limited',
     address: 'Scheme No. 78, Vijay Nagar, Indore(MP)',
-    imageUrl: require('../../assets/images/Dummy/Customer2.png'), 
+    imageUrl: require('../../assets/images/NoImage.png'), 
     rating: 'A+',
     type: 'Warm',
   },

@@ -28,28 +28,12 @@ import { BASE_URL, resolveMediaUrl } from '../../api/AxiosClient';
 import FastImage from 'react-native-fast-image';
 import Toast from 'react-native-toast-message';
 import { useGetSubmitCheckIN } from '../../api/query/CustomerApi';
+import { CurrentCheckin, CustomerCardItem } from './customerCardTypes';
 
 const { width } = Dimensions.get('window');
 
 interface SolarCardProps {
-  item: {
-    id?: any;
-    rating?: string;
-    type?: string;
-    company?: string;
-    address?: string;
-    imageUrl: any;
-    last_checkin_date?: any
-    legal_name?: string
-    shipping_address?: any
-    shop_image?: string
-    last_checkout_date?: string
-    last_checkin_id?: string
-    mobile?: string
-    last_checkin_time?: string
-    last_checkout_time?: string
-    email?: string | unknown
-  };
+  item: CustomerCardItem;
   index?: number
   isPunchedIn?: any
   navigation?: any
@@ -61,7 +45,8 @@ interface SolarCardProps {
   locationError?: any;
   onAddOrderPress?: () => void;
   onClosePress?: () => void;
-  type?: any
+  /** Set when this card is the customer the user is currently checked in to. */
+  type?: CurrentCheckin | null;
 }
 
 const CustomerCard: React.FC<SolarCardProps> = ({
@@ -173,7 +158,7 @@ const CustomerCard: React.FC<SolarCardProps> = ({
       navigation.navigate('VisitReport', {
         checkin_id: type ? type?.checkin_id : newCheckInData || item?.last_checkin_id,
         entity_type: 'distributor',
-        entity_id: item?.id,
+        entity_id: item.id,
         customerData: item, // pass full customer data if needed in report
         latitude: currentLat,
         longitude: currentLng,
@@ -181,6 +166,13 @@ const CustomerCard: React.FC<SolarCardProps> = ({
       return
     } else {
       setCheckInLoading(true)
+      // Without an id the check-in would post entity_id: undefined and fail with no
+      // explanation, so it is stopped here instead.
+      if (item?.id == null) {
+        Toast.show({ type: 'error', text1: 'Cannot check in', text2: 'This customer has no id.', position: 'top', visibilityTime: 3000 })
+        setCheckInLoading(false)
+        return
+      }
       const payload = {
         entity_type: 'distributor',
         entity_id: item?.id,
@@ -308,7 +300,7 @@ const CustomerCard: React.FC<SolarCardProps> = ({
 
     // Prefer coordinates if available
     if (gps && gps.includes(',')) {
-      const [lat, lng] = gps.split(',').map(s => s.trim());
+      const [lat, lng] = gps.split(',').map((s: string) => s.trim());
       if (lat && lng) {
         query = `${lat},${lng}`;
       }
@@ -365,7 +357,7 @@ const CustomerCard: React.FC<SolarCardProps> = ({
         !type && (
           <>
             <FastImage
-              source={require('../../assets/images/Dummy/Customer2.png')}
+              source={require('../../assets/images/NoImage.png')}
               style={[styles.mainImage, { position: 'absolute', top: 14, left: 12 }]}
               resizeMode="cover"
             />

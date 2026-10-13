@@ -5,6 +5,7 @@ import AppText from '../../components/AppText/AppText';
 import { colors } from '../../utils/Colors';
 import { RatingMonth, RatingRow } from '../../api/ratingApi';
 import { ratingStyles as styles } from './styles';
+import { ratingSolidTone, ratingTextTone } from './ratingBands';
 
 /** Below this a driver is worth calling out; the CRM uses the same line. */
 const ATTENTION_BELOW = 85;
@@ -12,8 +13,6 @@ const ATTENTION_BELOW = 85;
 /** Must match the chart styles: the overlay is positioned against these. */
 const CHART_PADDING = 10;
 const CHART_TRACK_HEIGHT = 96;
-
-const tone = (value: number) => (value >= 75 ? '#16A34A' : value >= 50 ? '#D97706' : '#DC2626');
 
 /**
  * How fast the rating is moving, in points per month.
@@ -192,7 +191,7 @@ const EmployeeRatingModal = ({ row, months, onClose }: Props) => {
                 const isActive = month.key === activeKey;
                 return (
                   <Pressable key={month.key} style={styles.chartCol} onPress={() => setSelected(month.key)}>
-                    <AppText size={10} family="InterSemiBold" color={tone(value)}>
+                    <AppText size={10} family="InterSemiBold" color={ratingTextTone(value)}>
                       {value.toFixed(0)}%
                     </AppText>
                     <View
@@ -205,7 +204,7 @@ const EmployeeRatingModal = ({ row, months, onClose }: Props) => {
                       <View
                         style={[
                           styles.chartBar,
-                          { height: `${Math.max(3, Math.min(100, value))}%`, backgroundColor: tone(value) },
+                          { height: `${Math.max(3, Math.min(100, value))}%`, backgroundColor: ratingSolidTone(value) },
                         ]}
                       />
                     </View>
@@ -257,7 +256,7 @@ const EmployeeRatingModal = ({ row, months, onClose }: Props) => {
                       {component.weight.toFixed(2)}
                     </AppText>
                   </View>
-                  <AppText size={15} family="InterBold" color={tone(component.percentage)}>
+                  <AppText size={15} family="InterBold" color={ratingTextTone(component.percentage)}>
                     {component.percentage.toFixed(2)}%
                   </AppText>
                 </View>

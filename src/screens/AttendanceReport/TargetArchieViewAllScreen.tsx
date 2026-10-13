@@ -25,7 +25,7 @@ import { fonts } from '../../utils/typography';
 import { rw } from '../../utils/responsive';
 import store from '../../components/redux/Store';
 import Toast from 'react-native-toast-message';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const BORDER = '#cfd3e6';
 
@@ -247,7 +247,11 @@ const TargetArchieViewAllScreen = ({ navigation }: any) => {
     }));
   };
 
-  const [filterData, setFilterData] = useState({
+  const [filterData, setFilterData] = useState<{
+    users: { id: number; name: string }[];
+    branches: string[];
+    zones: string[];
+  }>({
     users: [],
     branches: [],
     zones: [],
@@ -648,6 +652,9 @@ const TargetArchieViewAllScreen = ({ navigation }: any) => {
     return label.includes(search.toLowerCase());
   });
 
+  // The header sits under a translucent status bar; this is how far down it has to
+  // start. It used to be a hardcoded 40, which is short on a punch-hole phone.
+  const insets = useSafeAreaInsets();
   return (
     <View style={styles.container} >
       <StatusBar
@@ -655,7 +662,7 @@ const TargetArchieViewAllScreen = ({ navigation }: any) => {
         backgroundColor="transparent"
         barStyle={"light-content"}
       />
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <Pressable style={styles.backBtn} onPress={() => navigation.goBack()}>
           <Image
             source={require('../../assets/images/Dummy/back.png')}
@@ -995,32 +1002,8 @@ const TargetArchieViewAllScreen = ({ navigation }: any) => {
               </AppText>
             )}
 
-            renderSectionFooter={({ section }) => {
-
-              const sectionIndex = DATA.indexOf(section);
-
-              return (
-                <View style={[styles.totalRow, {
-                  backgroundColor:
-                    sectionIndex % 2 === 0 ? '#FAF0DD' : '#e6f4ea',
-                }]}>
-                  <AppText style={[styles.totalText, {
-                    color: sectionIndex % 2 === 0 ? '#8A5A08' : '#196c2a'
-                  }]}>{getShort(section.title)} total</AppText>
-                  <AppText style={[styles.totalText, {
-                    color: sectionIndex % 2 === 0 ? '#8A5A08' : '#196c2a'
-                  }]}></AppText>
-                  <AppText style={[styles.totalText, {
-                    color: sectionIndex % 2 === 0 ? '#8A5A08' : '#196c2a'
-                  }]}>{section.total.retailers}</AppText>
-                  <AppText style={[styles.totalText, {
-                    color: sectionIndex % 2 === 0 ? '#8A5A08' : '#196c2a'
-                  }]}>{section.total.qty}</AppText>
-                </View>
-              )
-            }}
-
-
+            // (An older four-column section footer used to be declared here as a second
+            // renderSectionFooter. JSX keeps the last one, so it never rendered.)
             renderSectionFooter={({ section }) => {
               const totals = calculateSectionTotals(section.data);
 

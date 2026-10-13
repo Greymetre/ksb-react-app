@@ -1,6 +1,7 @@
 import React,{useCallback,useEffect,useMemo,useState} from 'react';
-import {ActivityIndicator,Modal,Pressable,SafeAreaView,ScrollView,StyleSheet,Text,View} from 'react-native';
+import {ActivityIndicator,Modal,Platform,Pressable,SafeAreaView,ScrollView,StyleSheet,Text,View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {activityApi} from '../../api/activityApi';
 import { colors, BRAND_GRADIENT } from '../../utils/Colors';
 
@@ -14,8 +15,11 @@ export default function ActivitySummaryScreen(){
   useEffect(()=>{load()},[load]);const rows=useMemo(()=>data?.rows||[],[data?.rows]);const grand=useMemo(()=>sumRows(rows),[rows]);
   const displayRows=useMemo(()=>{let sr=0;const zones=[...new Set(rows.map((x:any)=>x.zone||'Unassigned'))];return zones.flatMap(zone=>{const zoneRows=rows.filter((x:any)=>(x.zone||'Unassigned')===zone);return [...zoneRows.map((row:any)=>({kind:'data',row,sr:++sr})),{kind:'subtotal',zone,summary:sumRows(zoneRows)}]})},[rows]);
   const choose=(title:string,items:any[],value:any,setter:any)=>setPicker({title,items,value,setter});
+  // The status bar is translucent, so on Android this header would sit behind the
+  // notification bar. iOS is already handled by SafeAreaView.
+  const insets=useSafeAreaInsets(); const statusBar=Platform.OS==='android'?insets.top:0;
   return <SafeAreaView style={s.page}>
-    <View style={s.header}><Pressable onPress={()=>nav.goBack()}><Text style={s.back}>‹</Text></Pressable><View><Text style={s.over}>KSB-AAROH · SUMMARY</Text><Text style={s.title}>Meeting summary — distributor wise</Text></View></View>
+    <View style={[s.header,{paddingTop:18+statusBar}]}><Pressable onPress={()=>nav.goBack()}><Text style={s.back}>‹</Text></Pressable><View><Text style={s.over}>KSB-AAROH · SUMMARY</Text><Text style={s.title}>Meeting summary — distributor wise</Text></View></View>
     <ScrollView><View style={s.filters}>
       <Select label="DATE RANGE" text={RANGE.find(x=>x.id===range)?.name||''} onPress={()=>choose('Date range',RANGE,{id:range},(x:any)=>setRange(x.id))}/>
       <Select label="ZONE" text={zone?.name||'All zones'} onPress={()=>choose('Zone',[{id:null,name:'All zones'},...(data?.filters?.zones||[]).map((x:string)=>({id:x,name:x}))],zone,setZone)}/>

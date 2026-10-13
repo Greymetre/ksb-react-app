@@ -50,7 +50,8 @@ export const useMutateSecondaryCustListApi = () => {
             city_name,
             for_user_id,
             kyc,
-            invoice_active
+            invoice_active,
+            category
         }: any) => {
 
             const params: any = {
@@ -78,6 +79,10 @@ export const useMutateSecondaryCustListApi = () => {
             // Only retailers who have submitted a loyalty invoice.
             if (invoice_active) {
                 params.invoice_active = 1;
+            }
+            // The RFM category, worked out on the server against the retailer's own state.
+            if (category) {
+                params.category = category;
             }
 
             console.log(`${API_ENDPOINT.SECONDARY_CUSTOMER_GET}${type}`,
@@ -296,7 +301,9 @@ export const useGetTodayBeatPlanData = () => {
 
 export const useGetSubmitCheckIN = () => {
     return useMutation({
-        mutationFn: (payload: { entity_type: any, entity_id: string, checkin_latitude: any, checkin_longitude: any }) =>
+        // entity_id is the customer's id, which arrives from the list as a number. It was
+        // declared as a string here while every caller has always sent the number.
+        mutationFn: (payload: { entity_type: any, entity_id: string | number, checkin_latitude: any, checkin_longitude: any }) =>
             axiosClient.post(
                 API_ENDPOINT.CUSTOMER_CHECKIN, payload
             ),
