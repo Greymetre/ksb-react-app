@@ -14,7 +14,7 @@ import { Dropdown } from 'react-native-element-dropdown'
 import CustomerCalendar from '../../components/CustomCalendar/CalendarPopupView'
 import { useAppSelector } from '../../components/redux/Store'
 import { SCREEN_HEIGHT } from '../../utils/misc'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BASE_URL } from "../../api/AxiosClient";
 
 interface FilterOption {
@@ -26,6 +26,7 @@ interface FilterOption {
 }
 
 const AttendanceReport = ({ navigation }: any) => {
+  const insets = useSafeAreaInsets();
   const [loader, setLoader] = useState(false);
   const [loader1, setLoader1] = useState(false);
   const [punchInStatus, setPunchInStatus] = useState(0);
@@ -1134,7 +1135,10 @@ const AttendanceReport = ({ navigation }: any) => {
               <CrossIcon />
             </Pressable>
           </View>
-          <ScrollView style={{ width: '100%', maxHeight: SCREEN_HEIGHT * 0.7 }} showsVerticalScrollIndicator={false} keyboardDismissMode='on-drag'>
+          {/* Leave room for the fixed header (61), the Submit button below (~60 incl. margin)
+              and the bottom safe-area padding, so the sheet (capped at 90% of the screen) never
+              clips the Submit button on shorter devices - the detail scrolls inside this box. */}
+          <ScrollView style={{ width: '100%', maxHeight: SCREEN_HEIGHT * 0.9 - insets.bottom - 121 }} showsVerticalScrollIndicator={false} keyboardDismissMode='on-drag'>
             <View style={styles.mainOCntainer} >
               <View style={[styles.row, { gap: 21 }]}>
                 <View style={styles.firstViewModal}>
