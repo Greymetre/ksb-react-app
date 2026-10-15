@@ -37,8 +37,8 @@ import {
   useGetPincodeListAPi,
   useGetStateListApi,
 } from '../../api/query/CustomerApi';
-// react-native-image-picker is no longer used here: ImageCropPicker opens the
-// gallery and the camera itself, in one step, and crops in the same pass.
+// Attachments use the shared invoice/KYC helpers (pickInvoiceAssets + compressInvoiceAsset),
+// so the whole photo is kept and only compressed when oversized - never cropped.
 import FastImage from 'react-native-fast-image';
 import Toast from 'react-native-toast-message';
 import store from '../../components/redux/Store';
@@ -47,7 +47,7 @@ import ActionSheet, { ActionSheetRef } from 'react-native-actions-sheet';
 import useLocationHook from '../../api/hooks/uselocationhook';
 import { fonts } from '../../utils/typography';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import ImageCropPicker from 'react-native-image-crop-picker';
+import { pickInvoiceAssets, compressInvoiceAsset, AttachmentTooLargeError, isPickerCancel } from '../../utils/invoiceAttachments';
 import { useFocusEffect } from '@react-navigation/native';
 import { toMobileDigits } from '../../utils/mobile';
 import { BANK_ACCOUNT_TYPES, normalizeBankAccountType } from '../../utils/bankAccountType';
@@ -436,52 +436,29 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
     actionSheetRef.current?.show();
   };
 
-  // Picking and cropping used to be two steps: react-native-image-picker returned a
-  // uri which was then handed to ImageCropPicker.openCropper. That chain is dead on
-  // iOS under the new architecture - openCropper is the one method in the native
-  // module that still reaches for the legacy bridge
-  // (`self.bridge moduleForName:@"ImageLoader"`), which is nil in bridgeless mode.
-  // Its callback then never fires, so the promise neither resolves nor rejects: the
-  // picture is chosen and nothing happens at all. openPicker and openCamera do the
-  // same job in one step and never touch the bridge.
-  // No permission gate of our own. ImageCropPicker asks for exactly what each route
-  // needs - camera permission for openCamera, nothing at all for openPicker on
-  // Android 11 and up, where the system photo picker needs no grant. The old gate
-  // demanded CAMERA before either route and returned false when it was refused, so
-  // on Android a person who had declined the camera could never open the gallery.
+  // The attachment is picked and compressed exactly like the KYC and invoice uploads
+  // (pickInvoiceAssets + compressInvoiceAsset): the whole photo is kept and only shrunk
+  // when it is too large - it is never cropped. An earlier version cropped to a 1200x1200
+  // square here, which cut large images.
   const pickImage = async (fromCamera = false) => {
-    const cropOptions = {
-      width: 1200,
-      height: 1200,
-      cropping: true,
-      cropperCircleOverlay: false,
-      freeStyleCropEnabled: true,
-      compressImageQuality: 0.85,
-      compressImageMaxWidth: 1200,
-      compressImageMaxHeight: 1200,
-      forceJpg: true,
-      mediaType: 'photo' as const,
-    };
-
     try {
-      const image = fromCamera
-        ? await ImageCropPicker.openCamera(cropOptions)
-        : await ImageCropPicker.openPicker(cropOptions);
+      const [asset] = await pickInvoiceAssets(fromCamera ? 'camera' : 'gallery', 1);
+      if (!asset) return; // the person backed out of the picker
+      const file = await compressInvoiceAsset(asset);
 
       if (currentUploadField) {
         handleChange(currentUploadField, {
-          uri: image.path,
-          type: image.mime || 'image/jpeg',
-          fileName: image.filename || `photo_${Date.now()}.jpg`,
-          width: image.width,
-          height: image.height,
-          size: image.size,
+          uri: file.uri,
+          type: file.type || 'image/jpeg',
+          fileName: file.name || `photo_${Date.now()}.jpg`,
+          size: file.size,
         });
       }
     } catch (error: any) {
-      // Backing out of the picker or the crop screen is not a failure.
-      if (error?.code !== 'E_PICKER_CANCELLED') {
-        console.error('Image pick/crop error:', error);
+      if (error instanceof AttachmentTooLargeError) {
+        Toast.show({ type: 'error', text1: 'Image too large', text2: error.message });
+      } else if (!isPickerCancel(error)) {
+        console.error('Image pick error:', error);
       }
     }
 
