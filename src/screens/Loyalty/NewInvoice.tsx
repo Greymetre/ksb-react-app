@@ -17,7 +17,7 @@ import {
 import Toast from 'react-native-toast-message';
 import AppText from '../../components/AppText/AppText';
 import { colors } from '../../utils/Colors';
-import { InvoiceAttachment, InvoiceDealer, InvoiceDetail, InvoiceRetailer, InvoiceScheme, invoiceApi } from '../../api/invoiceApi';
+import { InvoiceAttachment, InvoiceDealer, InvoiceDetail, InvoiceItemLine, InvoiceRetailer, InvoiceScheme, QuantityPreview, SchemeProduct, invoiceApi } from '../../api/invoiceApi';
 import {
   AttachmentTooLargeError,
   InvoiceAsset,
@@ -32,7 +32,9 @@ import { apiErrorMessage } from '../../utils/misc';
 import { invoiceFormStyles as styles } from './styles';
 import DatePickerModal from './DatePickerModal';
 
-type Picker = 'retailer' | 'dealer' | 'scheme' | null;
+type Picker = 'retailer' | 'dealer' | 'scheme' | 'product' | null;
+
+type QuantityRow = { productId: number | null; productName: string; quantity: string; price: string };
 
 const toApiDate = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -95,6 +97,18 @@ const NewInvoice = ({ navigation, route }: any) => {
   const [saving, setSaving] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [overlayHeight, setOverlayHeight] = useState(0);
+
+  // Quantity Slab: the product/quantity/price rows and the live points preview.
+  const [schemeProducts, setSchemeProducts] = useState<SchemeProduct[]>([]);
+  const [productsLoading, setProductsLoading] = useState(false);
+  const [quantityRows, setQuantityRows] = useState<QuantityRow[]>(
+    editing?.items?.length
+      ? editing.items.map(it => ({ productId: it.productId, productName: it.productName, quantity: String(it.quantity), price: String(it.price) }))
+      : [{ productId: null, productName: '', quantity: '', price: '' }],
+  );
+  const [preview, setPreview] = useState<QuantityPreview | null>(null);
+  const [productPickerRow, setProductPickerRow] = useState<number | null>(null);
+  const isQuantityScheme = scheme?.schemeType === 'Quantity';
 
   /* A sheet pinned to the bottom of a Modal ends up behind the keyboard - you type a name
      and cannot see what came back. The keyboard's height is tracked here so the sheet can
@@ -177,6 +191,40 @@ const NewInvoice = ({ navigation, route }: any) => {
       .catch(error => Toast.show({ type: 'error', position: 'top', text1: apiErrorMessage(error, 'Unable to load schemes') }));
   }, [retailer, invoiceDate]);
 
+  // A Quantity Slab scheme brings a product/quantity table; load its products and keep a row.
+  useEffect(() => {
+    if (scheme?.schemeType === 'Quantity') {
+      setProductsLoading(true);
+      invoiceApi
+        .schemeProducts(scheme.id)
+        .then(setSchemeProducts)
+        .catch(error => Toast.show({ type: 'error', position: 'top', text1: apiErrorMessage(error, 'Unable to load products') }))
+        .finally(() => setProductsLoading(false));
+      setQuantityRows(rows => (rows.length ? rows : [{ productId: null, productName: '', quantity: '', price: '' }]));
+    } else {
+      setSchemeProducts([]);
+      setQuantityRows([{ productId: null, productName: '', quantity: '', price: '' }]);
+      setPreview(null);
+    }
+  }, [scheme]);
+
+  // Live preview: what the entered quantities earn, on the product's cumulative period quantity.
+  useEffect(() => {
+    if (!isQuantityScheme || !scheme || !retailer) { setPreview(null); return; }
+    const lines = quantityRows
+      .filter(row => row.productId && Number(row.quantity) > 0)
+      .map(row => ({ product_id: row.productId as number, quantity: Number(row.quantity) }));
+    if (lines.length === 0) { setPreview(null); return; }
+    let active = true;
+    const timer = setTimeout(() => {
+      invoiceApi
+        .quantityPoints(scheme.id, retailer.id, toApiDate(invoiceDate), lines, editing?.id)
+        .then(result => { if (active) setPreview(result); })
+        .catch(() => { if (active) setPreview(null); });
+    }, 350);
+    return () => { active = false; clearTimeout(timer); };
+  }, [quantityRows, scheme, retailer, invoiceDate]);
+
   const attachmentCount = saved.length + assets.length;
 
   const addAttachments = useCallback(
@@ -225,13 +273,37 @@ const NewInvoice = ({ navigation, route }: any) => {
     if (file.id > 0) setRemovedIds(old => [...old, file.id]);
   };
 
+  const setRowQuantity = (index: number, value: string) =>
+    setQuantityRows(rows => rows.map((r, i) => (i === index ? { ...r, quantity: value.replace(/[^0-9.]/g, '') } : r)));
+  const setRowPrice = (index: number, value: string) =>
+    setQuantityRows(rows => rows.map((r, i) => (i === index ? { ...r, price: value.replace(/[^0-9.]/g, '') } : r)));
+  const addQuantityRow = () => setQuantityRows(rows => [...rows, { productId: null, productName: '', quantity: '', price: '' }]);
+  const removeQuantityRow = (index: number) =>
+    setQuantityRows(rows => (rows.length <= 1 ? [{ productId: null, productName: '', quantity: '', price: '' }] : rows.filter((_, i) => i !== index)));
+  const pickProduct = (product: SchemeProduct) => {
+    setQuantityRows(rows => rows.map((r, i) => (i === productPickerRow ? { ...r, productId: product.id, productName: product.name } : r)));
+    setProductPickerRow(null);
+    setPicker(null);
+  };
+  const rowPreview = (row: QuantityRow) => preview?.lines.find(l => l.productId === row.productId) || null;
+
   const submit = async () => {
     if (!retailer) return Toast.show({ type: 'error', position: 'top', text1: 'Please select a retailer' });
     if (dealers.length > 1 && !dealer)
       return Toast.show({ type: 'error', position: 'top', text1: 'This retailer has more than one dealer - select one' });
     if (!invoiceNumber.trim()) return Toast.show({ type: 'error', position: 'top', text1: 'Invoice number is required' });
     if (!scheme) return Toast.show({ type: 'error', position: 'top', text1: 'Please select a scheme' });
-    if (!(Number(amount) > 0)) return Toast.show({ type: 'error', position: 'top', text1: 'Amount must be greater than 0' });
+
+    // A Quantity Slab invoice is its product lines; a flat scheme is a single amount.
+    let items: InvoiceItemLine[] | undefined;
+    if (isQuantityScheme) {
+      items = quantityRows
+        .filter(row => row.productId && Number(row.quantity) > 0)
+        .map(row => ({ product_id: row.productId as number, quantity: Number(row.quantity), price: Number(row.price) || 0 }));
+      if (items.length === 0) return Toast.show({ type: 'error', position: 'top', text1: 'Add at least one product line with a quantity' });
+    } else if (!(Number(amount) > 0)) {
+      return Toast.show({ type: 'error', position: 'top', text1: 'Amount must be greater than 0' });
+    }
     if (processing) return Toast.show({ type: 'error', position: 'top', text1: 'Attachments are still being processed' });
     if (attachmentCount === 0) return Toast.show({ type: 'error', position: 'top', text1: 'Invoice attachment is required' });
 
@@ -243,7 +315,8 @@ const NewInvoice = ({ navigation, route }: any) => {
         schemeId: scheme.id,
         invoiceNumber: invoiceNumber.trim(),
         invoiceDate: toApiDate(invoiceDate),
-        amount: Number(amount),
+        amount: isQuantityScheme ? 0 : Number(amount),
+        items,
       };
 
       if (editing) {
@@ -267,7 +340,17 @@ const NewInvoice = ({ navigation, route }: any) => {
     }
   };
 
-  const options: any[] = picker === 'retailer' ? retailers : picker === 'dealer' ? dealers : schemes;
+  const productSearch = search.trim().toLowerCase();
+  const options: any[] =
+    picker === 'retailer'
+      ? retailers
+      : picker === 'dealer'
+        ? dealers
+        : picker === 'product'
+          ? (productSearch
+              ? schemeProducts.filter(p => p.name.toLowerCase().includes(productSearch) || (p.code || '').toLowerCase().includes(productSearch))
+              : schemeProducts)
+          : schemes;
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -341,23 +424,27 @@ const NewInvoice = ({ navigation, route }: any) => {
                 <AppText size={13.5} family="InterMedium" color="black" opacity={0.9}>{shownDate(invoiceDate)}</AppText>
               </Pressable>
             </View>
-            <View style={styles.half}>
-              <AppText size={12} family="InterSemiBold" color="black" opacity={0.5} style={styles.label}>PRE-GST AMOUNT *</AppText>
-              <View style={styles.field}>
-                <TextInput
-                  value={amount}
-                  onChangeText={setAmount}
-                  keyboardType="decimal-pad"
-                  placeholder="₹ 0"
-                  placeholderTextColor="#9AA5B1"
-                  style={styles.input}
-                />
+            {!isQuantityScheme && (
+              <View style={styles.half}>
+                <AppText size={12} family="InterSemiBold" color="black" opacity={0.5} style={styles.label}>PRE-GST AMOUNT *</AppText>
+                <View style={styles.field}>
+                  <TextInput
+                    value={amount}
+                    onChangeText={setAmount}
+                    keyboardType="decimal-pad"
+                    placeholder="₹ 0"
+                    placeholderTextColor="#9AA5B1"
+                    style={styles.input}
+                  />
+                </View>
               </View>
-            </View>
+            )}
           </View>
-          <AppText size={10.5} color="black" opacity={0.45} style={{ marginTop: 6 }}>
-            Enter the pre-GST invoice amount only. Do not include GST.
-          </AppText>
+          {!isQuantityScheme && (
+            <AppText size={10.5} color="black" opacity={0.45} style={{ marginTop: 6 }}>
+              Enter the pre-GST invoice amount only. Do not include GST.
+            </AppText>
+          )}
 
           <AppText size={12} family="InterSemiBold" color="black" opacity={0.5} style={[styles.label, { marginTop: 16 }]}>SCHEME *</AppText>
           <Pressable style={styles.field} onPress={() => retailer && schemes.length > 0 && setPicker('scheme')}>
@@ -366,6 +453,63 @@ const NewInvoice = ({ navigation, route }: any) => {
             </AppText>
             <AppText size={13} color="black" opacity={0.4}>⌄</AppText>
           </Pressable>
+
+          {isQuantityScheme && (
+            <View style={{ marginTop: 16 }}>
+              <AppText size={12} family="InterSemiBold" color="black" opacity={0.5} style={styles.label}>PRODUCTS & QUANTITY *</AppText>
+              <AppText size={10.5} color="black" opacity={0.45} style={{ marginBottom: 6 }}>
+                Points are earned on quantity. Price is your own figure, to cross-check the invoice photo.
+              </AppText>
+              {quantityRows.map((row, index) => {
+                const rp = rowPreview(row);
+                return (
+                  <View key={`qty-${index}`} style={{ marginBottom: 12, borderWidth: 1, borderColor: '#EEF0F3', borderRadius: 10, padding: 10 }}>
+                    <Pressable style={styles.field} onPress={() => { setProductPickerRow(index); setPicker('product'); setSearch(''); }}>
+                      <AppText size={13} family="InterMedium" color="black" opacity={row.productId ? 0.9 : 0.35} numLines={1}>
+                        {productsLoading ? 'Loading products...' : row.productId ? row.productName : 'Select product'}
+                      </AppText>
+                      <AppText size={13} color="black" opacity={0.4}>⌄</AppText>
+                    </Pressable>
+                    <View style={[styles.row, { marginTop: 8 }]}>
+                      <View style={styles.half}>
+                        <View style={styles.field}>
+                          <TextInput value={row.quantity} onChangeText={v => setRowQuantity(index, v)} keyboardType="decimal-pad"
+                            placeholder="Quantity" placeholderTextColor="#9AA5B1" style={styles.input} />
+                        </View>
+                      </View>
+                      <View style={styles.half}>
+                        <View style={styles.field}>
+                          <TextInput value={row.price} onChangeText={v => setRowPrice(index, v)} keyboardType="decimal-pad"
+                            placeholder="Price" placeholderTextColor="#9AA5B1" style={styles.input} />
+                        </View>
+                      </View>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                      <AppText size={11.5} family="InterSemiBold" color="black" opacity={0.6}>
+                        {rp ? `Expected: ${rp.points}` : 'Expected: 0'}
+                      </AppText>
+                      {quantityRows.length > 1 && (
+                        <Pressable onPress={() => removeQuantityRow(index)} hitSlop={8}>
+                          <AppText size={12} family="InterSemiBold" color="red" opacity={0.8}>Remove</AppText>
+                        </Pressable>
+                      )}
+                    </View>
+                    {rp?.hint ? (
+                      <AppText size={10.5} color="black" opacity={0.5} style={{ marginTop: 4 }}>{rp.hint}</AppText>
+                    ) : null}
+                  </View>
+                );
+              })}
+              <Pressable onPress={addQuantityRow} style={[styles.field, { justifyContent: 'center' }]}>
+                <AppText size={12.5} family="InterSemiBold" color="black" opacity={0.7}>+ Add Product</AppText>
+              </Pressable>
+              {preview ? (
+                <AppText size={12} family="InterSemiBold" color="black" opacity={0.8} style={{ marginTop: 10 }}>
+                  Total expected reward: {preview.totalPoints} points
+                </AppText>
+              ) : null}
+            </View>
+          )}
         </View>
 
         <View style={styles.card}>
@@ -456,14 +600,14 @@ const NewInvoice = ({ navigation, route }: any) => {
           />
           <View style={[styles.sheet, sheetLift > 0 && [{ marginBottom: sheetLift }, styles.sheetWithKeyboard]]}>
             <AppText size={16} family="InterSemiBold" color="black" style={{ marginBottom: 12 }}>
-              {picker === 'retailer' ? 'Select retailer' : picker === 'dealer' ? 'Select dealer' : 'Select scheme'}
+              {picker === 'retailer' ? 'Select retailer' : picker === 'dealer' ? 'Select dealer' : picker === 'product' ? 'Select product' : 'Select scheme'}
             </AppText>
 
-            {picker === 'retailer' ? (
+            {picker === 'retailer' || picker === 'product' ? (
               <TextInput
                 value={search}
                 onChangeText={setSearch}
-                placeholder="Search name, shop or mobile"
+                placeholder={picker === 'product' ? 'Search product name or code' : 'Search name, shop or mobile'}
                 placeholderTextColor="#9AA5B1"
                 style={styles.search}
               />
@@ -505,6 +649,7 @@ const NewInvoice = ({ navigation, route }: any) => {
                       Keyboard.dismiss();
                       if (picker === 'retailer') setRetailer(option);
                       else if (picker === 'dealer') setDealer(option);
+                      else if (picker === 'product') { pickProduct(option); setSearch(''); return; }
                       else setScheme(option);
                       setPicker(null);
                       setSearch('');

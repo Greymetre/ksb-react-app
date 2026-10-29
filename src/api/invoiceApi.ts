@@ -74,7 +74,25 @@ export type InvoiceDealer = {
   code: string | null;
 };
 
-export type InvoiceScheme = { id: number; name: string; code: string | null };
+export type InvoiceScheme = { id: number; name: string; code: string | null; schemeType: string };
+
+/** A product the dropdown offers for a Quantity Slab scheme. */
+export type SchemeProduct = { id: number; name: string; code: string | null };
+
+/** One product line of a Quantity Slab invoice. */
+export type InvoiceItemLine = { product_id: number; quantity: number; price: number };
+
+/** Live points preview for the entered quantities. */
+export type QuantityPreviewLine = {
+  productId: number;
+  productName: string;
+  quantity: number;
+  cumulativeQuantity: number;
+  rate: number | null;
+  points: number;
+  hint: string | null;
+};
+export type QuantityPreview = { totalPoints: number; lines: QuantityPreviewLine[] };
 
 export type InvoiceAttachment = {
   id: number;
@@ -96,6 +114,8 @@ export type InvoiceDetail = InvoiceListItem & {
   schemeId: number | null;
   dealerId: number | null;
   approvalLogs: { statusType: string; remark: string | null; by: string | null; at: string | null }[];
+  /** Quantity Slab product lines (product, quantity, price). Empty for other scheme types. */
+  items: { productId: number; productName: string; productCode: string | null; quantity: number; price: number }[];
 };
 
 const text = (value: any): string => (value === null || value === undefined ? '' : String(value));
@@ -196,6 +216,13 @@ export const invoiceApi = {
         by: nullableText(log?.by),
         at: nullableText(log?.at),
       })),
+      items: (row.items || []).map((item: any) => ({
+        productId: number(item?.product_id),
+        productName: text(item?.product_name),
+        productCode: nullableText(item?.product_code),
+        quantity: number(item?.quantity),
+        price: number(item?.price),
+      })),
     };
   },
 
@@ -242,7 +269,50 @@ export const invoiceApi = {
       id: number(row?.id),
       name: text(row?.name),
       code: nullableText(row?.code),
+      schemeType: text(row?.scheme_type) || 'Invoice',
     }));
+  },
+
+  /** The products a Quantity Slab scheme covers, for the invoice product dropdown. */
+  async schemeProducts(schemeId: number): Promise<SchemeProduct[]> {
+    const response = await axiosClient.get('api/field/scheme-products', {
+      params: { scheme_id: schemeId },
+    });
+    return (response.data?.products || []).map((row: any) => ({
+      id: number(row?.id),
+      name: text(row?.name),
+      code: nullableText(row?.code),
+    }));
+  },
+
+  /** Live preview of the points the entered quantities would earn on a Quantity Slab scheme. */
+  async quantityPoints(
+    schemeId: number,
+    customerId: number,
+    invoiceDate: string,
+    lines: { product_id: number; quantity: number }[],
+    exceptInvoiceId?: number | null,
+  ): Promise<QuantityPreview> {
+    const response = await axiosClient.post('api/field/quantity-points', {
+      scheme_id: schemeId,
+      customer_id: customerId,
+      invoice_date: invoiceDate,
+      except_invoice_id: exceptInvoiceId ?? null,
+      lines,
+    });
+    const preview = response.data?.preview || {};
+    return {
+      totalPoints: number(preview?.total_points),
+      lines: (preview?.lines || []).map((row: any) => ({
+        productId: number(row?.product_id),
+        productName: text(row?.product_name),
+        quantity: number(row?.quantity),
+        cumulativeQuantity: number(row?.cumulative_quantity),
+        rate: row?.rate === null || row?.rate === undefined ? null : number(row?.rate),
+        points: number(row?.points),
+        hint: nullableText(row?.hint),
+      })),
+    };
   },
 
   async create(payload: {
@@ -253,6 +323,7 @@ export const invoiceApi = {
     invoiceDate: string;
     amount: number;
     attachments: { uri: string; name: string; type: string }[];
+    items?: InvoiceItemLine[];
   }) {
     const form = new FormData();
     form.append('retailer_id', String(payload.retailerId));
@@ -261,6 +332,7 @@ export const invoiceApi = {
     form.append('invoice_number', payload.invoiceNumber);
     form.append('invoice_date', payload.invoiceDate);
     form.append('amount', String(payload.amount));
+    if (payload.items && payload.items.length > 0) form.append('items', JSON.stringify(payload.items));
     payload.attachments.forEach(file => form.append('attachments', file as any));
 
     const response = await axiosClient.post('api/field/invoices', form, {
@@ -282,6 +354,7 @@ export const invoiceApi = {
       amount: number;
       attachments?: { uri: string; name: string; type: string }[];
       removedAttachmentIds?: number[];
+      items?: InvoiceItemLine[];
     },
   ) {
     const form = new FormData();
@@ -291,6 +364,7 @@ export const invoiceApi = {
     form.append('invoice_number', payload.invoiceNumber);
     form.append('invoice_date', payload.invoiceDate);
     form.append('amount', String(payload.amount));
+    if (payload.items && payload.items.length > 0) form.append('items', JSON.stringify(payload.items));
     (payload.attachments || []).forEach(file => form.append('attachments', file as any));
     (payload.removedAttachmentIds || []).forEach(id => form.append('removed_attachment_ids', String(id)));
 
