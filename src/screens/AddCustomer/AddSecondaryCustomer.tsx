@@ -174,6 +174,9 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
   const isDealer = ['DEALER', 'DISTRIBUTOR', 'MASTER_DISTRIBUTOR'].includes(
     String(formData.type || type).trim().toUpperCase(),
   );
+  // An influencer uses the same form as a retailer, except the shop photo is optional
+  // (an influencer may not have a shop).
+  const isInfluencer = String(formData.type || type).trim().toUpperCase() === 'INFLUENCER';
 
   const [mobileInput, setMobileInput] = useState('');
   const [pinCode, setPincode] = useState('');
@@ -777,8 +780,9 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
     if (!formData.beat_id) return "Beat is required";
 
     // Attachments. On an edit the stored photo comes back as a uri, so a record that
-    // already has one does not have to be photographed again.
-    if (!formData.shop_photo?.uri) return "Shop Photo is required";
+    // already has one does not have to be photographed again. An influencer has no shop,
+    // so its shop photo is optional.
+    if (!isInfluencer && !formData.shop_photo?.uri) return "Shop Photo is required";
 
     // Bank validation
     if (!isBankInfoValid()) return "Bank account numbers do not match";
@@ -1127,7 +1131,7 @@ const AddSecondaryCustomer = ({ navigation, route }: any) => {
                   label="Shop Photo"
                   field="shop_photo"
                   value={formData.shop_photo}
-                  required
+                  required={!isInfluencer}
                   existingUri={isEdit ? formData.shop_photo?.uri : null}
                 />
                 {!isEdit && (

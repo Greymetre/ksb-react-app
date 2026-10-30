@@ -47,6 +47,7 @@ interface DropdownItem {
 const userTypes = [
   { id: '1', title: 'Distributor', icon: <FirstUserIcon />, navigateTO: "AddCustomer", title2: 'Distributor' },   // You can replace emoji with real SVG/icon
   { id: '2', title: 'Retailer', icon: <SecondUserIcon />, navigateTO: "AddCustomer", title2: 'RETAILER' },
+  { id: '3', title: 'Influencer', icon: <SecondUserIcon />, navigateTO: "AddSecondaryCustomer", title2: 'INFLUENCER' },
   // { id: '3', title: 'Workshop', icon: <ThirdUserIcon />, navigateTO: "AddCustomer", title2: 'WORKSHOP' },
   // { id: '4', title: 'Garage', icon: <FourthUserIcon />, navigateTO: "AddCustomer", title2: 'GARAGE' },
   // { id: '5', title: 'Mechanic', icon: <FifthUserIcon />, navigateTO: "AddSecondaryCustomer", title2: 'MECHANIC' },
@@ -524,7 +525,7 @@ const Home = () => {
 
   const filteredUserTypes =
     pressType === 'add'
-      ? userTypes.filter(item => item.title === 'Retailer')
+      ? userTypes.filter(item => item.title === 'Retailer' || item.title === 'Influencer')
       : customerTypeOptions;
 
 

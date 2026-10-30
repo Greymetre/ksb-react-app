@@ -92,7 +92,16 @@ export type QuantityPreviewLine = {
   points: number;
   hint: string | null;
 };
-export type QuantityPreview = { totalPoints: number; lines: QuantityPreviewLine[] };
+export type QuantityPreview = {
+  totalPoints: number;
+  /** The invoice's total quantity (all product lines summed) - the number the slab is read on. */
+  totalQuantity: number;
+  cumulativeQuantity: number;
+  rate: number | null;
+  tierName: string | null;
+  hint: string | null;
+  lines: QuantityPreviewLine[];
+};
 
 export type InvoiceAttachment = {
   id: number;
@@ -303,6 +312,11 @@ export const invoiceApi = {
     const preview = response.data?.preview || {};
     return {
       totalPoints: number(preview?.total_points),
+      totalQuantity: number(preview?.total_quantity),
+      cumulativeQuantity: number(preview?.cumulative_quantity),
+      rate: preview?.rate === null || preview?.rate === undefined ? null : number(preview?.rate),
+      tierName: nullableText(preview?.tier_name),
+      hint: nullableText(preview?.hint),
       lines: (preview?.lines || []).map((row: any) => ({
         productId: number(row?.product_id),
         productName: text(row?.product_name),

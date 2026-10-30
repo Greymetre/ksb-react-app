@@ -285,7 +285,6 @@ const NewInvoice = ({ navigation, route }: any) => {
     setProductPickerRow(null);
     setPicker(null);
   };
-  const rowPreview = (row: QuantityRow) => preview?.lines.find(l => l.productId === row.productId) || null;
 
   const submit = async () => {
     if (!retailer) return Toast.show({ type: 'error', position: 'top', text1: 'Please select a retailer' });
@@ -461,7 +460,6 @@ const NewInvoice = ({ navigation, route }: any) => {
                 Points are earned on quantity. Price is your own figure, to cross-check the invoice photo.
               </AppText>
               {quantityRows.map((row, index) => {
-                const rp = rowPreview(row);
                 return (
                   <View key={`qty-${index}`} style={{ marginBottom: 12, borderWidth: 1, borderColor: '#EEF0F3', borderRadius: 10, padding: 10 }}>
                     <Pressable style={styles.field} onPress={() => { setProductPickerRow(index); setPicker('product'); setSearch(''); }}>
@@ -484,19 +482,13 @@ const NewInvoice = ({ navigation, route }: any) => {
                         </View>
                       </View>
                     </View>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
-                      <AppText size={11.5} family="InterSemiBold" color="black" opacity={0.6}>
-                        {rp ? `Expected: ${rp.points}` : 'Expected: 0'}
-                      </AppText>
-                      {quantityRows.length > 1 && (
+                    {quantityRows.length > 1 && (
+                      <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', marginTop: 8 }}>
                         <Pressable onPress={() => removeQuantityRow(index)} hitSlop={8}>
                           <AppText size={12} family="InterSemiBold" color="red" opacity={0.8}>Remove</AppText>
                         </Pressable>
-                      )}
-                    </View>
-                    {rp?.hint ? (
-                      <AppText size={10.5} color="black" opacity={0.5} style={{ marginTop: 4 }}>{rp.hint}</AppText>
-                    ) : null}
+                      </View>
+                    )}
                   </View>
                 );
               })}
@@ -504,9 +496,15 @@ const NewInvoice = ({ navigation, route }: any) => {
                 <AppText size={12.5} family="InterSemiBold" color="black" opacity={0.7}>+ Add Product</AppText>
               </Pressable>
               {preview ? (
-                <AppText size={12} family="InterSemiBold" color="black" opacity={0.8} style={{ marginTop: 10 }}>
-                  Total expected reward: {preview.totalPoints} points
-                </AppText>
+                <View style={{ marginTop: 10, backgroundColor: '#ECFDF5', borderRadius: 10, padding: 10 }}>
+                  <AppText size={12} family="InterSemiBold" color="black" opacity={0.85}>
+                    Total quantity {preview.totalQuantity}
+                    {preview.tierName ? ` — slab ${preview.tierName}` : ''} → Expected reward: {preview.totalPoints} points
+                  </AppText>
+                  {preview.hint ? (
+                    <AppText size={10.5} color="black" opacity={0.55} style={{ marginTop: 4 }}>{preview.hint}</AppText>
+                  ) : null}
+                </View>
               ) : null}
             </View>
           )}

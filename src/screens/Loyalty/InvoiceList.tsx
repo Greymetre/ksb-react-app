@@ -348,6 +348,20 @@ const InvoiceList = ({ navigation }: any) => {
                     </View>
                   ))}
 
+                  {/* Quantity Slab invoices: the product/quantity lines, to cross-check the attachment. */}
+                  {selected.items && selected.items.length > 0 ? (
+                    <View style={{ marginTop: 12, marginBottom: 4 }}>
+                      <AppText size={12} color="black" opacity={0.45} style={{ marginBottom: 4 }}>PRODUCTS & QUANTITY</AppText>
+                      {selected.items.map((it, idx) => (
+                        <View key={`it-${idx}`} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: '#EEF0F3' }}>
+                          <AppText size={12.5} family="InterMedium" color="black" style={{ flex: 1 }} numLines={2}>{it.productName || `#${it.productId}`}</AppText>
+                          <AppText size={12.5} color="black" opacity={0.7} style={{ width: 56, textAlign: 'right' }}>Qty {it.quantity}</AppText>
+                          <AppText size={12.5} color="black" opacity={0.7} style={{ width: 76, textAlign: 'right' }}>{money(it.price)}</AppText>
+                        </View>
+                      ))}
+                    </View>
+                  ) : null}
+
                   {selected.schemeNote ? (
                     <View style={{ marginTop: -4, marginBottom: 10 }}>
                       <AppText size={11.5} family="InterMedium" color="black" opacity={0.5} align="right" lineHeight={16}>
