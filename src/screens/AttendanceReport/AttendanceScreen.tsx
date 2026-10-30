@@ -29,6 +29,7 @@ import {
 import Toast from 'react-native-toast-message';
 import { shadowStyle } from '../../utils/typography';
 import { PermissionsAndroid } from 'react-native';
+import { ensureLocationConsent } from '../../components/LocationDisclosure/locationConsent';
 import { SCREEN_HEIGHT } from '../../utils/misc';
 import { Dropdown } from 'react-native-element-dropdown';
 import ActionSheet, { ActionSheetRef } from 'react-native-actions-sheet';
@@ -165,6 +166,12 @@ const AttendanceScreen: React.FC<{ navigation: any; route: any }> = ({ navigatio
       setLocationError(null);
 
       if (Platform.OS === 'android') {
+        // Prominent Disclosure must precede the location permission request (Google Play policy).
+        if (!(await ensureLocationConsent())) {
+          setLocationError('Location permission denied');
+          setLocationLoading(false);
+          return;
+        }
         const granted = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
           {

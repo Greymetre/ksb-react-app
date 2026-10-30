@@ -10,6 +10,7 @@ import {
   getPunchInStateToday,
   startLocationTrackingAfterPunchIn,
 } from '../../services/locationTrackingService';
+import { ensureLocationConsent } from '../LocationDisclosure/locationConsent';
 
 type Problem = 'permission' | 'gps' | null;
 
@@ -61,6 +62,8 @@ const LocationRequiredGate = () => {
 
   const turnOn = async () => {
     if (problem === 'permission') {
+      // Prominent Disclosure first: never ask for location without the disclosure accepted.
+      if (!(await ensureLocationConsent())) return;
       const result = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
       if (result === PermissionsAndroid.RESULTS.GRANTED) {
         void check();

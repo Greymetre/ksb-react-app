@@ -30,6 +30,7 @@ import store, { persistor } from './src/components/redux/Store';
 import SplashScreen from './src/screens/Splash';
 import AppBackdrop from './src/components/AppBackdrop';
 import LocationRequiredGate from './src/components/LocationRequiredGate';
+import LocationDisclosureHost from './src/components/LocationDisclosure';
 import Routes from './src/navigations/Routes';
 import { navigationRef } from './src/services/NavigationService';
 import {
@@ -131,6 +132,7 @@ const App = () => {
                     {!loading && <LocationRequiredGate />}
                   </NavigationContainer>
 
+                  <LocationDisclosureHost />
                   <Toast config={toastConfig} visibilityTime={1500} />
                   {Platform.OS == 'android' && (
                     <SafeAreaView style={{ backgroundColor: colors.white }} /> 

@@ -37,6 +37,7 @@ import { BASE_URL, resolveMediaUrl } from '../../api/AxiosClient';
 import { API_ENDPOINT } from '../../api/ApiUrls';
 import ActionSheet, { ActionSheetRef } from 'react-native-actions-sheet';
 import Geolocation from '@react-native-community/geolocation';
+import { ensureLocationConsent } from '../../components/LocationDisclosure/locationConsent';
 import useLocationHook from '../../api/hooks/uselocationhook';
 import { useFocusEffect } from '@react-navigation/native';
 import { toMobileDigits } from '../../utils/mobile';
@@ -1292,6 +1293,8 @@ const [locationLoading, setLocationLoading] = useState(false);
     const requestLocationPermission = async () => {
       if (Platform.OS === 'android') {
         try {
+          // Prominent Disclosure must precede the location permission request (Google Play policy).
+          if (!(await ensureLocationConsent())) return;
           const granted = await PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
             {

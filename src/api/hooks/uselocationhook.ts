@@ -7,6 +7,7 @@ import {
   Platform,
   PermissionsAndroid,
 } from "react-native";
+import { ensureLocationConsent } from "../../components/LocationDisclosure/locationConsent";
 
 interface Coords {
   latitude: number;
@@ -34,6 +35,8 @@ const useLocationHook = () => {
     if (Platform.OS !== "android") return true;
 
     try {
+      // Prominent Disclosure must precede the location permission request (Google Play policy).
+      if (!(await ensureLocationConsent())) return false;
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
       );

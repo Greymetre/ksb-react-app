@@ -14,6 +14,7 @@ import {
 } from '../storage/liveLocationQueue';
 import { formatDateTimeForApi } from '../utils/dateTime';
 import { createMMKV } from 'react-native-mmkv';
+import { ensureLocationConsent } from '../components/LocationDisclosure/locationConsent';
 
 const LOCATION_SYNC_INTERVAL_MS = 7 * 60 * 1000;
 const ANDROID_PERMISSION_SETUP_SHOWN_KEY = 'android_live_location_permission_setup_shown_v1';
@@ -57,20 +58,12 @@ const configureGeolocation = () => {
   configured = true;
 };
 
-const showTrackingDisclosure = () =>
-  new Promise<boolean>(resolve => {
-    Alert.alert(
-      'Location tracking',
-      'Location tracking starts after punch-in and stops after punch-out. It is used for attendance and field activity tracking.',
-      [
-        { text: 'Cancel', style: 'cancel', onPress: () => resolve(false) },
-        { text: 'Continue', onPress: () => resolve(true) },
-      ],
-      { cancelable: true, onDismiss: () => resolve(false) },
-    );
-  });
-
 const requestAndroidPermission = async () => {
+  // Google Play Prominent Disclosure: show the in-app location disclosure and get the user's
+  // explicit acceptance BEFORE requesting any location permission. Never request without it.
+  const consented = await ensureLocationConsent();
+  if (!consented) return false;
+
   if (androidApiLevel() >= 33) {
     await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
@@ -491,10 +484,10 @@ export const startLiveLocationTracking = async (options?: {
   showDisclosure?: boolean;
   captureImmediately?: boolean;
 }) => {
-  if (options?.showDisclosure !== false) {
-    const accepted = await showTrackingDisclosure();
-    if (!accepted) return false;
-  }
+  // The prominent disclosure is now shown by the consent gate inside requestAndroidPermission
+  // (which startLocationTrackingAfterPunchIn calls), so we no longer raise a separate Alert here
+  // and avoid disclosing twice. The `showDisclosure` option is kept for call-site compatibility.
+  void options;
 
   const started = await startLocationTrackingAfterPunchIn(
     store.getState().auth?.user,
