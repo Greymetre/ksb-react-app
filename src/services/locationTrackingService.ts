@@ -301,6 +301,10 @@ export const runAndroidFirstTimeLiveLocationSetup = async () => {
   }
 
   if (Platform.OS !== 'android') return;
+  // Do nothing before the user is logged in: location is only for an authenticated field user, so
+  // we never prompt or show the settings guide on the login screen. Location permission (with its
+  // prominent disclosure) is requested in-context once the user punches in or uses a location feature.
+  if (!store.getState().auth?.token) return;
   if (permissionStorage.getBoolean(ANDROID_PERMISSION_SETUP_SHOWN_KEY)) return;
 
   permissionStorage.set(ANDROID_PERMISSION_SETUP_SHOWN_KEY, true);
