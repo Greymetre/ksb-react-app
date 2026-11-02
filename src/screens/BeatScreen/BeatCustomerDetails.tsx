@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Keyboard, Pressable, TextInput, View } from 'react-native';
+import { ActivityIndicator, FlatList, Keyboard, PermissionsAndroid, Platform, Pressable, TextInput, View } from 'react-native';
 import { CrossIcon } from '../../assets/svgs/SvgsFile';
 import { rw } from '../../utils/responsive';
 import { NavigationProp, ParamListBase, useFocusEffect, useNavigation } from '@react-navigation/native';
 import { colors } from '../../utils/Colors';
 import { SearchSvgIcon } from '../../assets/svgs/HomePageSvgs';
 import Geolocation from '@react-native-community/geolocation';
+import { ensureLocationConsent } from '../../components/LocationDisclosure/locationConsent';
 import Toast from 'react-native-toast-message';
 import store from '../../components/redux/Store';
 import axios from 'axios';
@@ -149,7 +150,21 @@ const BeatCustomerDetails = ({ route }: any) => {
 
 
     // ── Fetch current location once ─────────────────────────────
-    const getCurrentLocation = () => {
+    const getCurrentLocation = async () => {
+        if (Platform.OS === 'android') {
+            // Prominent Disclosure must precede the location permission request (Google Play policy).
+            if (!(await ensureLocationConsent())) {
+                setLocationError('Location permission denied')
+                return
+            }
+            const granted = await PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+            )
+            if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+                setLocationError('Location permission denied')
+                return
+            }
+        }
         Geolocation.getCurrentPosition(
             (position) => {
                 setCurrentLat(position.coords.latitude)

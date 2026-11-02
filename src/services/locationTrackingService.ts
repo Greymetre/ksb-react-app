@@ -50,7 +50,11 @@ const configureGeolocation = () => {
   if (configured) return;
 
   Geolocation.setRNConfiguration({
-    skipPermissionRequests: false,
+    // Never let the Geolocation library raise its own permission prompt: on Android, calling
+    // getCurrentPosition/watchPosition without permission would otherwise auto-request it with no
+    // in-app disclosure first (a Google Play "Prominent Disclosure" violation). We request every
+    // location permission ourselves, only after the disclosure is accepted (ensureLocationConsent).
+    skipPermissionRequests: true,
     authorizationLevel: 'always',
     enableBackgroundLocationUpdates: true,
     locationProvider: 'auto',
@@ -290,8 +294,8 @@ const attachAppStateListener = () => {
 };
 
 export const runAndroidFirstTimeLiveLocationSetup = async () => {
+  configureGeolocation();
   if (Platform.OS === 'ios') {
-    configureGeolocation();
     await requestIosPermission();
     return;
   }
@@ -450,6 +454,9 @@ export const getTrackingStatus = async () => {
 };
 
 export const initializeLiveLocationTracking = async () => {
+  // Apply the Geolocation config on every platform at startup (it sets skipPermissionRequests so
+  // the library never raises an undisclosed permission prompt). Was previously iOS-only.
+  configureGeolocation();
   attachNetInfoListener();
   attachAppStateListener();
   const user = store.getState().auth?.user;
