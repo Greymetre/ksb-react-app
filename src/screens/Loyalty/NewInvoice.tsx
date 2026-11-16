@@ -497,13 +497,34 @@ const NewInvoice = ({ navigation, route }: any) => {
               </Pressable>
               {preview ? (
                 <View style={{ marginTop: 10, backgroundColor: '#ECFDF5', borderRadius: 10, padding: 10 }}>
-                  <AppText size={12} family="InterSemiBold" color="black" opacity={0.85}>
-                    Total quantity {preview.totalQuantity}
-                    {preview.tierName ? ` — slab ${preview.tierName}` : ''} → Expected reward: {preview.totalPoints} points
-                  </AppText>
-                  {preview.hint ? (
-                    <AppText size={10.5} color="black" opacity={0.55} style={{ marginTop: 4 }}>{preview.hint}</AppText>
-                  ) : null}
+                  {preview.groups && preview.groups.length > 0 ? (
+                    <>
+                      {preview.groups.map(g => (
+                        <View key={g.groupNo} style={{ marginBottom: 6 }}>
+                          <AppText size={12} family="InterSemiBold" color="black" opacity={0.85}>
+                            Group {g.groupNo}: qty {g.quantity}
+                            {g.tierName ? ` — slab ${g.tierName}` : ''} → {g.points} points
+                          </AppText>
+                          {g.hint ? (
+                            <AppText size={10.5} color="black" opacity={0.55} style={{ marginTop: 2 }}>{g.hint}</AppText>
+                          ) : null}
+                        </View>
+                      ))}
+                      <AppText size={12.5} family="InterSemiBold" color="black" opacity={0.95}>
+                        Total expected reward: {preview.totalPoints} points
+                      </AppText>
+                    </>
+                  ) : (
+                    <>
+                      <AppText size={12} family="InterSemiBold" color="black" opacity={0.85}>
+                        Total quantity {preview.totalQuantity}
+                        {preview.tierName ? ` — slab ${preview.tierName}` : ''} → Expected reward: {preview.totalPoints} points
+                      </AppText>
+                      {preview.hint ? (
+                        <AppText size={10.5} color="black" opacity={0.55} style={{ marginTop: 4 }}>{preview.hint}</AppText>
+                      ) : null}
+                    </>
+                  )}
                 </View>
               ) : null}
             </View>

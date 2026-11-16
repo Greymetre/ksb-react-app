@@ -86,6 +86,10 @@ const RetailerSchemeDetail = ({ route }: any) => {
   const slabs: Slab[] = Array.isArray(scheme.slabs) ? scheme.slabs : [];
   const invoices: SchemeInvoice[] = Array.isArray(scheme.invoices) ? scheme.invoices : [];
   const percent = Math.max(0, Math.min(100, Number(progress.percent_to_next_tier) || 0));
+  // A Quantity Slab scheme is shown by its groups (each group's quantity ladder + products); the
+  // rupee tier progress does not apply to it, so that block is hidden.
+  const isQuantity = scheme.scheme_type === 'Quantity';
+  const groups: any[] = Array.isArray(scheme.groups) ? scheme.groups : [];
 
   return (
     <ScrollView
@@ -176,7 +180,9 @@ const RetailerSchemeDetail = ({ route }: any) => {
         </AppText>
       </View>
 
-      {/* Progress to the next slab, measured on HO-approved business only. */}
+      {/* Progress to the next slab, measured on HO-approved business only. Rupee-tier based, so it is
+          hidden for a Quantity Slab scheme (which earns per group on quantity, not one rupee ladder). */}
+      {!isQuantity ? (
       <View style={[local.block, { marginTop: 4 }]}>
         <View style={local.progressHead}>
           <View style={{ flex: 1 }}>
@@ -209,6 +215,7 @@ const RetailerSchemeDetail = ({ route }: any) => {
             : 'Top tier reached'}
         </AppText>
       </View>
+      ) : null}
 
       <View style={local.block}>
         <AppText size={13} color="#334155" family="InterBold" transform="uppercase" spacing={0.5} lineHeight={18}>
@@ -224,7 +231,36 @@ const RetailerSchemeDetail = ({ route }: any) => {
         </View>
       </View>
 
-      {slabs.length > 0 ? (
+      {isQuantity && groups.length > 0 ? (
+        <View style={local.block}>
+          <AppText size={13} color="#334155" family="InterBold" transform="uppercase" spacing={0.5} lineHeight={18}>
+            Quantity slab groups
+          </AppText>
+          {groups.map((group: any) => (
+            <View key={group.group_no} style={{ marginTop: 10, borderLeftWidth: 3, borderLeftColor: '#334155', paddingLeft: 10 }}>
+              <AppText size={12.5} color="#334155" family="InterBold" lineHeight={18}>Group {group.group_no}</AppText>
+              {(group.slabs || []).map((slab: any, i: number) => (
+                <View key={i} style={[local.slabRow, { borderBottomWidth: 0 }]}>
+                  <View style={{ flex: 1 }}>
+                    <AppText size={13} color="#0F172A" family="InterSemiBold" lineHeight={18}>{slab.tier_name || `Tier ${i + 1}`}</AppText>
+                    <AppText size={12} color="#64748B" family="InterRegular" lineHeight={17}>
+                      {slab.value_to && Number(slab.value_to) > 0 ? `${slab.value_from} – ${slab.value_to} units` : `${slab.value_from}+ units`}
+                    </AppText>
+                  </View>
+                  <View style={[s.tagPill, { backgroundColor: '#F1F5F9' }]}>
+                    <AppText size={12} color="#475569" family="InterBold" lineHeight={17}>{money(slab.reward_value)}/unit</AppText>
+                  </View>
+                </View>
+              ))}
+              {(group.products || []).length > 0 ? (
+                <AppText size={11.5} color="#64748B" family="InterRegular" lineHeight={16} style={{ marginTop: 4 }}>
+                  Products: {group.products.join(', ')}
+                </AppText>
+              ) : null}
+            </View>
+          ))}
+        </View>
+      ) : slabs.length > 0 ? (
         <View style={local.block}>
           <AppText size={13} color="#334155" family="InterBold" transform="uppercase" spacing={0.5} lineHeight={18}>
             Slabs

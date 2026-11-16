@@ -75,9 +75,26 @@ export const slabRewardText = (slab: SchemeSlab): string => {
   return `Rs. ${slab.value}`;
 };
 
+/** One band of a Quantity Slab group's ladder, shown in the scheme detail. */
+export type SchemeGroupSlab = {
+  tierName: string;
+  valueFrom: number;
+  valueTo: number | null;
+  rewardValue: number;
+};
+/** One group of a Quantity Slab scheme: its own quantity ladder and the goods it covers. */
+export type SchemeGroup = {
+  groupNo: number;
+  slabs: SchemeGroupSlab[];
+  products: string[];
+};
+
 export type SchemeDetail = {
   scheme: SchemeCard;
+  /** Invoice, Product or Quantity. Quantity schemes show their groups instead of the amount slabs. */
+  schemeType: string | null;
   slabs: SchemeSlab[];
+  groups: SchemeGroup[];
   performance: {
     invoiceCount: number;
     retailerCount: number;
@@ -133,12 +150,23 @@ export const schemeApi = {
     const performance: any = data.performance || {};
     return {
       scheme: toCard(data.scheme || {}),
+      schemeType: nullableText(data.scheme_type),
       slabs: (data.slabs || []).map((slab: any) => ({
         fromAmount: number(slab?.from_amount),
         toAmount: number(slab?.to_amount),
         value: number(slab?.value),
         valueType: nullableText(slab?.value_type),
         rewardLabel: nullableText(slab?.reward_label),
+      })),
+      groups: (data.groups || []).map((g: any) => ({
+        groupNo: number(g?.group_no) || 1,
+        slabs: (g?.slabs || []).map((s: any) => ({
+          tierName: text(s?.tier_name),
+          valueFrom: number(s?.value_from),
+          valueTo: s?.value_to === null || s?.value_to === undefined ? null : number(s?.value_to),
+          rewardValue: number(s?.reward_value),
+        })),
+        products: (g?.products || []).map((p: any) => text(p)).filter((p: string) => p.length > 0),
       })),
       performance: {
         invoiceCount: number(performance.invoice_count),

@@ -221,7 +221,36 @@ const SchemeList = () => {
                     </View>
                   </View>
 
-                  {detail.slabs.length ? (
+                  {detail.schemeType === 'Quantity' && detail.groups.length ? (
+                    <View style={{ marginTop: 20 }}>
+                      <AppText size={13} family="InterSemiBold" color="black">Quantity slab groups</AppText>
+                      <AppText size={11} color="black" opacity={0.45} style={{ marginBottom: 8 }}>
+                        Each group earns on its own products' total quantity.
+                      </AppText>
+                      {detail.groups.map(group => (
+                        <View key={group.groupNo} style={{ marginBottom: 14, borderLeftWidth: 3, borderLeftColor: colors.navy, paddingLeft: 10 }}>
+                          <AppText size={12.5} family="InterSemiBold" customColor={colors.navy} style={{ marginBottom: 4 }}>
+                            Group {group.groupNo}
+                          </AppText>
+                          {group.slabs.map((slab, i) => (
+                            <View key={i} style={styles.slabRow}>
+                              <AppText size={12.5} family="InterMedium" color="black" opacity={0.8}>
+                                {slab.valueTo && slab.valueTo > 0
+                                  ? `${slab.valueFrom} – ${slab.valueTo} units`
+                                  : `${slab.valueFrom}+ units`}
+                              </AppText>
+                              <AppText size={13} family="InterSemiBold" customColor={colors.navy}>{money(slab.rewardValue)}/unit</AppText>
+                            </View>
+                          ))}
+                          {group.products.length ? (
+                            <AppText size={11.5} color="black" opacity={0.55} style={{ marginTop: 6 }}>
+                              Products: {group.products.join(', ')}
+                            </AppText>
+                          ) : null}
+                        </View>
+                      ))}
+                    </View>
+                  ) : detail.slabs.length ? (
                     <View style={{ marginTop: 20 }}>
                       <AppText size={13} family="InterSemiBold" color="black">Reward slabs</AppText>
                       <AppText size={11} color="black" opacity={0.45} style={{ marginBottom: 8 }}>
