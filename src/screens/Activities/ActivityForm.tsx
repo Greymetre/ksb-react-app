@@ -356,6 +356,10 @@ export default function ActivityFormScreen() {
       return 'Hotel Name is required.';
     if (!String(form.locationText || '').trim())
       return 'Activity Location is required.';
+    if (form.photos.length > cfg.photo_limit)
+      return `You can add up to ${cfg.photo_limit} photos only. Please remove ${
+        form.photos.length - cfg.photo_limit
+      } photo(s) before submitting.`;
     for (let i = 0; i < form.participants.length; i++) {
       const p = form.participants[i];
       if (
@@ -470,26 +474,50 @@ export default function ActivityFormScreen() {
     }
     const asset = result.assets?.[0];
     if (!asset) return;
+    if (form.photos.length >= cfg.photo_limit) {
+      Alert.alert(
+        'Photo limit reached',
+        `You can add up to ${cfg.photo_limit} photos only.`,
+      );
+      return;
+    }
     try {
       const uploaded = (await activityApi.upload(asset)).data.data.url;
-      setForm((current: any) => ({
-        ...current,
-        photos: [
-          ...current.photos,
-          {
-            photoUrl: uploaded,
-            latitude: Number(current.locationLat || 0),
-            longitude: Number(current.locationLng || 0),
-            takenAt: new Date().toISOString(),
-            preview: asset.uri,
-          },
-        ],
-      }));
+      setForm((current: any) => {
+        // Race-safe guard: several uploads can finish close together, so
+        // re-check the live count before appending.
+        if (current.photos.length >= cfg.photo_limit) return current;
+        return {
+          ...current,
+          photos: [
+            ...current.photos,
+            {
+              photoUrl: uploaded,
+              latitude: Number(current.locationLat || 0),
+              longitude: Number(current.locationLng || 0),
+              takenAt: new Date().toISOString(),
+              preview: asset.uri,
+            },
+          ],
+        };
+      });
     } catch {
       Alert.alert('Upload failed', 'Please check internet and try again.');
     }
   };
-  const addPhoto = () =>
+  const removePhoto = (index: number) =>
+    setForm((current: any) => ({
+      ...current,
+      photos: current.photos.filter((_: any, i: number) => i !== index),
+    }));
+  const addPhoto = () => {
+    if (form.photos.length >= cfg.photo_limit) {
+      Alert.alert(
+        'Photo limit reached',
+        `You can add up to ${cfg.photo_limit} photos only.`,
+      );
+      return;
+    }
     Alert.alert('Add activity photo', 'Choose photo source', [
       { text: 'Cancel', style: 'cancel' },
       {
@@ -509,6 +537,7 @@ export default function ActivityFormScreen() {
           ),
       },
     ]);
+  };
   if (loading || !cfg)
     return <ActivityIndicator style={{ flex: 1 }} color="#8A5A08" />;
   return (
@@ -941,11 +970,21 @@ export default function ActivityFormScreen() {
           </Text>
           <View style={s.photos}>
             {form.photos.map((p: any, i: number) => (
-              <Image
-                key={i}
-                source={{ uri: p.preview || resolveMediaUrl(p.photoUrl) }}
-                style={s.photo}
-              />
+              <View key={i} style={s.photoWrap}>
+                <Image
+                  source={{ uri: p.preview || resolveMediaUrl(p.photoUrl) }}
+                  style={s.photo}
+                />
+                {!readOnly && (
+                  <Pressable
+                    style={s.photoRemove}
+                    hitSlop={8}
+                    onPress={() => removePhoto(i)}
+                  >
+                    <Text style={s.photoRemoveText}>×</Text>
+                  </Pressable>
+                )}
+              </View>
             ))}
             {!readOnly && form.photos.length < cfg.photo_limit && (
               <Pressable style={s.photoAdd} onPress={addPhoto}>
@@ -1385,7 +1424,25 @@ const s = StyleSheet.create({
   },
   totalValue: { fontWeight: '700', color: '#8A5A08' },
   photos: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 },
+  photoWrap: { width: 72, height: 72 },
   photo: { width: 72, height: 72, borderRadius: 8 },
+  photoRemove: {
+    position: 'absolute',
+    top: -6,
+    right: -6,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#d74351',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  photoRemoveText: {
+    color: '#fff',
+    fontSize: 15,
+    lineHeight: 17,
+    fontWeight: '700',
+  },
   photoAdd: {
     width: 72,
     height: 72,
