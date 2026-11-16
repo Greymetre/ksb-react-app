@@ -30,6 +30,7 @@ import RetailerSchemeDetail from '../screens/Customer/RetailerSchemeDetail';
 import UserTourList from '../screens/TourPlan/UserTourList';
 import BeatCustomerDetails from '../screens/BeatScreen/BeatCustomerDetails';
 import OrderHistoryDetailsScreen from '../screens/OrderScreen/OrderHistoryDetailsScreen';
+import DispatchOrderScreen from '../screens/OrderScreen/DispatchOrderScreen';
 import Reports from '../screens/reports';
 import Documents from '../screens/Documents';
 import OrderList from '../screens/OrderScreen';
@@ -104,6 +105,10 @@ const Routes = () => {
         <Stack.Screen name='OrderHistoryDetailsScreen' component={OrderHistoryDetailsScreen} options={{
           headerShown: true,
           title: 'Order'
+        }} />
+        <Stack.Screen name='DispatchOrderScreen' component={DispatchOrderScreen} options={{
+          headerShown: true,
+          title: 'Dispatch Order'
         }} />
         <Stack.Screen name='Reports' component={Reports} options={{
           headerShown: true,

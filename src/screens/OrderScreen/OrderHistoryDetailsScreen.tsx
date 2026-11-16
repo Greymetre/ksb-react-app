@@ -12,7 +12,9 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeModules } from 'react-native';
 import ReactNativeBlobUtil from 'react-native-blob-util';
+import { useSelector } from 'react-redux';
 import { BASE_URL } from "../../api/AxiosClient";
+import { getOrderForDispatch } from '../../api/orderDispatchApi';
 const { HtmlToPdf } = NativeModules;
 import { Platform } from 'react-native';
 
@@ -91,10 +93,42 @@ const OrderHistoryDetailsScreen = () => {
     const [orderItems, setOrderItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
 
+    // Dispatch gating: the order's current status + whether anything is left to
+    // dispatch. The legacy getOrderDetails endpoint does not return these, so we
+    // read them from the CRM orders/{id} endpoint used by the dispatch flow.
+    const authUser = useSelector((state: any) => state?.auth?.user);
+    const permissions: string[] = Array.isArray(authUser?.permissions) ? authUser.permissions : [];
+    const canDispatchPermission = permissions.includes('order.dispatch');
+    const [dispatchStatusId, setDispatchStatusId] = useState<number | null>(null);
+    const [hasRemaining, setHasRemaining] = useState(false);
+
+    // statusId: null Pending, 1 Fully Dispatched, 2 Partial, 4 Cancelled.
+    const canDispatch =
+        canDispatchPermission &&
+        hasRemaining &&
+        dispatchStatusId !== 1 &&
+        dispatchStatusId !== 4;
 
     useEffect(() => {
-        fetchOrderDetails();
-    }, []);
+        // Reload on every focus so the dispatch buttons reflect the latest status
+        // after returning from a dispatch.
+        const unsubscribe = navigation.addListener('focus', () => {
+            fetchOrderDetails();
+            loadDispatchInfo();
+        });
+        return unsubscribe;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [navigation]);
+
+    const loadDispatchInfo = async () => {
+        try {
+            const data = await getOrderForDispatch(orderId);
+            setDispatchStatusId(data.statusId);
+            setHasRemaining(data.lines.some(line => line.remaining > 0));
+        } catch {
+            // Non-blocking: if this fails, dispatch buttons simply stay hidden.
+        }
+    };
 
     const fetchOrderDetails = async () => {
         const token = store.getState().auth?.token;
@@ -443,16 +477,25 @@ const OrderHistoryDetailsScreen = () => {
 
 
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
-                            <Pressable style={[styles.buttonView, { width: '48%', }]}  onPress={generatePDF}>
+                            <Pressable style={[styles.buttonView, { width: '100%', }]}  onPress={generatePDF}>
                                 <AppText color='white' family='InterBold' size={16}>Download</AppText>
                             </Pressable>
-                            {/* <Pressable style={[styles.buttonView, { width: '48%', backgroundColor: 'red' }]} >
-                                <AppText color='white' family='InterBold' size={16}>Cancel</AppText>
-                            </Pressable> */}
                         </View>
-                        {/* <Pressable style={[styles.buttonView,]} >
-                            <AppText color='white' family='InterBold' size={16}>Order Dispatch</AppText>
-                        </Pressable> */}
+
+                        {canDispatch && (
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12, marginBottom: 10 }}>
+                                <Pressable
+                                    style={[styles.buttonView, { width: '48%', marginTop: 0 }]}
+                                    onPress={() => navigation.navigate('DispatchOrderScreen', { orderId, mode: 'full' })}>
+                                    <AppText color='white' family='InterBold' size={15}>Fully Dispatch</AppText>
+                                </Pressable>
+                                <Pressable
+                                    style={{ width: '48%', height: 44, borderRadius: 6, backgroundColor: colors.navy, justifyContent: 'center', alignItems: 'center' }}
+                                    onPress={() => navigation.navigate('DispatchOrderScreen', { orderId, mode: 'partial' })}>
+                                    <AppText color='white' family='InterBold' size={15}>Partially Dispatch</AppText>
+                                </Pressable>
+                            </View>
+                        )}
                     </ScrollView>
                 )
             }
