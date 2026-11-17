@@ -17,6 +17,24 @@ interface DropdownUser {
     value: number | string;
 }
 
+// Dispatch status filter options. Empty value = all. Values match the API's `status` param.
+const STATUS_OPTIONS = [
+    { label: 'All Status', value: '' },
+    { label: 'Pending', value: 'pending' },
+    { label: 'Partially Dispatched', value: 'partial' },
+    { label: 'Fully Dispatched', value: 'fully' },
+    { label: 'Cancelled', value: 'cancelled' },
+];
+
+const statusColors = (label?: string) => {
+    switch ((label || '').toLowerCase()) {
+        case 'fully dispatched': return { bg: '#E6F4EA', fg: '#1E7E34' };
+        case 'partially dispatched': return { bg: '#FFF4E5', fg: '#C77700' };
+        case 'cancelled': return { bg: '#FDE8E8', fg: '#C0392B' };
+        default: return { bg: '#EAF1FB', fg: '#14295A' }; // Pending / unknown
+    }
+};
+
 type OrderListProps = {
     navigation: any
 }
@@ -29,6 +47,7 @@ const OrderList = ({ navigation }: OrderListProps) => {
     const [loadingOrders, setLoadingOrders] = useState(false);
     const [showCal, setShowCal] = useState(false);
 
+    const [selectedStatus, setSelectedStatus] = useState<string>('');
     const [rangeType, setRange] = useState('currentMonth');
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
@@ -112,7 +131,8 @@ const OrderList = ({ navigation }: OrderListProps) => {
         start?: Date,
         end?: Date,
         pageNumber: number = 1,
-        loadMore: boolean = false
+        loadMore: boolean = false,
+        statusValue: string = selectedStatus
     ) => {
 
         const token = store.getState().auth?.token;
@@ -146,6 +166,10 @@ const OrderList = ({ navigation }: OrderListProps) => {
 
             if (end) {
                 params.append("enddate", formatYYYYMMDD(end));
+            }
+
+            if (statusValue) {
+                params.append("status", statusValue);
             }
 
             const url = `${BASE_URL}api/getOrderList?${params.toString()}`;
@@ -248,10 +272,15 @@ const OrderList = ({ navigation }: OrderListProps) => {
             <Pressable style={[styles.listItem, shadowStyle]} onPress={() => navigation.navigate("OrderHistoryDetailsScreen", {
                 orderId: items?.order_id,
             })}>
-                <View style={[styles.row]}>
-                    <View style={{ gap: 3 }}>
+                <View style={[styles.row, { justifyContent: 'space-between', alignItems: 'flex-start' }]}>
+                    <View style={{ gap: 3, flex: 1 }}>
                         <AppText color='black' family='InterMedium' size={14} opacity={0.8}>Firm Name</AppText>
                         <AppText color='black' family='InterBold' size={14}>{items?.buyer_name || items?.seller_name}</AppText>
+                    </View>
+                    <View style={{ backgroundColor: statusColors(items?.status_label).bg, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 }}>
+                        <AppText family='InterBold' size={12} customColor={statusColors(items?.status_label).fg}>
+                            {items?.status_label || 'Pending'}
+                        </AppText>
                     </View>
                 </View>
 
@@ -331,6 +360,26 @@ const OrderList = ({ navigation }: OrderListProps) => {
                         renderRightIcon={() => <ArrowDownIcon />}
                     />
 
+                </View>
+                <View style={{ marginTop: 12 }}>
+                    <Dropdown
+                        style={styles.selectUser}
+                        placeholderStyle={{ color: '#718096', fontSize: 14 }}
+                        selectedTextStyle={{ color: colors.black, fontSize: 14 }}
+                        data={STATUS_OPTIONS}
+                        maxHeight={300}
+                        labelField="label"
+                        valueField="value"
+                        placeholder="All Status"
+                        value={selectedStatus}
+                        onChange={(item) => {
+                            setSelectedStatus(item.value);
+                            setPage(1);
+                            setHasMore(true);
+                            fetchOrderList(selectedUserId, startDate, endDate, 1, false, item.value);
+                        }}
+                        renderRightIcon={() => <ArrowDownIcon />}
+                    />
                 </View>
                 <Pressable style={[styles.dateTimeBox, styles.row, { justifyContent: 'space-between' }]} onPress={() => setShowCal(true)}>
                     <View style={{ justifyContent: 'center' }}>

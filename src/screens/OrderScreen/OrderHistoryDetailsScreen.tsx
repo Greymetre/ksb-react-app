@@ -18,6 +18,16 @@ import { getOrderForDispatch } from '../../api/orderDispatchApi';
 const { HtmlToPdf } = NativeModules;
 import { Platform } from 'react-native';
 
+// Dispatch status pill colours (same scheme as the order list).
+const orderStatusColors = (label?: string) => {
+    switch ((label || '').toLowerCase()) {
+        case 'fully dispatched': return { bg: '#E6F4EA', fg: '#1E7E34' };
+        case 'partially dispatched': return { bg: '#FFF4E5', fg: '#C77700' };
+        case 'cancelled': return { bg: '#FDE8E8', fg: '#C0392B' };
+        default: return { bg: '#EAF1FB', fg: '#14295A' }; // Pending / unknown
+    }
+};
+
 interface OrderItem {
     id: string;               // unique key
     productName: string;
@@ -428,6 +438,15 @@ const OrderHistoryDetailsScreen = () => {
                             <AppText size={14} color={'#333333'} family={'InterRegular'}>
                                 Order Date : {orderDetails?.order_date}
                             </AppText>
+
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
+                                <AppText size={14} color={'#333333'} family={'InterRegular'}>Status : </AppText>
+                                <View style={{ backgroundColor: orderStatusColors(orderDetails?.status_label).bg, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 20 }}>
+                                    <AppText size={12} family={'InterBold'} customColor={orderStatusColors(orderDetails?.status_label).fg}>
+                                        {orderDetails?.status_label || 'Pending'}
+                                    </AppText>
+                                </View>
+                            </View>
 
                             <AppText size={14} color={'#333333'} family={'InterRegular'}>
                                 Created By : {orderDetails?.createdbyname?.name}
